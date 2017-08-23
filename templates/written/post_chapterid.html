@@ -1,0 +1,27 @@
+<button type="button" class="btn btn-default" id="chapter">
+<a href="new/">添加章节</a>
+</button>
+
+{% for chapter in chapter_list %}
+    <button type="button" class="btn" id="chapters{{ chapter.id }}">
+        {{ chapter.title }}
+        <li hidden class="chaptersid">{{ chapter.id }}</li>
+    </button>
+{% endfor %}
+
+<script>
+$.ajaxSetup({
+    data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+});
+$(document).ready(function(){
+    $(".btn").click(function(){
+        var id = $(this).find('.chaptersid').text();
+        $.post("/written/chapter/"+id,{'id':id}, function(ret){
+            var jsonStr = JSON.stringify(ret);
+            var obj = JSON.parse(jsonStr);
+            $("#content").html("\<div id=\"content\"\>" + obj.content + "</div>");
+        });
+    });
+});
+
+</script>

@@ -1,0 +1,132 @@
+<!DOCTYPE>
+<html>
+<head>
+<title> 404 </title>
+{% load staticfiles %}
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<style>* { 
+	margin:0;
+	padding:0;
+}
+html, body { 
+	height:100%;
+}
+body { 
+	background:#000;
+	font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+	font-size:100%; 
+	line-height:1em;
+	color:#afa196;
+	font-weight:bold;
+}
+
+ul, ol { 
+	list-style:none;
+}
+
+.wrapper { 
+	width:100%;
+	overflow:hidden;
+}
+
+/*==== GLOBAL =====*/
+
+#header {
+	height:190px;
+}
+#content {
+	min-height:457px;
+	height:auto !important;
+	height:457px;
+}
+#footer {
+	font-family:Tahoma, Geneva, sans-serif;
+	color:#333;
+	font-size:12px;
+	text-align:center;
+	padding:10px 0 0 0;
+	font-weight:normal;
+}
+	#footer a {
+		color:#333;
+	}
+
+p {
+	margin-bottom:8px;
+	text-align:center;
+	padding:0 35px;
+	letter-spacing:-1px;
+}
+
+/*----- txt, links, lines, titles -----*/
+a {
+	color:#fff; 
+	outline:none;
+}
+a:hover{
+	text-decoration:none;
+}
+
+h1 {
+	font-size:50px;
+	line-height:1.1em;
+	font-weight:normal;
+	color:#afa196;
+	text-align:center;
+	padding:94px 0 0 0;
+	text-transform:capitalize;
+	font-variant:small-caps;
+	letter-spacing:-2px;
+}
+	h1 span {
+		display:block;
+		font-size:20px;
+		line-height:25px;
+		color:#6b635e;
+		font-variant:normal;
+		text-transform:none;
+		letter-spacing:0;
+		font-weight:bold;
+		letter-spacing:-1px;
+	}
+
+
+/*===== content =====*/
+#content .nav {
+	position:relative;
+	height:368px;
+}
+	#content .nav li {
+		position:absolute;
+		font-size:20px;
+		line-height:1.2em;
+		font-weight:bold;
+		text-transform:uppercase;
+		font-weight:normal;
+		letter-spacing:-1px;
+	}
+	#content .nav li.home {
+        left:47%;
+        top:50%;
+	}
+</style>
+</head>
+
+<body>
+	<div id="main">
+		<!-- header -->
+		<div id="header">
+			<h1>No pages here as you see!<span>404 error - not found.</span></h1>
+		</div>
+		<!-- content -->
+		<div id="content">
+			<ul class="nav">
+         	<li class="home"><a href="/">Home Page</a></li>
+         </ul>
+         <p>Unless creepy emptiness was what you were looking for, this place has nothing that you want.</p> 
+		</div>
+		<!-- footer -->
+	</div>
+</body>
+</html>

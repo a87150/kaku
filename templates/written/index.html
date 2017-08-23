@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block main %}
+{% for article in article_list %}
+<div class="page-header" id="article">
+    <h3 class="entry-title">
+        <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+    </h3>
+    <a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a>
+    <div id="views">
+        <p>点击量{{ article.views }}</p>
+    </div>
+    <div class="read-more cl-effect-14">
+        <a href="{{ article.get_absolute_url }}" class="more-link">继续阅读 <span class="meta-nav">→</span></a>
+        <p>{{ article.created_time }}</p>
+    </div>
+</div>
+{% empty %}
+    <div class="no-article">暂时还没有发布的文章！</div>
+{% endfor %}
+
+{% include 'pagination.html' %}
+
+
+{% endblock main %}

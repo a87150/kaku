@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ MEDIA_URL }}favicon.ico" />
+    <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/static/css/mdui.min.css" rel="stylesheet"/>
+    {% block title %}
+    <title>kaku demo</title>
+    {% endblock title %}
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.428571429;
+            color: #333333;
+            background-color: #f8f9fa;
+            margin:auto;
+            width:70%;
+        }
+        
+        pre, code, pre tt {
+            font-family: Courier, 'Courier New', monospace;
+        }
+
+        pre {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 1em 1.5em;
+            display: block;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        a:hover,
+        a:focus {
+          color: #2a6496;
+          text-decoration: underline;
+        }
+
+        a:focus {
+          outline: thin dotted #333;
+          outline: 5px auto -webkit-focus-ring-color;
+          outline-offset: -2px;
+        }
+        
+        .article-body {
+            box-shadow: 5px 5px 10px #888888;
+            height:auto;
+            width:90%;
+            line-height: 50px;
+        }
+
+        .media {
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow: auto;
+        }
+        
+        #div_id_tags{
+            width: 15%;
+        }
+
+        /* pagedown */
+        .wmd-wrapper .wmd-panel {
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .wmd-wrapper .wmd-input {
+            height: 30em;
+            width: 100%;
+            background-color: white;
+            border: solid 1px #cccccc;
+        }
+
+        .wmd-wrapper .wmd-preview {
+            background-color: white;
+        }
+
+        .wmd-wrapper .wmd-preview-title {
+            margin-top: 10px;
+        }
+
+    </style>
+    {% block style %}
+    {% endblock style %}
+    <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/static/js/mdui.min.js"></script>
+    {% block script %}
+    {% endblock script %}
+</head>
+<body class="mdui-drawer-body-right">
+    <header>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#example-navbar-collapse">
+                    <span class="sr-only">切换导航</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'index:index' %}">kaku demo</a>
+            </div>
+            <div class="collapse navbar-collapse" id="example-navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/written">written</a></li>
+                    <li><a href="/picture">picture</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            option <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/written/new">发文</a></li>
+                            <li><a href="/picture/new">发图</a></li>
+                        </ul>
+                    </li>
+                    <button class="mdui-btn" style="height:50px;" mdui-drawer="{target: '#right-drawer'}">open and close right drawer</button>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    </header>
+    
+
+    <div class="mdui-drawer mdui-drawer-right" id="right-drawer">
+        <form class="navbar-form navbar-left">
+            <div class="input-group">
+                <input id="search" class="form-control" type="text" placeholder="正在开发中...">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button">搜索</button>
+                </span>
+            </div>
+        </form>
+        {% if request.user.is_authenticated %}
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item-content" href="{% url 'users:detail' request.user.username %}">{{ request.user.nickname }}</a>
+            <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url}}" style="width: 26px;"/></div>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item-content" href="{% url 'users:profile' %}">设置</a>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item-content" href="{% url 'account_logout' %}?next={{ request.path }}">登出</a>
+        </li>
+        {% else %}
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item mdui-ripple" href="{% url 'account_signup' %}?next={{ request.path }}">注册</a>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item mdui-ripple" href="{% url 'account_login' %}?next={{ request.path }}">登录</a>
+        </li>
+        {% endif %}
+    </div>
+    
+    <div class="container">
+        {% block content %}
+            {% block main %}
+            {% endblock main %}
+        {% endblock content %}
+    </div>
+
+
+</body>
+</html>
