@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+
+<div class="conment" id="conment" ><h3>评论</h3>
+{% if request.user.is_authenticated %}
+    <div class="card-block" >
+        {% crispy form %}
+    </div>
+{% else %}
+    <div class="card card-block">
+        需要登录才能评论
+    </div>
+{% endif %}
+
+{% for comment in comment_list %}
+    <li class="mdui-list-item mdui-ripple">{{ comment.author }}:<br>{{ comment.content }}</li>
+    <br></br>
+{% empty %}
+    <li class="list-group-item">该用户下没有动态</li>
+{% endfor %}
+</div>

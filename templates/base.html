@@ -49,7 +49,13 @@
             box-shadow: 5px 5px 10px #888888;
             height:auto;
             width:90%;
-            line-height: 50px;
+            line-height: 30px;
+        }
+        
+        .conment {
+            height:auto;
+            width:90%;
+            line-height: 30px;
         }
 
         .media {
@@ -141,7 +147,7 @@
         {% if request.user.is_authenticated %}
         <li class="mdui-list-item mdui-ripple">
             <a class="mdui-list-item-content" href="{% url 'users:detail' request.user.username %}">{{ request.user.nickname }}</a>
-            <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url}}" style="width: 26px;"/></div>
+            <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url}}" /></div>
         </li>
         <li class="mdui-list-item mdui-ripple">
             <a class="mdui-list-item-content" href="{% url 'users:profile' %}">设置</a>

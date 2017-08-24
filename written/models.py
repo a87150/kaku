@@ -1,9 +1,11 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.fields import GenericRelation
 from django.urls import reverse
 
 from index.models import Tag
+from comment.models import Comment
 
     
 class Article(models.Model):
@@ -17,6 +19,7 @@ class Article(models.Model):
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)
     likes = models.PositiveIntegerField(_('likes'), default=0, editable=False)
     tags = models.ManyToManyField(Tag, blank=True, verbose_name=_('tags'))
+    comments = GenericRelation(Comment, verbose_name=_('comments'))
     
     class Meta:
         ordering = ['-created_time']
@@ -35,7 +38,6 @@ class Article(models.Model):
         self.save(update_fields=['likes'])
         
     def get_absolute_url(self):
-        print(self.pk)
         return reverse('written:detail', kwargs={'pk': self.pk})
 
         

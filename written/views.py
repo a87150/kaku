@@ -14,7 +14,8 @@ import bleach
 
 from .models import Article, Chapter
 from .forms import ArticleCreationForm, ArticleEditForm, ChapterCreationForm
-from index import pagination_data
+from index.pagination_data import pagination_data
+from comment.forms import CommentCreationForm
 
 class IndexView(ListView):
 
@@ -41,10 +42,10 @@ class IndexView(ListView):
         is_paginated = context.get('is_paginated')
 
         # 调用自己写的 pagination_data 方法获得显示分页导航条需要的数据，见下方。
-        pagination_data = pagination_data(paginator, page, is_paginated)
+        page_data = pagination_data(paginator, page, is_paginated)
 
-        # 将分页导航条的模板变量更新到 context 中，注意 pagination_data 方法返回的也是一个字典。
-        context.update(pagination_data)
+        # 将分页导航条的模板变量更新到 context 中，注意 page_data 方法返回的也是一个字典。
+        context.update(page_data)
 
         return context
 
@@ -94,21 +95,17 @@ class Detail(DetailView):
         context = super().get_context_data(**kwargs)
         tag_list = self.object.tags.all()
         chapter_list = self.object.chapter_set.all()
+        comment_list = self.object.comments.all()
+        form = CommentCreationForm()
         
         context.update({
             'tag_list': tag_list,
             'chapter_list': chapter_list,
-        })
-        return context
-'''
-        form = CommentForm()
-        comment_list = self.object.comment_set.all()
-        context.update({
+            'comment_list': comment_list,
             'form': form,
-            'comment_list': comment_list
         })
         return context
-'''
+
 
 class ChapterDetail(DetailView):
     model = Chapter

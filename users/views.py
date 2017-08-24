@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, UpdateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseForbidden, HttpResponse
 
 from actstream.models import actor_stream, Action
 
@@ -26,6 +27,12 @@ class MugshotChangeView(LoginRequiredMixin, UpdateView):
     form_class = MugshotForm
     template_name = 'users/mugshot_change.html'
     success_url = '/users/profile'
+    
+    def post(self, request, *args, **kwargs):
+        if len(request.FILES['mugshot']) >= 1024*1024:
+            return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/users/mugshot/change/\">返回</a>")
+        response = super().post(request, *args, **kwargs)
+        return response
 
     def form_valid(self, form):
         if form.has_changed():
@@ -45,14 +52,14 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         articles = self.object.article_set.all().order_by('-created_time')[:10]
-        actions = actor_stream(self.object)
+        actions = actor_stream(self.object)[:20]
 
         if self.object != self.request.user:
             actions = actions.exclude(verb__startswith='un')
 
         context.update({
             'article_list': articles,
-            'action_list': actions[:20],
+            'action_list': actions,
         })
         return context
 
@@ -73,7 +80,7 @@ class UserActionView(ListView):
 
 
 class UserArticleListView(ListView):
-    paginate_by = 10
+    paginate_by = 20
     model = Article
     template_name = 'users/articles.html'
 

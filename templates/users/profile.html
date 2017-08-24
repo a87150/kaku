@@ -14,21 +14,6 @@
                     <strong>用户名：</strong>{{ user.username }}
                 </li>
                 <li class="mb-1">
-                    <strong>邮箱：</strong>
-                    <ul class="list-unstyled">
-                        {% for emailaddress in user.emailaddress_set.all %}
-                            <li>{{ emailaddress.email }}
-                                {% if emailaddress.verified %}
-                                    <span class="verified small">已验证</span>
-                                {% else %}
-                                    <span class="unverified small">未验证</span>
-                                {% endif %}
-                                {% if emailaddress.primary %}
-                                    <span class="primary small" style="color:red">主邮箱</span>{% endif %}</li>
-                        {% endfor %}
-                    </ul>
-                </li>
-                <li class="mb-1">
                     <strong>昵称：</strong>{{ user.nickname }}
                 </li>
                 <li class="mb-1">
@@ -42,9 +27,9 @@
             <span>当前头像</span>
             <img src="{{ user.mugshot_thumbnail.url }}" alt=""
                  style="width: 96px;">
+             <br></br>
             <div>
-                <button class="btn btn-outline-info btn-sm mt-1"><a href="{% url 'users:mugshot_change' %}">上传新头像</a>
-                </button>
+                <button class="btn btn-default"><a href="{% url 'users:mugshot_change' %}">上传新头像</a></button>
             </div>
         </div>
         <div class="card card-block">
@@ -52,6 +37,22 @@
             <hr>
             <ul class="list-unstyled">
                 <li><a href="{% url 'account_change_password' %}"><i class="fa fa-key" aria-hidden="true"></i> 修改密码</a>
+                </li>
+                <br></br>
+                <li class="mb-1">
+                    <strong>邮箱：</strong>
+                    <ul class="list-unstyled">
+                        {% for emailaddress in user.emailaddress_set.all %}
+                            <li>{{ emailaddress.email }}
+                                {% if emailaddress.verified %}
+                                    <span class="verified small">已验证</span>
+                                {% else %}
+                                    <span class="unverified small">未验证</span>
+                                {% endif %}
+                                {% if emailaddress.primary %}
+                                    <span class="primary small" style="color:red">主邮箱</span>{% endif %}</li>
+                        {% endfor %}
+                    </ul>
                 </li>
                 <li><a href="{% url 'account_email' %}"><i class="fa fa-envelope" aria-hidden="true"></i> 修改绑定邮箱</a>
                 </li>

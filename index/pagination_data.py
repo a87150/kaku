@@ -1,4 +1,4 @@
-def pagination_data(self, paginator, page, is_paginated):
+def pagination_data(paginator, page, is_paginated):
 
     if not is_paginated:
         # 如果没有分页，则无需显示分页导航条，不用任何分页导航条的数据，因此返回一个空的字典

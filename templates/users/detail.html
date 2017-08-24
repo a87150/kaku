@@ -27,7 +27,7 @@
             {% empty %}
             <li class="list-group-item">该用户下面没有</li>
             {% endfor %}
-            {% if not article_list.count < 10 %}
+            {% if article_list.count > 9 %}
             <li class="list-group-item small"><a href="{% url 'users:articles' user.username %}"
                 class="text-muted">{{ user.nickname }}更多作品>></a></li>
             {% endif %}
@@ -46,7 +46,7 @@
             {% empty %}
                 <li class="list-group-item">该用户下没有动态</li>
             {% endfor %}
-            {% if not action_list.count < 20 %}
+            {% if action_list.count > 19 %}
                 <li class="list-group-item small"><a href="{% url 'users:actions' user.username %}"
                 class="text-muted">{{ user.nickname }}的全部动态>></a></li>
             {% endif %}

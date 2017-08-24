@@ -26,7 +26,7 @@ class User(AbstractUser):
                                        options={'quality': 80})
 
     def __str__(self):
-        return self.username
+        return self.nickname
 
     def save(self, *args, **kwargs):
         if not self.nickname:
