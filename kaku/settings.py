@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'actstream',
     'notifications',
     'bootstrap_pagination',
+    'imagekit',
     
     'users',
     'picture',
