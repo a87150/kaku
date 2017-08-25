@@ -16,7 +16,7 @@ $.ajaxSetup({
 $(document).ready(function(){
     $(".btn").click(function(){
         var id = $(this).find('.chaptersid').text();
-        $.post("/written/chapter/"+id,{'id':id}, function(ret){
+        $.post("/written/chapter/"+id+"/",{'id':id}, function(ret){
             var jsonStr = JSON.stringify(ret);
             var obj = JSON.parse(jsonStr);
             $("#content").html("\<div id=\"content\"\>" + obj.content + "</div>");

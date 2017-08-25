@@ -109,7 +109,7 @@ class Detail(DetailView):
 
 class ChapterDetail(DetailView):
     model = Chapter
-    template_name = "written/detail.html"
+    template_name = "written/chapter_detail.html"
     context_object_name = 'article'
 
     def get_object(self, queryset=None):
