@@ -12,9 +12,9 @@
 {% endif %}
 
 {% for comment in comment_list %}
-    <li class="mdui-list-item mdui-ripple"><a href="{{ comment.author.get_absolute_url }}" class="author">{{ comment.author }}</a>
-    :<br>{{ comment.content }}</li>
-    <br></br>
+    <li class="mdui-list-item mdui-ripple"><a href="{{ comment.author.get_absolute_url }}" class="author">{{ comment.author }}:</a>
+    <br><br>
+    {{ comment.content }}</li>
 {% empty %}
     <li class="mdui-list-item mdui-ripple">没有评论</li>
 {% endfor %}

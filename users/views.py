@@ -52,14 +52,14 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         articles = self.object.article_set.all().order_by('-created_time')[:10]
-        actions = actor_stream(self.object)[:20]
+        actions = actor_stream(self.object)
 
         if self.object != self.request.user:
             actions = actions.exclude(verb__startswith='un')
 
         context.update({
             'article_list': articles,
-            'action_list': actions,
+            'action_list': actions[:20],
         })
         return context
 
