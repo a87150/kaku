@@ -7,7 +7,7 @@
 
 <div class="page-header" id="article-title">
     <a href="{{ article.get_absolute_url }}" id="title"><h3>{{ article.title }}</h3></a>
-    {% include 'written\post_chapterid.html' %}
+    {% include 'written/post_chapterid.html' %}
 </div>
 <div class="article-body" id="article-body">
     <div id="content">{{ article.content|safe }}</div>
@@ -19,6 +19,6 @@
 <li hidden class="id">{{ article.id }}</li>
 {% include 'post_tag.html' %}
 
-{% include 'comment\comment.html' %}
+{% include 'comment/comment.html' %}
 
 {% endblock main %}

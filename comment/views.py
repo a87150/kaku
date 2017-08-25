@@ -29,11 +29,6 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         form = super().get_form(form_class=form_class)
         return form
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        action.send(self.request.user, verb='写了评论', action_object=self.object)
-        return response
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         self.referrer = self.request.META['HTTP_REFERER']
