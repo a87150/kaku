@@ -17,8 +17,8 @@ def user_mugshot_path(instance, filename):
 class User(AbstractUser):
     last_login_ip = models.GenericIPAddressField(unpack_ipv4=True, blank=True, null=True)
     ip_joined = models.GenericIPAddressField(unpack_ipv4=True, blank=True, null=True)
-    nickname = models.CharField(max_length=50, unique=True)
-    signature = models.CharField(max_length=100, blank=True)
+    nickname = models.CharField(max_length=20, unique=True)
+    signature = models.CharField(max_length=200, blank=True)
     mugshot = models.ImageField(upload_to=user_mugshot_path)
     mugshot_thumbnail = ImageSpecField(source='mugshot',
                                        processors=[ResizeToFill(96, 96)],

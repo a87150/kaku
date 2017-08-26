@@ -17,8 +17,6 @@
             line-height: 1.428571429;
             color: #333333;
             background-color: #f8f9fa;
-            margin:auto;
-            width:70%;
         }
         
         pre, code, pre tt {
@@ -48,7 +46,6 @@
         .article-body {
             box-shadow: 5px 5px 10px #888888;
             height:auto;
-            width:90%;
             line-height: 30px;
         }
         
@@ -157,10 +154,10 @@
         </li>
         {% else %}
         <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item mdui-ripple" href="{% url 'account_signup' %}?next={{ request.path }}">注册</a>
+            <a class="mdui-list-item-content" href="{% url 'account_signup' %}?next={{ request.path }}">注册</a>
         </li>
         <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item mdui-ripple" href="{% url 'account_login' %}?next={{ request.path }}">登录</a>
+            <a class="mdui-list-item-content" href="{% url 'account_login' %}?next={{ request.path }}">登录</a>
         </li>
         {% endif %}
     </div>

@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class Comment(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL)
-    content = models.TextField(max_length=1000, blank=True)
+    content = models.TextField(max_length=600, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
     likes = models.PositiveIntegerField(default=0, editable=False)
     content_type = models.ForeignKey(ContentType)

@@ -2,9 +2,7 @@
 
 <div class="conment" id="conment" ><h3>评论</h3>
 {% if request.user.is_authenticated %}
-    <div class="card-block" >
         {% crispy form %}
-    </div>
 {% else %}
     <div class="card card-block">
         需要登录才能评论
@@ -12,9 +10,8 @@
 {% endif %}
 
 {% for comment in comment_list %}
-    <li class="mdui-list-item mdui-ripple"><a href="{{ comment.author.get_absolute_url }}" class="author">{{ comment.author }}:</a>
-    <br><br>
-    {{ comment.content }}</li>
+    <a href="{{ comment.author.get_absolute_url }}" class="author">{{ comment.author }}: </a>
+    <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
 {% empty %}
     <li class="mdui-list-item mdui-ripple">没有评论</li>
 {% endfor %}

@@ -11,7 +11,7 @@ from comment.models import Comment
 class Article(models.Model):
     
     id = models.AutoField(primary_key=True)
-    title = models.CharField(_('title'), max_length=100)
+    title = models.CharField(_('title'), max_length=50)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('author'))
     content = models.TextField(_('content'))
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
@@ -43,7 +43,7 @@ class Article(models.Model):
         
 class Chapter(models.Model):
 
-    title = models.CharField(_('title'), max_length=100)
+    title = models.CharField(_('title'), max_length=50)
     content = models.TextField(_('content'))
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     last_modified_time = models.DateTimeField(_('last modified time'), auto_now=True)

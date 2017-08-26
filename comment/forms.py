@@ -1,7 +1,7 @@
 from django import forms
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Field
 
 from .models import Comment
 
@@ -18,9 +18,13 @@ class CommentCreationForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_action = 'comment:create'
         self.helper.form_method = 'post'
-        self.helper.form_id = 'id_create_form'
+        self.helper.form_id = 'comment_create_form'
         self.helper.add_input(Submit('submit', '发布'))
-        self.fields['content'].help_text = '限制500字'
+        self.helper.field_class = 'mdui-textfield'
+        self.fields['content'].help_text = '限制600字'
+        self.helper.layout = Layout(
+            Field('content', css_class="mdui-textfield-input", id="content")
+        )
 
     def save(self, commit=True):
         if self.user:

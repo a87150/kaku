@@ -10,7 +10,7 @@ from comment.models import Comment
 class Picture(models.Model):
     
     id = models.AutoField(primary_key=True)
-    title = models.CharField(_('title'), max_length=100)
+    title = models.CharField(_('title'), max_length=50)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('author'))
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)

@@ -72,11 +72,6 @@ class Detail(DetailView):
         # 之所以需要先调用父类的 get 方法，是因为只有当 get 方法被调用后，
         # 才有 self.object 属性，其值为 article 模型实例，即被访问的文章 article
         response = super().get(request, *args, **kwargs)
-        
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            ip = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            ip = request.META['REMOTE_ADDR']
 
         self.object.increase_views()
 
@@ -87,7 +82,10 @@ class Detail(DetailView):
         # 覆写 get_object 方法的目的是因为需要对 article 的 content 值进行渲染
         article = super().get_object(queryset=None)
         if article:
-            article.content = markdown.markdown(html_clean(article.content))
+            article.content = markdown.markdown(html_clean(article.content), extensions=[
+                                     'markdown.extensions.extra',
+                                     'markdown.extensions.codehilite',
+                                     'markdown.extensions.toc',])
             return article
 
     def get_context_data(self, **kwargs):
@@ -116,7 +114,11 @@ class ChapterDetail(DetailView):
         article = super().get_object(queryset=None)
 
         if article:
-            article.content = markdown.markdown(html_clean(article.content))
+            article.content = markdown.markdown(
+            html_clean(article.content), extensions=[
+                                     'markdown.extensions.extra',
+                                     'markdown.extensions.codehilite',
+                                     'markdown.extensions.toc',])
             return article
 
     def get_context_data(self, **kwargs):
