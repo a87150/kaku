@@ -4,14 +4,21 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.fields import GenericRelation
 from django.urls import reverse
 
+import os
+
 from index.models import Tag
 from comment.models import Comment
-    
+
+
+def pictures_path(instance, filename):
+    return os.path.join(settings.MEDIA_URL, 'pictures', filename)
+
 class Picture(models.Model):
     
     id = models.AutoField(primary_key=True)
     title = models.CharField(_('title'), max_length=50)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('author'))
+    thematic = models.ImageField(_('题图'), upload_to=pictures_path, )
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)
     likes = models.PositiveIntegerField(_('likes'), default=0, editable=False)
@@ -36,7 +43,9 @@ class Picture(models.Model):
         
     def get_absolute_url(self):
         return reverse('picture:detail', kwargs={'pk': self.pk})
-        
+
+
 class Address(models.Model):
 
-    address = models.URLField(_('address'), unique=True)
+    picture = models.ForeignKey(Picture, blank=False, null=False, verbose_name=_('picture'))
+    address = models.TextField(max_length=6000, verbose_name=_('address'))

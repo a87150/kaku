@@ -1,9 +1,9 @@
-import os
-
 from django.db import models
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
+
+import os
 
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill

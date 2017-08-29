@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+    {% block title %}
+    <title>{{ picture.title }}</title>
+    {% endblock title %}
+
+{% block main %}
+
+<div class="page-header" id="picture-title">
+    <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
+</div>
+<div class="picture-body" id="picture-body">
+    <img id="thematic" src={{ picture.thematic }}>
+</div>
+<div class="mdui-divider"></div>
+<br></br>
+{% include 'tag.html' %}
+<br></br>
+<li hidden class="type">picture</li>
+<li hidden class="id">{{ picture.id }}</li>
+{% include 'post_tag.html' %}
+
+{% include 'comment/comment.html' %}
+
+{% endblock main %}

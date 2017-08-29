@@ -1,63 +1,80 @@
 {% extends 'base.html' %}
 
 {% block main %}
-    <main class="col-md-8 mb-1">
-        <div class="card card-block">
-            <div class="media">
-                <div class="media-left">
-                    <img class="media-object" src="{{ user.mugshot_thumbnail.url }}" alt=""
-                         style="width: 73px;"></img>
-                </div>
-                <div class="media-body">
-                    <h3 class="media-heading">{{ user.nickname }}</h3>
-                    <p>{{ user.signature }}</p>
-                    <div>django forum demo 第 {{ user.pk }} 号会员，加入于 {{ user.date_joined }}</div>
-                </div>
-            </div>
-        </div>
-    <div class="production">
-        <ul class="list-group mb-1">
-            <li class="list-group-item font-weight-bold">
-                {{ user.nickname }} 的作品
-            </li>
-            {% for article in article_list %}
-            <li class="list-group-item">
-                <a class="nav-item" href="{{ article.get_absolute_url }}"> {{ article }} </a>
-            </li>
-            {% empty %}
-            <li class="list-group-item">该用户下面没有</li>
-            {% endfor %}
-            {% if article_list.count > 9 %}
-            <li class="list-group-item small"><a href="{% url 'users:articles' user.username %}"
-                class="text-muted">{{ user.nickname }}更多作品>></a></li>
-            {% endif %}
-        </ul>
-    </div>
-    {% if request.user.is_authenticated %}
-    <div class="affairs">
-        <ul class="list-group mb-2">
-            <li class="list-group-item font-weight-bold">用户最新动态
-            </li>
 
-            {% for act in action_list %}
-                <li class="list-group-item">
-                    {{ act }}
-                </li>
-            {% empty %}
-                <li class="list-group-item">该用户下没有动态</li>
-            {% endfor %}
-            {% if action_list.count > 19 %}
-                <li class="list-group-item small"><a href="{% url 'users:actions' user.username %}"
-                class="text-muted">{{ user.nickname }}的全部动态>></a></li>
-            {% endif %}
-        </ul>
+<div class="media">
+    <div class="media-left">
+        <img class="media-object" src="{{ user.mugshot_thumbnail.url }}" alt=""
+             style="width: 73px;"></img>
     </div>
-        {% else %}
-        <div class="card card-block">
-            需要登录才能查看用户动态
-        </div>
-        {% endif %}
-    </main>
+    <div class="media-body">
+        <h3 class="media-heading">{{ user.nickname }}</h3>
+        <p>{{ user.signature }}</p>
+        <div>django forum demo 第 {{ user.pk }} 号会员，加入于 {{ user.date_joined }}</div>
+    </div>
+</div>
+<br></br>
+<ul class="article">
+    <li class="mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">{{ user.nickname }} 的文章</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">translate</i>
+    </li>
+    {% for article in article_list %}
+    <li class="mdui-list-item mdui-ripple">
+        <a class="nav-item" href="{{ article.get_absolute_url }}"> {{ article }} </a>
+    </li>
+    {% empty %}
+    <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
+    {% endfor %}
+    {% if article_list.count > 9 %}
+    <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:articles' user.username %}"
+        class="text-muted">{{ user.nickname }}更多文章>></a></li>
+    {% endif %}
+</ul>
+
+<ul class="picture">
+    <li class="mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">{{ user.nickname }} 的图画</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">wallpaper</i>
+    </li>
+    {% for picture in picture_list %}
+    <li class="mdui-list-item mdui-ripple">
+        <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
+    </li>
+    {% empty %}
+    <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
+    {% endfor %}
+    {% if article_list.count > 9 %}
+    <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:picture' user.username %}"
+        class="text-muted">{{ user.nickname }}更多图画>></a></li>
+    {% endif %}
+</ul>
+
+{% if request.user.is_authenticated %}
+<ul class="affairs">
+    <li class="mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">{{ user.nickname }} 的动态</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">motorcycle</i>
+    </li>
+
+    {% for act in action_list %}
+        <li class="mdui-list-item mdui-ripple">
+            {{ act }}
+        </li>
+    {% empty %}
+        <li class="mdui-list-item mdui-ripple">该用户下没有动态</li>
+    {% endfor %}
+    {% if action_list.count > 19 %}
+        <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:actions' user.username %}"
+        class="text-muted">{{ user.nickname }}的全部动态>></a></li>
+    {% endif %}
+</ul>
+    {% else %}
+    <div class="card card-block">
+        需要登录才能查看用户动态
+    </div>
+    {% endif %}
+
 {% endblock main %}
 
 {% block script %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load bootstrap_pagination %}
+
+{% block main %}
+
+    <ul class="list-group">
+        {% for picture in picture_list %}
+            <li class="mdui-list-item mdui-ripple">
+                <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
+            </li>
+        {% empty %}
+            <li class="mdui-list-item mdui-ripple">该用户没写什么</li>
+        {% endfor %}
+        {% if article_list and paginator.num_pages > 1 %}
+            {% bootstrap_paginate page_obj size='small' range=10 show_first_last='true' %}
+        {% endif %}
+    </ul>
+
+{% endblock main %}

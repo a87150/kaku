@@ -1,5 +1,5 @@
-<div class="input-group" style="width: 200px;">
-    <input type="text" class="form-control" placeholder="tag" id="tag_input">
+<div class="input-group" id="addtag" style="width: 200px;">
+    <input type="text" class="form-control" placeholder="tag" id="tag_input"/>
     <span class="input-group-btn">
         <button type="button" class="btn btn-default" id="tag_post">添加</button>
     </span>
@@ -22,7 +22,7 @@ $.ajaxSetup({
                 $(this).attr("disabled","true");
                 setTimeout("$('#tag_post').removeAttr('disabled')",3000);
                 $.post("/tags/",{'tag':tag, 'id':id, 'type':type}, function(ret){
-                    alert(ret);
+                    $("#addtag").after("\<div class=\"alert alert-warning\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\">&times;</a><strong>"+ret+"</strong></div>");
                 });
             };
         });

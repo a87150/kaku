@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+{% load notifications_tags %}
 <html>
 <head>
     <meta charset="UTF-8">
@@ -42,13 +43,13 @@
           outline: 5px auto -webkit-focus-ring-color;
           outline-offset: -2px;
         }
-        
+
         .article-body {
             box-shadow: 5px 5px 10px #888888;
             height:auto;
             line-height: 30px;
         }
-        
+
         .conment {
             height:auto;
             width:90%;
@@ -60,7 +61,7 @@
             word-break: break-all;
             overflow: auto;
         }
-        
+
         #div_id_tags{
             width: 15%;
         }
@@ -68,25 +69,18 @@
         /* pagedown */
         .wmd-wrapper .wmd-panel {
             margin-left: 0;
-            margin-right: 0;
             width: 100%;
-            min-width: 0;
         }
 
         .wmd-wrapper .wmd-input {
-            height: 30em;
-            width: 100%;
-            background-color: white;
-            border: solid 1px #cccccc;
-        }
-
-        .wmd-wrapper .wmd-preview {
+            height: 40em;
             background-color: white;
         }
 
-        .wmd-wrapper .wmd-preview-title {
-            margin-top: 10px;
+        .wmd-preview {
+            background-color: white;
         }
+
 
     </style>
     {% block style %}
@@ -94,6 +88,21 @@
     <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/static/js/mdui.min.js"></script>
+        <script>
+        $.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+        });
+        $(document).ready(function(){
+            $(".captcha").click(function () {
+                var form = $(this).parents('form');
+                $.getJSON('/captcha/refresh/', {}, function (json) {
+                    form.find('input[name="captcha_0"]').val(json.key);
+                    form.find('img.captcha').attr('src', json.image_url);
+                });
+                return false;
+            });
+        });
+    </script>
     {% block script %}
     {% endblock script %}
 </head>
@@ -109,22 +118,21 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url 'index:index' %}">kaku demo</a>
+                <a class="navbar-brand" href="/">kaku demo</a>
             </div>
             <div class="collapse navbar-collapse" id="example-navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="/written">written</a></li>
-                    <li><a href="/picture">picture</a></li>
+                    <li><a href="/written">文章</a></li>
+                    <li><a href="/picture">图画</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             option <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="/written/new/">发文</a></li>
-                            <li><a href="/picture/new/">发图</a></li>
+                            <li><a href="#">没想好</a></li>
                         </ul>
                     </li>
-                    <button class="mdui-btn" style="height:50px;" mdui-drawer="{target: '#right-drawer'}">open and close right drawer</button>
+                    <button class="mdui-btn" style="height:50px;" mdui-drawer="{target: '#right-drawer'}">open or close right drawer</button>
                 </ul>
             </div>
         </div>
@@ -145,6 +153,18 @@
         <li class="mdui-list-item mdui-ripple">
             <a class="mdui-list-item-content" href="{% url 'users:detail' request.user.username %}">{{ request.user.nickname }}</a>
             <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url}}" /></div>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            {% notifications_unread as unread_count %}
+            <a href="/notifications/"
+               {% if unread_count %}style="color: red"
+               {% endif %} class="mdui-list-item-content"aria-hidden="true"> {{ unread_count }} 条未读提醒</a>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item-content" href="/written/new/">发文</a>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item-content" href="/picture/new/">发图</a>
         </li>
         <li class="mdui-list-item mdui-ripple">
             <a class="mdui-list-item-content" href="{% url 'users:profile' %}">设置</a>

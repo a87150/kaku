@@ -6,6 +6,7 @@ from django.http import HttpResponseForbidden, HttpResponse
 from actstream.models import actor_stream, Action
 
 from written.models import Article
+from picture.models import Picture
 from .forms import UserProfileForm, MugshotForm
 from .models import User
 
@@ -31,8 +32,7 @@ class MugshotChangeView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         if len(request.FILES['mugshot']) >= 1024*1024:
             return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/users/mugshot/change/\">返回</a>")
-        response = super().post(request, *args, **kwargs)
-        return response
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         if form.has_changed():
@@ -52,6 +52,7 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         articles = self.object.article_set.all().order_by('-created_time')[:10]
+        pictures = self.object.picture_set.all().order_by('-created_time')[:10]
         actions = actor_stream(self.object)
 
         if self.object != self.request.user:
@@ -59,6 +60,7 @@ class UserDetailView(DetailView):
 
         context.update({
             'article_list': articles,
+            'picture_list': pictures,
             'action_list': actions[:20],
         })
         return context
@@ -83,6 +85,21 @@ class UserArticleListView(ListView):
     paginate_by = 20
     model = Article
     template_name = 'users/articles.html'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(author__username=self.kwargs.get('username')).order_by('-created_time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = User.objects.get(username=self.kwargs.get('username'))
+        context['user'] = user
+        return context
+
+
+class UserPictureListView(ListView):
+    paginate_by = 20
+    model = Picture
+    template_name = 'users/picture.html'
 
     def get_queryset(self):
         return super().get_queryset().filter(author__username=self.kwargs.get('username')).order_by('-created_time')

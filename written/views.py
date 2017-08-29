@@ -9,7 +9,7 @@ import json
 
 from notifications.views import AllNotificationsList
 from actstream.signals import action
-import markdown
+import mistune
 import bleach
 
 from .models import Article, Chapter
@@ -51,14 +51,15 @@ class IndexView(ListView):
 
 
 def html_clean(htmlstr):
+    markdown = mistune.Markdown()
 
     # 采用bleach来清除不必要的标签，并linkify text
 
     tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul']
-    tags.extend(['div','p','hr','br','pre','code','span','h1','h2','h3','h4','h5','del','dl','img','sub','sup','u'
+    tags.extend(['p','hr','br','pre','code','span','h1','h2','h3','h4','h5','del','dl','img','sub','sup','u'
                  'table','thead','tr','th','td','tbody','dd','caption','blockquote','section'])
     attributes = {'*':['class','id'],'a': ['href', 'title','target'],'img':['src','style','width','height']}
-    return bleach.linkify(bleach.clean(htmlstr,tags=tags,attributes=attributes))
+    return bleach.linkify(bleach.clean(markdown(htmlstr),tags=tags,attributes=attributes))
 
 
 class Detail(DetailView):
@@ -82,10 +83,7 @@ class Detail(DetailView):
         # 覆写 get_object 方法的目的是因为需要对 article 的 content 值进行渲染
         article = super().get_object(queryset=None)
         if article:
-            article.content = markdown.markdown(html_clean(article.content), extensions=[
-                                     'markdown.extensions.extra',
-                                     'markdown.extensions.codehilite',
-                                     'markdown.extensions.toc',])
+            article.content = html_clean(article.content)
             return article
 
     def get_context_data(self, **kwargs):
@@ -114,11 +112,7 @@ class ChapterDetail(DetailView):
         article = super().get_object(queryset=None)
 
         if article:
-            article.content = markdown.markdown(
-            html_clean(article.content), extensions=[
-                                     'markdown.extensions.extra',
-                                     'markdown.extensions.codehilite',
-                                     'markdown.extensions.toc',])
+            article.content = html_clean(article.content)
             return article
 
     def get_context_data(self, **kwargs):
@@ -132,9 +126,9 @@ class ChapterDetail(DetailView):
         
     def post(self, request, *args, **kwargs):
         id = request.POST['id']
-        chap = Chapter.objects.get(id=id)
+        chap = get_object_or_404(Chapter, id=id)
         response_data = {}
-        response_data['content'] = markdown.markdown(html_clean(chap.content))
+        response_data['content'] = html_clean(chap.content)
         return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 

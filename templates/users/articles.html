@@ -3,18 +3,18 @@
 {% load bootstrap_pagination %}
 
 {% block main %}
-    <main class="col-md-8 mb-1">
-        <ul class="list-group">
-            {% for article in article_list %}
-                <li class="list-group-item">
-                    <a class="nav-item" href="{{ article.get_absolute_url }}"> {{ article.title }} </a>
-                </li>
-            {% empty %}
-                <li class="list-group-item">该用户没写什么</li>
-            {% endfor %}
-            {% if article_list and paginator.num_pages > 1 %}
-                {% bootstrap_paginate page_obj size='small' range=10 show_first_last='true' %}
-            {% endif %}
-        </ul>
-    </main>
+
+    <ul class="list-group">
+        {% for article in article_list %}
+            <li class="mdui-list-item mdui-ripple">
+                <a href="{{ article.get_absolute_url }}"> {{ article.title }} </a>
+            </li>
+        {% empty %}
+            <li class="mdui-list-item mdui-ripple">该用户没写什么</li>
+        {% endfor %}
+        {% if article_list and paginator.num_pages > 1 %}
+            {% bootstrap_paginate page_obj size='small' range=10 show_first_last='true' %}
+        {% endif %}
+    </ul>
+
 {% endblock main %}

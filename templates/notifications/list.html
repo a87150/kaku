@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load bootstrap_pagination %}
+
+{% block main %}
+{% for notice in notice_list %}
+<div class="alert alert-block alert-{{ notice.level }}">
+  <a class="close pull-right" href="{% url 'notifications:mark_as_read' notice.slug %}">
+    <i class="icon-close"></i>
+  </a>
+
+  <h4>
+    <i class="icon-mail{% if notice.unread %}-alt{% endif %}"></i>
+    {{ notice.actor }} 
+    {% if notice.target %}
+      在 {{ notice.target }}
+    {% endif %}
+    {{ notice.verb }}
+  </h4>
+
+  <p>{{ notice.timesince }} 之前</p>
+</div>
+{% endfor %}
+{% endblock main %}

@@ -1,1 +1,1 @@
-fault_app_config = 'picture.apps.PictureConfig'
+default_app_config = 'picture.apps.PictureConfig'

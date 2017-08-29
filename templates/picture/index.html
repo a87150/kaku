@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block main %}
+{% for picture in picture_list %}
+<div class="page-header" id="picture">
+    <h3 class="entry-title">
+        <a href="{{ picture.get_absolute_url }}">{{ picture.title }}</a>
+    </h3>
+    <a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a>
+
+    <div class="read-more cl-effect-14">
+        <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a><br>
+        <a href="{{ picture.get_absolute_url }}" class="more-link">继续观看 <span class="meta-nav">→</span></a>
+        <p>{{ picture.created_time }}</p>
+    </div>
+</div>
+{% empty %}
+    <div class="no-picture">暂时还没有图片！</div>
+{% endfor %}
+
+{% include 'pagination.html' %}
+
+{% endblock main %}

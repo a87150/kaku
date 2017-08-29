@@ -8,6 +8,6 @@ django-pagedown
 django-activity-stream
 django-bootstrap-pagination
 
-Markdown
+mistune
 Pillow
 bleach

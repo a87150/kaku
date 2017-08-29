@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^(?P<username>[\w.@+-]+)/$', views.UserDetailView.as_view(), name='detail'),
     url(r'^(?P<username>[\w.@+-]+)/articles/$', views.UserArticleListView.as_view(), name='articles'),
     url(r'^(?P<username>[\w.@+-]+)/actions/$', views.UserActionView.as_view(), name='actions'),
+    url(r'^(?P<username>[\w.@+-]+)/pictures/$', views.UserPictureListView.as_view(), name='pictures'),
 ]

@@ -1,9 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
+from django.conf import settings
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 import re
+
+from notifications.views import AllNotificationsList
+from notifications.models import Notification
 
 from written.models import Article
 from picture.models import Picture
@@ -40,3 +44,17 @@ class TagCreateView(LoginRequiredMixin, View):
                 return HttpResponse("成功")
             except:
                 return HttpResponse("失败")
+
+
+class NotificationsListView(AllNotificationsList):
+    template_name = 'notifications/list.html'
+    context_object_name = 'notice_list'
+    paginate_by = 10
+
+    def get_queryset(self):
+        Notification.objects.mark_all_as_read(self.request.user)
+        if getattr(settings, 'NOTIFICATIONS_SOFT_DELETE', False):
+            qs = self.request.user.notifications.active()
+        else:
+            qs = self.request.user.notifications.all()
+        return qs

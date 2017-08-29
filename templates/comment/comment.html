@@ -10,8 +10,15 @@
 {% endif %}
 
 {% for comment in comment_list %}
-    <a href="{{ comment.author.get_absolute_url }}" class="author">{{ comment.author }}: </a>
+<div class="conments" id="conments" style="margin:20px 20px 20px 0px;">
+    <li class="mdui-list-item mdui-ripple"> 
+        <a href="{{ comment.author.get_absolute_url }}" class="author">
+            <img src="{{ comment.author.mugshot_thumbnail.url}}" width="20%" height="20%"/>{{ comment.author }}
+        </a>&nbsp&nbsp{{ comment.created_time }}
+    </li>
     <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
+</div>
+<div class="mdui-divider"></div>
 {% empty %}
     <li class="mdui-list-item mdui-ripple">没有评论</li>
 {% endfor %}

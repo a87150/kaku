@@ -27,13 +27,10 @@ class ArticleCreationForm(forms.ModelForm):
         self.fields['content'].label = '正文'
         self.fields['content'].help_text = '支持 Markdown 语法标记'
         self.fields['tags'].label = 'tags'
-        self.fields['tags'].help_text = '选择文章标签'
+        self.fields['tags'].help_text = '选择标签, 可按Ctrl多选'
 
         if use_pagedown:
             self.fields['content'].widget = PagedownWidget()
-
-        if self.initial.get('tags'):
-            self.fields['tags'].widget = forms.HiddenInput()
 
     def save(self, commit=True):
         if self.user:
