@@ -14,7 +14,8 @@
     <li class="mdui-list-item mdui-ripple"> 
         <a href="{{ comment.author.get_absolute_url }}" class="author">
             <img src="{{ comment.author.mugshot_thumbnail.url}}" width="20%" height="20%"/>{{ comment.author }}
-        </a>&nbsp&nbsp{{ comment.created_time }}
+        </a>&nbsp&nbsp{{ comment.created_time }}&nbsp&nbsp
+        <button type="button" class="mdui-btn" id="reply" style="position:relative; right:-45%">回复 {{ comment.author }}</button>
     </li>
     <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
 </div>
@@ -23,3 +24,13 @@
     <li class="mdui-list-item mdui-ripple">没有评论</li>
 {% endfor %}
 </div>
+
+<script>
+$(document).ready(function(){
+    $('div.conments button.mdui-btn').click(function(){
+        var id = $(this).text().substring(3);
+        $('#comment-content').val('@'+id+' ');
+
+    });
+});
+</script>

@@ -18,11 +18,12 @@ class PictureCreateForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_action = 'picture:create'
         self.helper.form_method = 'post'
-        self.helper.form_id = 'id_create_form'
-        self.helper.add_input(Submit('submit', '发布'))
+        self.helper.form_id = 'picture_create_form'
+        self.helper.add_input(Submit('picture', '发布'))
         self.fields['title'].label = '标题'
         self.fields['title'].help_text = '限制为50字'
         self.fields['thematic'].label = '题图'
+        self.fields['thematic'].help_text = '不能大于1mb'
         self.fields['tags'].label = 'tags'
         self.fields['tags'].help_text = '选择标签, 可按Ctrl多选'
         

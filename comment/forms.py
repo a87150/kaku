@@ -24,6 +24,7 @@ class CommentCreationForm(forms.ModelForm):
         self.fields['content'].help_text = '限制300字'
         self.fields['content'].widget.attrs['class']='mdui-textfield-input'
         self.fields['content'].widget.attrs['rows']='1'
+        self.fields['content'].widget.attrs['id']='comment-content'
 
     def save(self, commit=True):
         if self.user:

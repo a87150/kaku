@@ -27,9 +27,9 @@ class TagCreateView(LoginRequiredMixin, View):
 
         id = request.POST['id']
         if request.POST['type'] == 'article':
-            obj = Article.objects.get(id=id)
+            obj = get_object_or_404(Article, id=id)
         else:
-            obj = Picture.objects.get(id=id)
+            obj = get_object_or_404(Picture, id=id)
         try:
             if len(obj.tags.all()) >= 10:
                 return HttpResponse("超过10个tag")

@@ -1,25 +1,27 @@
-{% if user == article.author %}
-
-<button type="button" class="mdui-btn mdui-btn-raised" id="chapter">
-<a href="new/">添加章节</a>
-</button>
-
-{% endif %}
+<div id="chapters">
 {% for chapter in chapter_list %}
-    <button type="button" class="btn" id="chapters">
+    <button type="button" class="mdui-btn mdui-btn-raised" >
         {{ chapter.title }}
         <li hidden class="chaptersid">{{ chapter.id }}</li>
     </button>
 {% endfor %}
+{% if user == article.author %}
+
+    <button type="button" class="mdui-btn mdui-btn-raised" id="addchapter">
+    <a href="new/">添加章节</a>
+    </button>
+
+{% endif %}
+</div>
 
 <script>
 $.ajaxSetup({
     data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
 });
 $(document).ready(function(){
-    $(".btn").click(function(){
+    $('div#chapters button.mdui-btn').click(function(){
         var id = $(this).find('.chaptersid').text();
-        $('.btn').removeAttr('disabled');
+        $('div#chapters button.mdui-btn').removeAttr('disabled');
         $(this).attr("disabled","true");
         $.post("/written/chapter/"+id+"/",{'id':id}, function(ret){
             var jsonStr = JSON.stringify(ret);

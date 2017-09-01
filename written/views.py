@@ -90,8 +90,8 @@ class Detail(DetailView):
         # 覆写 get_context_data 的目的是因为要把评论表单、article 下的评论列表传递给模板。
         context = super().get_context_data(**kwargs)
         tag_list = self.object.tags.all()
-        chapter_list = self.object.chapter_set.all()
-        comment_list = self.object.comments.all()
+        chapter_list = self.object.chapter_set.all()[:20]
+        comment_list = self.object.comments.all()[:20]
         form = CommentCreationForm()
         
         context.update({

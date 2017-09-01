@@ -7,6 +7,7 @@ from actstream.models import actor_stream, Action
 
 from written.models import Article
 from picture.models import Picture
+from follow.models import Follow
 from .forms import UserProfileForm, MugshotForm
 from .models import User
 
@@ -54,7 +55,14 @@ class UserDetailView(DetailView):
         articles = self.object.article_set.all().order_by('-created_time')[:10]
         pictures = self.object.picture_set.all().order_by('-created_time')[:10]
         actions = actor_stream(self.object)
-
+        if self.request.user.is_authenticated():
+            user = User.objects.get(nickname=self.request.user)
+            try:
+                user.followers.get(follow_object=self.object.id)
+                isfollow = True
+                print(isfollow)
+            except:
+                isfollow = False
         if self.object != self.request.user:
             actions = actions.exclude(verb__startswith='un')
 
@@ -62,6 +70,7 @@ class UserDetailView(DetailView):
             'article_list': articles,
             'picture_list': pictures,
             'action_list': actions[:20],
+            'isfollow': isfollow,
         })
         return context
 

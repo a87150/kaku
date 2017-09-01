@@ -13,8 +13,9 @@
     {% endblock title %}
     <style>
         body {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: "Roboto", sans-serif;
             font-size: 14px;
+            font-weight: 400;
             line-height: 1.428571429;
             color: #333333;
             background-color: #f8f9fa;
@@ -45,8 +46,6 @@
         }
 
         .article-body {
-            box-shadow: 5px 5px 10px #888888;
-            height:auto;
             line-height: 30px;
         }
 
@@ -70,11 +69,13 @@
         .wmd-wrapper .wmd-panel {
             margin-left: 0;
             width: 100%;
+            background-color: white
         }
 
         .wmd-wrapper .wmd-input {
             height: 40em;
             background-color: white;
+            width: 100%;
         }
 
         .wmd-preview {
@@ -143,7 +144,7 @@
     <div class="mdui-drawer mdui-drawer-right" id="right-drawer">
         <form class="navbar-form navbar-left">
             <div class="input-group">
-                <input id="search" class="form-control" type="text" placeholder="正在开发中...">
+                <input id="search" class="form-control" type="text" placeholder="正在开发中..."/>
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button">搜索</button>
                 </span>

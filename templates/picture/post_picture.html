@@ -5,4 +5,27 @@
 
 {% crispy form %}
 
+    <script>
+    $(document).ready(function(){
+        var objfile = document.getElementById('id_thematic');
+        var input = $('#id_thematic')
+        objfile.addEventListener('change', function () {
+            var filepath = objfile.value;
+            if (!filepath) {
+                alert("请先选择上传文件");
+                return;
+            }
+            var file = objfile.files[0];
+            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
+                alert("不是有效的图片文件!");
+                input.val('');
+                return;
+            } else if (file.size > 1024*1024) {
+                alert("图片超过1mb");
+                input.val('');
+                return;
+            }
+        });
+     });
+    </script>
 {% endblock main %}

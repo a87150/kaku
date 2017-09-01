@@ -52,7 +52,7 @@ class Detail(DetailView):
         context = super().get_context_data(**kwargs)
         tag_list = self.object.tags.all()
         address_list = self.object.address_set.all()
-        comment_list = self.object.comments.all()
+        comment_list = self.object.comments.all()[:20]
         form = CommentCreationForm()
         
         context.update({

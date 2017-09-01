@@ -3,38 +3,38 @@
 {% load crispy_forms_tags %}
 
 {% block main %}
-    <div class="col-md-8">
-        <div class="card card-block">
-            <h3 class="card-title">头像上传</h3>
-            <hr>
-            <span>当前头像</span>
-            <img src="{{ user.mugshot_thumbnail.url }}" alt=""
-                 style="width: 96px;">
-            {% crispy form %}
-            <p>不能大于1mb</p>
-            <script>
-            $(document).ready(function(){
-                var objfile = document.getElementById('id_mugshot');
-                var input = $('#id_mugshot')
-                objfile.addEventListener('change', function () {
-                    var filepath = objfile.value;
-                    if (!filepath) {
-                        alert("请先选择上传文件");
-                        return;
-                    }
-                    var file = objfile.files[0];
-                    if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
-                        alert("不是有效的图片文件!");
-                        input.val('');
-                        return;
-                    } else if (file.size > 1024*1024) {
-                        alert("图片超过1mb");
-                        input.val('');
-                        return;
-                    }
-                });
-             });
-            </script>
-        </div>
-    </div>
+
+<div class="card card-block">
+    <h3 class="card-title">头像上传</h3>
+    <hr>
+    <span>当前头像</span>
+    <img src="{{ user.mugshot_thumbnail.url }}" alt=""
+         style="width: 96px;">
+    {% crispy form %}
+    <p>不能大于1mb</p>
+    <script>
+    $(document).ready(function(){
+        var objfile = document.getElementById('id_mugshot');
+        var input = $('#id_mugshot')
+        objfile.addEventListener('change', function () {
+            var filepath = objfile.value;
+            if (!filepath) {
+                alert("请先选择上传文件");
+                return;
+            }
+            var file = objfile.files[0];
+            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
+                alert("不是有效的图片文件!");
+                input.val('');
+                return;
+            } else if (file.size > 1024*1024) {
+                alert("图片超过1mb");
+                input.val('');
+                return;
+            }
+        });
+     });
+    </script>
+</div>
+
 {% endblock main %}
