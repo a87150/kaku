@@ -1,18 +1,26 @@
 {% extends 'base.html' %}
 {% block main %}
 {% for picture in picture_list %}
-<div class="page-header" id="picture">
-    <h3 class="entry-title">
+<div>
+    <h3>
         <a href="{{ picture.get_absolute_url }}">{{ picture.title }}</a>
     </h3>
     <a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a>
-
-    <div class="read-more cl-effect-14">
-        <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a><br>
-        <a href="{{ picture.get_absolute_url }}" class="more-link">继续观看 <span class="meta-nav">→</span></a>
-        <p>{{ picture.created_time }}</p>
+    <div>
+        <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
     </div>
+    <br>
+    <span class="tag-single">
+        tags:
+        {% for tag in picture.tags.all %}
+        <a class="badge" id="tags" href="/search/#query={{ tag }}" target="_blank">{{ tag }}</a>
+    </span>
+        {% empty %}
+        <div class="no-tag">暂时还没有tag！</div>
+        {% endfor %}
+    <p>{{ picture.created_time }}</p>
 </div>
+<hr>
 {% empty %}
     <div class="no-picture">暂时还没有图片！</div>
 {% endfor %}

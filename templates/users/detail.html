@@ -9,10 +9,13 @@
     </div>
     <div class="media-body">
         <h3 class="media-heading">{{ user.nickname }} 
-            {% if isfollow %}
-            <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
+            {% if request.user == user %}
             {% else %}
-            <button class="mdui-btn mdui-btn-raised mdui-ripple" id="follow-btn" userid={{ user.id }}>关注</button>
+                {% if isfollow %}
+                <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
+                {% else %}
+                <button class="mdui-btn mdui-btn-raised mdui-ripple" id="follow-btn" userid={{ user.id }}>关注</button>
+                {% endif %}
             {% endif %}
         </h3>
 
@@ -30,6 +33,7 @@
                             $this.attr('id', "unfollow-btn");
                             $this.attr('class', "mdui-btn mdui-color-theme-accent mdui-ripple");
                             $this.text('取关');
+                            $this.off('click');
                         }else{
                             alert(ret);
                         }
@@ -46,6 +50,7 @@
                             $this.attr('id', "follow-btn");
                             $this.attr('class', "mdui-btn mdui-btn-raised mdui-ripple");
                             $this.text('关注');
+                            $this.off('click');
                         }else{
                             alert(ret);
                         }
@@ -97,7 +102,7 @@
 </ul>
 <hr>
 {% if request.user.is_authenticated %}
-<ul class="affairs">
+<ul class="activity">
     <li class="mdui-list-item mdui-ripple">
         <div class="mdui-list-item-content">{{ user.nickname }} 的动态</div>
         <i class="mdui-list-item-icon mdui-icon material-icons">motorcycle</i>

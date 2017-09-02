@@ -3,22 +3,23 @@
 {% block main %}
 
 {% for article in article_list %}
-<div class="page-header" id="article">
-    <h3 class="entry-title">
+<div>
+    <h3>
         <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
     </h3>
     <a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a>
     <br></br>
-<span class="tag-single">
-    tags:
+    <span class="tag-single">
+        tags:
         {% for tag in article.tags.all  %}
         <a class="badge" id="tags" href="/search/#query={{ tag }}" target="_blank">{{ tag }}</a>
-</span>
+    </span>
         {% empty %}
         <div class="no-tag">暂时还没有tag！</div>
         {% endfor %}
     <p>{{ article.created_time }}</p>
 </div>
+<hr>
 {% empty %}
     <div class="no-article">暂时还没有发布的文章！</div>
 {% endfor %}

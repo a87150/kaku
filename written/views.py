@@ -25,7 +25,7 @@ class IndexView(ListView):
     context_object_name = "article_list"
 
     def get_queryset(self):
-        return Article.objects.order_by("-created_time")
+        return Article.objects.defer('content').order_by("-created_time")
         
     def get_context_data(self, **kwargs):
 
@@ -55,7 +55,7 @@ def html_clean(htmlstr):
 
     # 采用bleach来清除不必要的标签，并linkify text
 
-    tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul']
+    tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img']
     tags.extend(['p','hr','br','pre','code','span','h1','h2','h3','h4','h5','del','dl','img','sub','sup','u'
                  'table','thead','tr','th','td','tbody','dd','caption','blockquote','section'])
     attributes = {'*':['class','id'],'a': ['href', 'title','target'],'img':['src','style','width','height']}

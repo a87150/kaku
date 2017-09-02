@@ -1,17 +1,19 @@
 {% extends 'base.html' %}
 
-    {% block title %}
-    <title>{{ picture.title }}</title>
-    {% endblock title %}
+{% block title %}
+<title>{{ picture.title }}</title>
+{% endblock title %}
 
 {% block main %}
 
-<div class="page-header" id="picture-title">
+<div id="picture-title">
     <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
 </div>
+<hr>
 <div class="picture-body" id="picture-body">
-    <img id="thematic" src={{ picture.thematic }}>
+    <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ picture.thematic }}/>
 </div>
+<br></br>
 <div class="mdui-divider"></div>
 <br></br>
 {% include 'tag.html' %}

@@ -1,25 +1,15 @@
 {% extends 'base.html' %}
-
 {% load bootstrap_pagination %}
 
 {% block main %}
-    {% if request.user.is_authenticated %}
-
     <ul class="list-group">
     {% for act in action_list %}
         <li class="mdui-list-item mdui-ripple">{{ act }}</li>
     {% empty %}
-        <li class="mdui-list-item mdui-ripple">该用户下没有动态</li>
+        <li class="mdui-list-item mdui-ripple"> 最近10天还没有！</li>
     {% endfor %}
-    {% else %}
-    <div class="card card-block">
-        需要登录才能查看用户动态
-    </div>
-    {% endif %}
-    </ul>
         {% if action_list and paginator.num_pages > 1 %}
             {% bootstrap_paginate page_obj size='small' range=10 show_first_last='true' %}
         {% endif %}
-    </ul>
-
+     </ul>
 {% endblock main %}

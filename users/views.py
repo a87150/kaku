@@ -52,24 +52,25 @@ class UserDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        articles = self.object.article_set.all().order_by('-created_time')[:10]
+        articles = self.object.article_set.all().defer('content').order_by('-created_time')[:10]
         pictures = self.object.picture_set.all().order_by('-created_time')[:10]
-        actions = actor_stream(self.object)
+
         if self.request.user.is_authenticated():
+            actions = actor_stream(self.object)[:20]
             user = User.objects.get(nickname=self.request.user)
             try:
                 user.followers.get(follow_object=self.object.id)
                 isfollow = True
-                print(isfollow)
             except:
                 isfollow = False
-        if self.object != self.request.user:
-            actions = actions.exclude(verb__startswith='un')
+        else:
+            actions = {}
+            isfollow = False
 
         context.update({
             'article_list': articles,
             'picture_list': pictures,
-            'action_list': actions[:20],
+            'action_list': actions,
             'isfollow': isfollow,
         })
         return context
@@ -83,12 +84,6 @@ class UserActionView(ListView):
     def get_queryset(self):
         return actor_stream(get_object_or_404(User, username=self.kwargs.get('username')))
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=self.kwargs.get('username'))
-        context['user'] = user
-        return context
-
 
 class UserArticleListView(ListView):
     paginate_by = 20
@@ -96,13 +91,7 @@ class UserArticleListView(ListView):
     template_name = 'users/articles.html'
 
     def get_queryset(self):
-        return super().get_queryset().filter(author__username=self.kwargs.get('username')).order_by('-created_time')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=self.kwargs.get('username'))
-        context['user'] = user
-        return context
+        return super().get_queryset().filter(author__username=self.kwargs.get('username')).defer('content').order_by('-created_time')
 
 
 class UserPictureListView(ListView):
@@ -112,9 +101,3 @@ class UserPictureListView(ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(author__username=self.kwargs.get('username')).order_by('-created_time')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = User.objects.get(username=self.kwargs.get('username'))
-        context['user'] = user
-        return context
