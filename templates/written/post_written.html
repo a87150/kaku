@@ -2,6 +2,42 @@
 
 {% load crispy_forms_tags %}
 
+{% block style %}
+<style>
+.wmd-spacer{
+	width: 1px; 
+	height: 20px; 
+	margin-left: 10px;
+	position: relative;
+	background-color: Silver;
+	display: inline-block; 
+	list-style: none;
+}
+
+.wmd-wrapper .wmd-panel {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 10px;
+    background-color: white;
+}
+
+.wmd-preview-title {
+    margin-top: 20px;
+}
+
+.wmd-wrapper .textInput {
+    height: 400px;
+    background-color: white;
+    max-width: 100%;
+}
+
+.wmd-preview { 
+	background-color: white;
+}
+</style>
+{% endblock style %}
+
 {% block main %}
 
     <nav class="card-header">

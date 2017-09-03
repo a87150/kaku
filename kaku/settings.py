@@ -25,7 +25,7 @@ SECRET_KEY = '%jf93$!gf@r4d$5lqtlqzvz^hx3w@hj$a@8j%*j2u57e9gvcx+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['takanashi.site', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['takanashi.site', '127.0.0.1', '192.168.1.104']
 SITE_ID = 1
 
 # Application definition

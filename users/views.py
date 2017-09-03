@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden, HttpResponse
 
 from actstream.models import actor_stream, Action
+from allauth.account.views import LoginView, SignupView
 
 from written.models import Article
 from picture.models import Picture
@@ -11,6 +12,17 @@ from follow.models import Follow
 from .forms import UserProfileForm, MugshotForm
 from .models import User
 
+'''
+class LoginView(LoginView):
+    def get_success_url(self):
+        response = super().get_success_url()
+        if self.request.META.has_key('HTTP_X_FORWARDED_FOR'):
+            ip =  self.request.META['HTTP_X_FORWARDED_FOR']
+        else:
+            ip = self.request.META['REMOTE_ADDR']
+        print(dir(self.request))
+        return response
+'''
 
 class UserProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'users/profile.html'
