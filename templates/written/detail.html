@@ -7,7 +7,7 @@
 {% block main %}
 
 <div id="article-title">
-    <a href="{{ article.get_absolute_url }}" id="title"><h3>{{ article.title }}</h3></a>
+    <a href="edit/" id="title"><h3>{{ article.title }}</h3></a>
     {% include 'written/post_chapterid.html' %}
 </div>
 <hr>
@@ -15,14 +15,14 @@
     <div id="content">{{ article.content|safe }}</div>
 </div>
 <br></br>
-<div class="mdui-divider"></div>
+<hr>
 <br></br>
 {% include 'tag.html' %}
 <br></br>
 <li hidden class="type">article</li>
 <li hidden class="id">{{ article.id }}</li>
 {% include 'post_tag.html' %}
-
+<hr>
 {% include 'comment/comment.html' %}
 
 {% endblock main %}

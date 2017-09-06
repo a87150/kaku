@@ -25,7 +25,7 @@ SECRET_KEY = '%jf93$!gf@r4d$5lqtlqzvz^hx3w@hj$a@8j%*j2u57e9gvcx+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['takanashi.site', '127.0.0.1', '192.168.1.104']
+ALLOWED_HOSTS = ['takanashi.site', '192.168.1.104', '127.0.0.1', 'localhost']
 SITE_ID = 1
 
 # Application definition
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'index',
     'comment',
     'follow',
+    'oauth',
 ]
 
 MIDDLEWARE = [
@@ -174,3 +175,12 @@ ACCOUNT_USERNAME_VALIDATORS = 'users.validators.ASCIIUsernameValidator'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 USE_PAGEDOWN = True
+
+# github oauth
+
+GITHUB_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
+GITHUB_CLIENTID = 'dd3d055a11113c51b0f0'
+GITHUB_CLIENTSECRET = '8348bc8ed5b6694d0519b4c18de44d3716c841e1'
+
+# 这里是github认证处理的url,就是自己处理登陆逻辑
+GITHUB_CALLBACK = 'http://localhost:8000/oauth/github/'

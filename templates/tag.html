@@ -1,6 +1,7 @@
 <span class="tag-single">
-    tags:
     {% for tag in tag_list %}
-        <a class="badge" href="/search/#query={{ tag }}" target="_blank">{{ tag }}</a>
+        <a class="badge" href="/search/?query={{ tag }}" target="_blank">{{ tag }}</a>
+    {% empty %}
+        <div class="no-tag">暂时还没有tag！</div>
     {% endfor %}
 </span>

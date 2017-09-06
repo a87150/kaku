@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
     url(r'^comment/', include('comment.urls')),
     url(r'^follow/', include('follow.urls')),
+    url(r'^oauth/', include('oauth.urls')),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]
 

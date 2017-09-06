@@ -9,7 +9,7 @@
     </div>
     <div class="media-body">
         <h3 class="media-heading">{{ user.nickname }} 
-            {% if request.user == user %}
+            {% if request.user == user or not request.user.is_authenticated %}
             {% else %}
                 {% if isfollow %}
                 <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
@@ -65,7 +65,7 @@
     </div>
 </div>
 <hr>
-<ul class="article">
+<ul id="article_list">
     <li class="mdui-list-item mdui-ripple">
         <div class="mdui-list-item-content">{{ user.nickname }} 的文章</div>
         <i class="mdui-list-item-icon mdui-icon material-icons">translate</i>
@@ -83,7 +83,7 @@
     {% endif %}
 </ul>
 <hr>
-<ul class="picture">
+<ul id="picture_list">
     <li class="mdui-list-item mdui-ripple">
         <div class="mdui-list-item-content">{{ user.nickname }} 的图画</div>
         <i class="mdui-list-item-icon mdui-icon material-icons">wallpaper</i>
@@ -102,7 +102,7 @@
 </ul>
 <hr>
 {% if request.user.is_authenticated %}
-<ul class="activity">
+<ul id="activity_list">
     <li class="mdui-list-item mdui-ripple">
         <div class="mdui-list-item-content">{{ user.nickname }} 的动态</div>
         <i class="mdui-list-item-icon mdui-icon material-icons">motorcycle</i>

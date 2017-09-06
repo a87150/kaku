@@ -1,10 +1,22 @@
 {% if request.user.is_authenticated %}
-    <div class="input-group" id="addtag" style="width: 200px;">
-        <input type="text" class="form-control" placeholder="tag" id="tag_input"/>
-        <span class="input-group-btn">
-            <button type="button" class="btn btn-default" id="tag_post">添加</button>
-        </span>
+<div class="panel panel-default" style="width: 100px;">
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" 
+               href="#collapseOne">
+                添加标签
+            </a>
+        </h4>
     </div>
+    <div id="collapseOne" class="panel-collapse collapse">
+        <div class="input-group" id="addtag" style="width: 200px;">
+            <input type="text" class="form-control" placeholder="tag" id="tag_input"/>
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default" id="tag_post">添加</button>
+            </span>
+        </div>
+    </div>
+</div>
 
 <script>
 $.ajaxSetup({

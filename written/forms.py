@@ -42,7 +42,7 @@ class markdown(PagedownWidget):
 class ArticleCreationForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ('title', 'content', 'tags',)
+        fields = ('title', 'content', 'excerpt', 'tags')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -56,6 +56,8 @@ class ArticleCreationForm(forms.ModelForm):
         self.fields['title'].help_text = '限制为50字'
         self.fields['content'].label = '正文'
         self.fields['content'].help_text = '支持 Markdown 语法标记'
+        self.fields['excerpt'].label = '摘要'
+        self.fields['excerpt'].help_text = '限制100字以内'
         self.fields['tags'].label = 'tags'
         self.fields['tags'].help_text = '选择标签, 可按Ctrl多选'
 
@@ -71,7 +73,7 @@ class ArticleCreationForm(forms.ModelForm):
 class ArticleEditForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ('title', 'content', 'tags',)
+        fields = ('title', 'content', 'excerpt', 'tags')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,6 +84,8 @@ class ArticleEditForm(forms.ModelForm):
         self.fields['title'].help_text = '限制为50字'
         self.fields['content'].label = '正文'
         self.fields['content'].help_text = '支持 Markdown 语法标记'
+        self.fields['excerpt'].label = '摘要'
+        self.fields['excerpt'].help_text = '限制100字以内'
         self.fields['tags'].label = 'tags'
         self.fields['tags'].help_text = '选择文章标签'
 

@@ -13,11 +13,12 @@
 <div class="conments" id="conments" style="margin:20px 20px 20px 0px;">
     <li class="mdui-list-item mdui-ripple"> 
         <a href="{{ comment.author.get_absolute_url }}" class="author">
-            <img src="{{ comment.author.mugshot_thumbnail.url}}" width="20%" height="20%"/>{{ comment.author }}
-        </a>&nbsp&nbsp{{ comment.created_time }}&nbsp&nbsp
-        <button type="button" class="mdui-btn" id="reply" style="position:relative; right:-45%">回复 {{ comment.author }}</button>
+            <img src="{{ comment.author.mugshot_thumbnail.url}}" width="22%" height="22%"/>{{ comment.author }}
+        </a>
+        <button type="button" class="mdui-btn" id="reply">回复 {{ comment.author }}</button>
     </li>
     <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
+    <li class="mdui-list-item mdui-ripple">{{ comment.created_time }}</li>
 </div>
 <div class="mdui-divider"></div>
 {% empty %}
