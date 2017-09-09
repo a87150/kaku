@@ -10,19 +10,19 @@
     <a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a>
     <br></br>
     <div>{{ article.excerpt }}</div>
-    <br></br>
+    </br>
     <p>{{ article.created_time }}</p>
     <span class="tag-single">
         {% for tag in article.tags.all  %}
         <a class="badge" id="tags" href="/search/?query={{ tag }}" target="_blank">{{ tag }}</a>
     </span>
         {% empty %}
-        <div class="no-tag">暂时还没有tag！</div>
+        <div class="no-tag">暂时还没有tag</div>
         {% endfor %}
 </div>
 <hr>
 {% empty %}
-    <div class="no-article">暂时还没有发布的文章！</div>
+    <div class="no-article">暂时还没有发布的文章</div>
 {% endfor %}
 
 {% include 'pagination.html' %}

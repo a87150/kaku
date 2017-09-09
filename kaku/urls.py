@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^comment/', include('comment.urls')),
     url(r'^follow/', include('follow.urls')),
     url(r'^oauth/', include('oauth.urls')),
+    url(r'^search/', include('search.urls')),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]
 

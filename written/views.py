@@ -218,9 +218,3 @@ class ChapterCreateView(LoginRequiredMixin, CreateView):
         response = super().form_valid(form)
         action.send(self.request.user, verb='写了新章节', action_object=self.object)
         return response
-
-    
-class NotificationsListView(AllNotificationsList):
-    paginate_by = 10
-    pass
-        

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% load bootstrap_pagination %}
+
+{% block main %}
+<form class="form" role="search" method="get" id="searchform" action="{% url 'search:search' %}">
+    <div class="input-group">
+        <input id="search" class="form-control" type="search" name="query" placeholder="搜索" required />
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="submit">搜索</button>
+        </span>
+    </div>
+    <label class="mdui-radio">
+        <input type="radio" name="type" value="article"/>
+        <i class="mdui-radio-icon"></i>
+        搜文章
+    </label>
+    <label class="mdui-radio">
+        <input type="radio" name="type" value="picture""/>
+        <i class="mdui-radio-icon"></i>
+        搜图
+    </label>
+</form>
+<hr>
+<ul>
+    {% for search in search_list %}
+        <li class="mdui-list-item mdui-ripple">
+            <a href="{{ search.get_absolute_url }}"> {{ search }} </a>
+        </li>
+    {% empty %}
+        <li class="mdui-list-item mdui-ripple">empty</li>
+    {% endfor %}
+    {% if search_list and paginator.num_pages > 1 %}
+        {% bootstrap_paginate page_obj range=10 show_first_last='true' %}
+    {% endif %}
+</ul>
+<hr>
+{% endblock main %}

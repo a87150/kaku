@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'comment',
     'follow',
     'oauth',
+    'search',
 ]
 
 MIDDLEWARE = [

@@ -3,6 +3,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.contrib import auth
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -27,7 +28,7 @@ def githhub_login(request):
 def github_auth(request):
     template_html = 'account/login.html'
 
-    # 如果申请登陆页面成功后，就会返回code和state(被坑了好久)
+    # 如果申请登陆页面成功后，就会返回code和state
     if 'code' not in request.GET:
         return render(request,template_html)
 
@@ -60,7 +61,7 @@ def github_auth(request):
     html = response.read().decode('utf-8')
     data = json.loads(html)
     print(data)
-    username = 'gh' + str(data['id'])
+    username = 'github' + str(data['id'])
     password = 'jiandandemima1'
 
     # 如果不存在username，则创建
