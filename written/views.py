@@ -25,7 +25,7 @@ class IndexView(ListView):
     context_object_name = "article_list"
 
     def get_queryset(self):
-        return Article.objects.defer('content').order_by("-created_time")
+        return Article.objects.defer('content')
         
     def get_context_data(self, **kwargs):
 

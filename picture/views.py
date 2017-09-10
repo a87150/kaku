@@ -20,9 +20,6 @@ class IndexView(ListView):
     template_name = "picture/index.html"
     context_object_name = "picture_list"
 
-    def get_queryset(self):
-        return Picture.objects.order_by("-created_time")
-
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)

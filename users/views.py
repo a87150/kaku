@@ -53,8 +53,8 @@ class UserDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        articles = self.object.article_set.all().defer('content').order_by('-created_time')[:10]
-        pictures = self.object.picture_set.all().order_by('-created_time')[:10]
+        articles = self.object.article_set.all().defer('content')[:10]
+        pictures = self.object.picture_set.all()[:10]
 
         if self.request.user.is_authenticated():
             actions = actor_stream(self.object)[:20]
@@ -92,7 +92,7 @@ class UserArticleListView(ListView):
     template_name = 'users/articles.html'
 
     def get_queryset(self):
-        return super().get_queryset().filter(author__username=self.kwargs.get('username')).defer('content').order_by('-created_time')
+        return super().get_queryset().filter(author__username=self.kwargs.get('username')).defer('content')
 
 
 class UserPictureListView(ListView):
@@ -101,4 +101,4 @@ class UserPictureListView(ListView):
     template_name = 'users/picture.html'
 
     def get_queryset(self):
-        return super().get_queryset().filter(author__username=self.kwargs.get('username')).order_by('-created_time')
+        return super().get_queryset().filter(author__username=self.kwargs.get('username'))
