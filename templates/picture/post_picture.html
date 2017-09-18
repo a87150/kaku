@@ -6,9 +6,10 @@
 <div id="test-image-preview" 
     style="border: 1px solid #ccc; width: 100%; height: 300px; background-size: contain; background-repeat: no-repeat; background-position: center center;">
 </div>
+
 {% crispy form %}
 
-    <script>
+<script>
     $(document).ready(function(){
         var objfile = document.getElementById('id_thematic');
         var input = $('#id_thematic')
@@ -38,5 +39,5 @@
             reader.readAsDataURL(file);
         });
      });
-    </script>
+</script>
 {% endblock main %}

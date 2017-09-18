@@ -40,6 +40,9 @@ class SearchView(ListView):
                 except:
                     p_list = Picture.objects.filter(title__icontains=q)
                 return p_list[:20]
+                
+            else:
+                return HttpResponseNotFound
 
         else:
             try:

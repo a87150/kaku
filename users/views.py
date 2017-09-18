@@ -53,8 +53,8 @@ class UserDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        articles = self.object.article_set.all().defer('content')[:10]
-        pictures = self.object.picture_set.all()[:10]
+        articles = self.object.a_author.all().defer('content')[:10]
+        pictures = self.object.p_author.all()[:10]
 
         if self.request.user.is_authenticated():
             actions = actor_stream(self.object)[:20]

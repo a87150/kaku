@@ -7,13 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="shortcut icon" type="image/x-icon" href="{{ MEDIA_URL }}favicon.ico"/>
     <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="/static/css/mdui.min.css" rel="stylesheet"/>
+    <link href={% static '/css/mdui.min.css' %} rel="stylesheet"/>
     {% block title %}
     <title>kaku demo</title>
     {% endblock title %}
     <style>
         body {
-            font-family: "Roboto", sans-serif;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 16px;
             font-weight: 300;
             line-height: 1.428571429;
@@ -41,14 +41,16 @@
     </style>
     {% block style %}
     {% endblock style %}
+
     <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="/static/js/mdui.min.js"></script>
-        <script>
+    <script src={% static '/js/mdui.min.js' %}></script>
+    <script>
         $.ajaxSetup({
             data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
         });
-        $(document).ready(function(){
+
+        $(document).ready(function() {
             $(".captcha").click(function () {
                 var form = $(this).parents('form');
                 $.getJSON('/captcha/refresh/', {}, function (json) {
@@ -88,8 +90,8 @@
                             <li><a href="#">没想好</a></li>
                         </ul>
                     </li>
-                    <button class="mdui-btn" style="height:50px;" mdui-drawer="{target: '#right-drawer', swipe: true}">open or close right drawer</button>
                 </ul>
+                <button class="mdui-btn" style="height:50px;" mdui-drawer="{target: '#right-drawer', swipe: true}">open or close right drawer</button>
             </div>
         </div>
     </nav>
@@ -97,52 +99,16 @@
     
 
     <div class="mdui-drawer mdui-drawer-right" id="right-drawer">
-        <form class="navbar-form navbar-left" role="search" method="get" id="searchform" action="{% url 'search:search' %}">
-            <div class="input-group">
-                <input id="search" class="form-control" type="search" name="query" placeholder="搜索" />
-                <span class="input-group-btn">
-                    <button class="btn btn-default" type="submit">搜索</button>
-                </span>
-            </div>
-        </form>
-        {% if request.user.is_authenticated %}
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'users:detail' request.user.username %}">{{ request.user.nickname }}</a>
-            <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url}}" /></div>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            {% notifications_unread as unread_count %}
-            <a href="{% url 'index:notifications' %}"
-               {% if unread_count %}style="color: red"
-               {% endif %} class="mdui-list-item-content"aria-hidden="true"> {{ unread_count }} 条未读提醒</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'written:create' %}">发文</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'picture:create' %}">发图</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'follow:follow' %}">动态</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'users:profile' %}">设置</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'account_logout' %}?next={{ request.path }}">登出</a>
-        </li>
-        {% else %}
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'account_signup' %}?next={{ request.path }}">注册</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'account_login' %}?next={{ request.path }}">登录</a>
-        </li>
-        <li class="mdui-list-item mdui-ripple">
-            <a class="mdui-list-item-content" href="{% url 'oauth:github_login' %}?next={{ request.path }}">github登录</a>
-        </li>
-        
-        {% endif %}
+
+        <script>
+            $(document).ready(function() {
+                var target = $('#right-drawer');
+                $.get('/drawer', {}, function (ret) {
+                    target.html(ret);
+                });
+            });
+        </script>
+
     </div>
     
     <div class="container" style="max-width:100%;">

@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 
 import json
 
@@ -15,7 +16,9 @@ import bleach
 from .models import Article, Chapter
 from .forms import ArticleCreationForm, ArticleEditForm, ChapterCreationForm
 from index.pagination_data import pagination_data
+from index.redis_caches import *
 from comment.forms import CommentCreationForm
+
 
 class IndexView(ListView):
 
@@ -25,7 +28,7 @@ class IndexView(ListView):
     context_object_name = "article_list"
 
     def get_queryset(self):
-        return Article.objects.defer('content')
+        return Article.objects.defer('content').prefetch_related('tags')
         
     def get_context_data(self, **kwargs):
 
@@ -55,36 +58,30 @@ def html_clean(htmlstr):
 
     # 采用bleach来清除不必要的标签，并linkify text
 
-    tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img']
+    tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img', 'table']
     tags.extend(['p','hr','br','pre','code','span','h1','h2','h3','h4','h5','del','dl','img','sub','sup','u'
                  'table','thead','tr','th','td','tbody','dd','caption','blockquote','section'])
-    attributes = {'*':['class','id'],'a': ['href', 'title','target'],'img':['src','style','width','height']}
+    attributes = {'a': ['href', 'title', 'target'],'img':['src', 'width', 'height']}
     return bleach.linkify(bleach.clean(markdown(htmlstr),tags=tags,attributes=attributes))
 
 
 class Detail(DetailView):
     model = Article
     template_name = "written/detail.html"
-
     context_object_name = 'article'
 
     def get(self, request, *args, **kwargs):
-        # get 方法返回的是一个 HttpResponse 实例
-        # 之所以需要先调用父类的 get 方法，是因为只有当 get 方法被调用后，
-        # 才有 self.object 属性，其值为 article 模型实例，即被访问的文章 article
         response = super().get(request, *args, **kwargs)
-
-        self.object.increase_views()
-
-        # 视图必须返回一个 HttpResponse 对象
+        update_views('article', self.article)
         return response
 
     def get_object(self, queryset=None):
         # 覆写 get_object 方法的目的是因为需要对 article 的 content 值进行渲染
-        article = super().get_object(queryset=None)
-        if article:
-            article.content = html_clean(article.content)
-            return article
+        self.article = super().get_object(queryset=None)
+
+        if self.article:
+            self.article.content = html_clean(self.article.content)
+            return self.article
 
     def get_context_data(self, **kwargs):
         # 覆写 get_context_data 的目的是因为要把评论表单、article 下的评论列表传递给模板。
@@ -93,12 +90,14 @@ class Detail(DetailView):
         chapter_list = self.object.chapter_set.all()[:20]
         comment_list = self.object.comments.all()[:20]
         form = CommentCreationForm()
+        views = get_views('article', self.article)
         
         context.update({
             'tag_list': tag_list,
             'chapter_list': chapter_list,
             'comment_list': comment_list,
             'form': form,
+            'views': views
         })
         return context
 
@@ -139,9 +138,9 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         # TODO：add rate limit
         try:
-            latest_article = self.request.user.article_set.latest('created_time')
-            if latest_article.created_time + timezone.timedelta(seconds=60) > timezone.now():
-                return HttpResponseForbidden('您的发文间隔小于 1 分钟，请稍微休息一会')
+            latest_article = self.request.user.a_author.latest('created_time')
+            if latest_article.created_time + timezone.timedelta(seconds=60*3) > timezone.now():
+                return HttpResponseForbidden('您的发文间隔小于 3 分钟，请稍微休息一会')
         except Article.DoesNotExist:
             pass
 

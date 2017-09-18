@@ -8,13 +8,15 @@
 
 <div id="article-title">
     <a href="edit/" id="title"><h3>{{ article.title }}</h3></a>
+    {% include 'views.html' %}
     {% include 'written/post_chapterid.html' %}
 </div>
 <hr>
 <div class="article-body" id="article-body">
     <div id="content">{{ article.content|safe }}</div>
 </div>
-<br></br>
+<hr>
+{% include 'post_like.html' %}
 <hr>
 <br></br>
 {% include 'tag.html' %}

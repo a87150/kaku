@@ -1,0 +1,49 @@
+<div>
+    {% if not request.user.is_authenticated %}
+    {% else %}
+
+        <button class="mdui-btn mdui-color-theme-accent mdui-ripple mdui-color-indigo-50" id="dislike-btn" style="margin-left: 45%;">取消</button>
+
+        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent mdui-color-pink-500" id="like-btn" style="margin-left: 45%;">点赞</button>
+
+    {% endif %}
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#like-btn').click(function(){
+            var $this = $(this);
+            var id = $('.id').text();
+            var type = $('.type').text();
+            $.post('/like/',{type: type, object_id: id, ltype: 'like'},
+                function(ret){
+                    if (ret=='成功'){
+                        $this.attr('id', "dislike-btn");
+                        $this.attr('class', "mdui-btn mdui-color-theme-accent mdui-ripple mdui-color-indigo-50");
+                        $this.text('取消');
+                        $this.off('click');
+                    }else{
+                        alert(ret);
+                    }
+            });
+        });
+    });
+    $(document).ready(function(){
+        $('#dislike-btn').click(function(){
+            var $this = $(this);
+            var id = $('.id').text();
+            var type = $('.type').text();
+            $.post('/like/',{type: type, object_id: id, ltype: 'dislike'},
+                function(ret){
+                    if (ret=='成功'){
+                        $this.attr('id', "like-btn");
+                        $this.attr('class', "mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent mdui-color-pink-500");
+                        $this.text('点赞');
+                        $this.off('click');
+                    }else{
+                        alert(ret);
+                    }
+            });
+        });
+    });
+</script>

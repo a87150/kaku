@@ -11,6 +11,7 @@ from actstream.signals import action
 from .models import Picture, Address
 from .forms import PictureCreateForm
 from index.pagination_data import pagination_data
+from index.redis_caches import *
 from comment.forms import CommentCreationForm
 
 class IndexView(ListView):
@@ -19,6 +20,9 @@ class IndexView(ListView):
     model = Picture
     template_name = "picture/index.html"
     context_object_name = "picture_list"
+
+    def get_queryset(self):
+        return Picture.objects.prefetch_related('tags')
 
     def get_context_data(self, **kwargs):
 
@@ -36,14 +40,16 @@ class IndexView(ListView):
 class Detail(DetailView):
     model = Picture
     template_name = "picture/detail.html"
-
     context_object_name = 'picture'
 
     def get(self, request, *args, **kwargs):
-
         response = super().get(request, *args, **kwargs)
-        self.object.increase_views()
+        update_views('picture', self.picture)
         return response
+
+    def get_object(self, queryset=None):
+        self.picture = super().get_object(queryset=None)
+        return self.picture
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -51,12 +57,13 @@ class Detail(DetailView):
         address_list = self.object.address_set.all()
         comment_list = self.object.comments.all()[:20]
         form = CommentCreationForm()
+        views = get_views('picture', self.picture)
         
         context.update({
             'tag_list': tag_list,
-            'address_list': address_list,
             'comment_list': comment_list,
             'form': form,
+            'views': views
         })
         return context
 
@@ -66,12 +73,12 @@ class PictureCreateView(LoginRequiredMixin, CreateView):
     template_name = 'picture/post_picture.html'
 
     def post(self, request, *args, **kwargs):
-        if len(request.FILES['mugshot']) >= 1024*1024:
-            return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/users/mugshot/change/\">返回</a>")
+        if len(request.FILES['thematic']) >= 1024*1024:
+            return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/picture/new/\">返回</a>")
         try:
-            latest_picture = self.request.user.picture_set.latest('created_time')
-            if latest_picture.created_time + timezone.timedelta(seconds=300) > timezone.now():
-                return HttpResponseForbidden('您的发图间隔小于 5 分钟，请稍微休息一会')
+            latest_picture = self.request.user.p_author.latest('created_time')
+            if latest_picture.created_time + timezone.timedelta(seconds=60*6) > timezone.now():
+                return HttpResponseForbidden('您的发图间隔小于 6 分钟，请稍微休息一会')
         except Picture.DoesNotExist:
             pass
 

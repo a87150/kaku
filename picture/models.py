@@ -11,36 +11,28 @@ from comment.models import Comment
 
 
 def pictures_path(instance, filename):
-    return os.path.join(settings.MEDIA_URL, 'pictures', filename)
+    return os.path.join('pictures', filename)
 
 class Picture(models.Model):
-    
+
     id = models.AutoField(primary_key=True)
     title = models.CharField(_('title'), max_length=50)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('author'))
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('p_author'))
     thematic = models.ImageField(_('题图'), upload_to=pictures_path, )
-    created_time = models.DateTimeField(_('created time'), auto_now_add=True)
+    created_time = models.DateTimeField(_('created_time'), auto_now_add=True)
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)
-    likes = models.PositiveIntegerField(_('likes'), default=0, editable=False)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name=_('p_likes'))
     tags = models.ManyToManyField(Tag, blank=True, verbose_name=_('tags'))
     comments = GenericRelation(Comment, verbose_name=_('comments'))
-    
+
     class Meta:
         ordering = ['-created_time']
         verbose_name = _('Picture')
         verbose_name_plural = _('Pictures')
-        
+
     def __str__(self):
         return self.title
 
-    def increase_views(self):
-        self.views += 1
-        self.save(update_fields=['views'])
-        
-    def increase_likes(self):
-        self.likes += 1
-        self.save(update_fields=['likes'])
-        
     def get_absolute_url(self):
         return reverse('picture:detail', kwargs={'pk': self.pk})
 

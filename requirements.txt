@@ -7,7 +7,9 @@ django-simple-captcha
 django-pagedown
 django-activity-stream
 django-bootstrap-pagination
+django-redis
 
 mistune
 Pillow
 bleach
+mysqlclient

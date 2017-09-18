@@ -19,10 +19,6 @@
 </div>
 
 <script>
-$.ajaxSetup({
-    data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
-});
-
 $(document).ready(function(){
     $("#tag_post").click(function(){
         var tag = $("#tag_input").val();
@@ -36,7 +32,7 @@ $(document).ready(function(){
             $(this).attr("disabled","true");
             setTimeout("$('#tag_post').removeAttr('disabled')",3000);
             $.post("/tags/",{'tag':tag, 'id':id, 'type':type}, function(ret){
-                $("#addtag").after("\<div class=\"alert alert-warning\"><a href=\"#\" class=\"close\" data-dismiss=\"alert\">&times;</a><strong>"+ret+"</strong></div>");
+                alert(ret);
             });
         }
     });

@@ -8,10 +8,11 @@
 
 <div id="picture-title">
     <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
+    {% include 'views.html' %}
 </div>
 <hr>
 <div class="picture-body" id="picture-body">
-    <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ picture.thematic }}/>
+    <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ MEDIA_URL }}{{ picture.thematic }}/>
 </div>
 <br></br>
 <hr>

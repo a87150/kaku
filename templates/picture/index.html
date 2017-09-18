@@ -7,7 +7,7 @@
     </h3>
     <a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a>
     <div>
-        <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
+        <a href="{{ picture.get_absolute_url }}"> <img src={{ MEDIA_URL }}{{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
     </div>
     <br>
     <p>{{ picture.created_time }}</p>

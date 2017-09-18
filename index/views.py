@@ -13,12 +13,16 @@ from written.models import Article
 from picture.models import Picture
 from .models import Tag
 
+
 def index(request):
     return render(request, 'index.html', context={
-                      'welcome': '欢迎访问kaku'
-                  })
-                  
-                  
+                      'welcome': '欢迎访问kaku'})
+
+
+def drawer(request):
+    return render(request, 'drawer.html', context={})
+
+
 class TagCreateView(LoginRequiredMixin, View):
 
     template_name = 'post_tag.html'
@@ -36,7 +40,7 @@ class TagCreateView(LoginRequiredMixin, View):
             else:
                 t=Tag(name=request.POST['tag'])
                 t.save()
-                obj.tags.add(Tag.objects.get(id=t.id))
+                obj.tags.add(t)
                 return HttpResponse("成功")
         except:
             try:
@@ -44,6 +48,15 @@ class TagCreateView(LoginRequiredMixin, View):
                 return HttpResponse("成功")
             except:
                 return HttpResponse("失败")
+
+
+class LikeCreateView(LoginRequiredMixin, View):
+
+    template_name = 'post_like.html'
+
+    def post(self, request, *args, **kwargs):
+
+        return HttpResponse("成功")
 
 
 class NotificationsListView(AllNotificationsList):

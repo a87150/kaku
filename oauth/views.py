@@ -50,7 +50,7 @@ def github_auth(request):
     binary_data = data.encode('utf-8')
     # 设置请求返回的数据类型
     headers={'Accept': 'application/json'}
-    req = Request(url, binary_data,headers)
+    req = Request(url, binary_data, headers)
     result = urlopen(req) 
     # json是str类型的，将bytes转成str
     result = result.read().decode('utf-8')
@@ -61,7 +61,7 @@ def github_auth(request):
     html = response.read().decode('utf-8')
     data = json.loads(html)
     print(data)
-    username = 'github' + str(data['id'])
+    username = 'gh' + str(data['id'])
     password = 'jiandandemima1'
 
     # 如果不存在username，则创建

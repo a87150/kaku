@@ -14,6 +14,7 @@ from .mugshot import Avatar
 def user_mugshot_path(instance, filename):
     return os.path.join('mugshots', instance.username, filename)
 
+
 class User(AbstractUser):
     last_login_ip = models.GenericIPAddressField(unpack_ipv4=True, blank=True, null=True)
     ip_joined = models.GenericIPAddressField(unpack_ipv4=True, blank=True, null=True)

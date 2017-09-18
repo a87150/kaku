@@ -8,59 +8,9 @@
              style="width: 73px;"/>
     </div>
     <div class="media-body">
-        <h3 class="media-heading">{{ user.nickname }} 
-            {% if request.user == user or not request.user.is_authenticated %}
-            {% else %}
-                {% if isfollow %}
-                <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
-                {% else %}
-                <button class="mdui-btn mdui-btn-raised mdui-ripple" id="follow-btn" userid={{ user.id }}>关注</button>
-                {% endif %}
-            {% endif %}
-        </h3>
-
-        <script>
-        $.ajaxSetup({
-            data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
-        });
-        $(document).ready(function(){
-            $('#follow-btn').click(function(){
-                var $this = $(this);
-                var $objectId = $this.attr('userid');
-                $.post('/follow/create/',{object_id: $objectId,ftype: 'follow'},
-                    function(ret){
-                        if (ret=='成功'){
-                            $this.attr('id', "unfollow-btn");
-                            $this.attr('class', "mdui-btn mdui-color-theme-accent mdui-ripple");
-                            $this.text('取关');
-                            $this.off('click');
-                        }else{
-                            alert(ret);
-                        }
-                });
-            });
-        });
-        $(document).ready(function(){
-            $('#unfollow-btn').click(function(){
-                var $this = $(this);
-                var $objectId = $this.attr('userid');
-                $.post('/follow/create/',{object_id: $objectId, ftype: 'unfollow'},
-                    function(ret){
-                        if (ret=='成功'){
-                            $this.attr('id', "follow-btn");
-                            $this.attr('class', "mdui-btn mdui-btn-raised mdui-ripple");
-                            $this.text('关注');
-                            $this.off('click');
-                        }else{
-                            alert(ret);
-                        }
-                });
-            });
-        });
-        </script>
-
-        <p>{{ user.signature }}</p>
-        <div>django forum demo 第 {{ user.pk }} 号会员，加入于 {{ user.date_joined }}</div>
+        {% include 'users/post_follow.html' %}
+        <div><p>{{ user.signature }}</p></div>
+        <div>kaku 第 {{ user.pk }} 号会员，加入于 {{ user.date_joined }}</div>
 
     </div>
 </div>
@@ -90,7 +40,7 @@
     </li>
     {% for picture in picture_list %}
     <li class="mdui-list-item mdui-ripple">
-        <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
+        <a href="{{ picture.get_absolute_url }}"> <img src={{ MEDIA_URL }}{{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
     </li>
     {% empty %}
     <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
