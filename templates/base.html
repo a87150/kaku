@@ -103,8 +103,10 @@
         <script>
             $(document).ready(function() {
                 var target = $('#right-drawer');
-                $.get('/drawer', {}, function (ret) {
-                    target.html(ret);
+                var link = location.pathname;
+                $.get('/drawer/', {}, function (ret) {
+                    var r = ret.replace(/\/drawer\//g, link);
+                    target.html(r);
                 });
             });
         </script>

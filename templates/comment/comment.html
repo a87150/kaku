@@ -1,37 +1,36 @@
 {% load crispy_forms_tags %}
 
 <div class="conment" id="conment" ><h3>评论</h3>
-{% if request.user.is_authenticated %}
+    {% if request.user.is_authenticated %}
         {% crispy form %}
-{% else %}
-    <div class="card card-block">
-        需要登录才能评论
-    </div>
-{% endif %}
+    {% else %}
+        <div class="card card-block">
+            需要登录才能评论
+        </div>
+    {% endif %}
 
-{% for comment in comment_list %}
-<div class="conments" id="conments" style="margin:20px 20px 20px 0px;">
-    <li class="mdui-list-item mdui-ripple"> 
-        <a href="{{ comment.author.get_absolute_url }}" class="author">
-            <img src="{{ comment.author.mugshot_thumbnail.url}}" width="22%" height="22%"/>{{ comment.author }}
-        </a>
-        <button type="button" class="mdui-btn" id="reply">回复 {{ comment.author }}</button>
-    </li>
-    <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
-    <li class="mdui-list-item mdui-ripple">{{ comment.created_time }}</li>
-</div>
-<div class="mdui-divider"></div>
-{% empty %}
-    <li class="mdui-list-item mdui-ripple">没有评论</li>
-{% endfor %}
+    {% for comment in comment_list %}
+    <div class="conments" id="conments" style="margin:20px 20px 20px 0px;">
+        <li class="mdui-list-item mdui-ripple"> 
+            <a href="{{ comment.author.get_absolute_url }}" class="author">
+                <img src="{{ comment.author.mugshot_thumbnail.url}}" width="22%" height="22%"/>{{ comment.author }}
+            </a>
+            <button type="button" class="mdui-btn" id="reply">回复 {{ comment.author }}</button>
+        </li>
+        <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
+        <li class="mdui-list-item mdui-ripple">{{ comment.created_time }}</li>
+    </div>
+    <div class="mdui-divider"></div>
+    {% empty %}
+        <li class="mdui-list-item mdui-ripple">没有评论</li>
+    {% endfor %}
 </div>
 
 <script>
-$(document).ready(function(){
-    $('div.conments button.mdui-btn').click(function(){
-        var id = $(this).text().substring(3);
-        $('#comment-content').val('@'+id+' ');
-
+    $(document).ready(function(){
+        $('div.conments button.mdui-btn').click(function(){
+            var id = $(this).text().substring(3);
+            $('#comment-content').val('@'+id+' ');
+        });
     });
-});
 </script>

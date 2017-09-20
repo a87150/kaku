@@ -61,18 +61,18 @@ class UserDetailView(DetailView):
             user = User.objects.get(nickname=self.request.user)
             try:
                 user.followers.get(follow_object=self.object.id)
-                isfollow = True
+                is_follow = True
             except:
-                isfollow = False
+                is_follow = False
         else:
             actions = {}
-            isfollow = False
+            is_follow = False
 
         context.update({
             'article_list': articles,
             'picture_list': pictures,
             'action_list': actions,
-            'isfollow': isfollow,
+            'is_follow': is_follow,
         })
         return context
 

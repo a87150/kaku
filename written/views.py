@@ -16,7 +16,7 @@ import bleach
 from .models import Article, Chapter
 from .forms import ArticleCreationForm, ArticleEditForm, ChapterCreationForm
 from index.pagination_data import pagination_data
-from index.redis_caches import *
+from index.redis_caches import update_views, get_views, is_likes
 from comment.forms import CommentCreationForm
 
 
@@ -91,13 +91,19 @@ class Detail(DetailView):
         comment_list = self.object.comments.all()[:20]
         form = CommentCreationForm()
         views = get_views('article', self.article)
-        
+
+        if self.request.user.is_authenticated():
+            is_like = is_likes('article', self.article, self.request.user)
+        else:
+            is_like = False
+        print(is_like)
         context.update({
             'tag_list': tag_list,
             'chapter_list': chapter_list,
             'comment_list': comment_list,
             'form': form,
-            'views': views
+            'views': views,
+            'is_like': is_like,
         })
         return context
 

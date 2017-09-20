@@ -4,15 +4,13 @@ from django.conf import settings
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-import re
-
 from notifications.views import AllNotificationsList
 from notifications.models import Notification
 
 from written.models import Article
 from picture.models import Picture
 from .models import Tag
-
+from .redis_caches import like, dislike
 
 def index(request):
     return render(request, 'index.html', context={
@@ -56,7 +54,21 @@ class LikeCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
 
-        return HttpResponse("成功")
+        id = request.POST['id']
+        type = request.POST['type']
+        user = request.user
+
+        if request.POST['type'] == 'article':
+            obj = get_object_or_404(Article, id=id)
+        else:
+            obj = get_object_or_404(Picture, id=id)
+
+        if request.POST['ltype']=='like':
+            like(type, obj, user)
+            return HttpResponse("成功")
+        else:
+            dislike(type, obj, user)
+            return HttpResponse("成功")
 
 
 class NotificationsListView(AllNotificationsList):

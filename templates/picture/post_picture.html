@@ -20,7 +20,7 @@
                 return;
             }
             var file = objfile.files[0];
-            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
+            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif' && file.type !== 'image/webp') {
                 alert("不是有效的图片文件!");
                 input.val('');
                 return;

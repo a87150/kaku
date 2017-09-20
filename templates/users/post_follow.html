@@ -1,13 +1,12 @@
-<h3 class="media-heading">{{ user.nickname }} 
-    {% if request.user == user or not request.user.is_authenticated %}
+{% if request.user != user and request.user.is_authenticated %}
+    {% if is_follow %}
+    <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
     {% else %}
-        {% if isfollow %}
-        <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
-        {% else %}
-        <button class="mdui-btn mdui-btn-raised mdui-ripple" id="follow-btn" userid={{ user.id }}>关注</button>
-        {% endif %}
+    <button class="mdui-btn mdui-btn-raised mdui-ripple" id="follow-btn" userid={{ user.id }}>关注</button>
     {% endif %}
-</h3>
+{% else %}
+
+{% endif %}
 
 <script>
     $(document).ready(function(){

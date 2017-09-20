@@ -8,10 +8,11 @@
              style="width: 73px;"/>
     </div>
     <div class="media-body">
+        <h3 class="media-heading">{{ user.nickname }} 
         {% include 'users/post_follow.html' %}
+        </h3>
         <div><p>{{ user.signature }}</p></div>
         <div>kaku 第 {{ user.pk }} 号会员，加入于 {{ user.date_joined }}</div>
-
     </div>
 </div>
 <hr>

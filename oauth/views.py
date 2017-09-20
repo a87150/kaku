@@ -30,7 +30,7 @@ def github_auth(request):
 
     # 如果申请登陆页面成功后，就会返回code和state
     if 'code' not in request.GET:
-        return render(request,template_html)
+        return render(request, template_html)
 
     code = request.GET.get('code')
 
@@ -51,17 +51,15 @@ def github_auth(request):
     # 设置请求返回的数据类型
     headers={'Accept': 'application/json'}
     req = Request(url, binary_data, headers)
-    result = urlopen(req) 
     # json是str类型的，将bytes转成str
-    result = result.read().decode('utf-8')
+    result = urlopen(req).read().decode('utf-8')
     result = json.loads(result)
     access_token = result['access_token']
     url = 'https://api.github.com/user?access_token=%s' % (access_token)
-    response = urlopen(url)
-    html = response.read().decode('utf-8')
-    data = json.loads(html)
-    print(data)
-    username = 'gh' + str(data['id'])
+    response = urlopen(url).read().decode('utf-8')
+    response = json.loads(response)
+    print(response)
+    username = 'gh' + str(response['id'])
     password = 'jiandandemima1'
 
     # 如果不存在username，则创建

@@ -8,7 +8,8 @@
 
 <div id="picture-title">
     <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
-    {% include 'views.html' %}
+    <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 点击: {{ views }}</p>
+    <p>{{ picture.created_time }}</p>
 </div>
 <hr>
 <div class="picture-body" id="picture-body">

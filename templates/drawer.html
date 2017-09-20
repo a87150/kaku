@@ -12,7 +12,7 @@
     {% if request.user.is_authenticated %}
     <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'users:detail' request.user.username %}">{{ request.user.nickname }}</a>
-        <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url}}" /></div>
+        <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url }}" /></div>
     </li>
     <li class="mdui-list-item mdui-ripple">
         {% notifications_unread as unread_count %}
@@ -32,17 +32,17 @@
     <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'users:profile' %}">设置</a>
     </li>
-    <li class="mdui-list-item mdui-ripple">
+    <li class="mdui-list-item mdui-ripple login">
         <a class="mdui-list-item-content" href="{% url 'account_logout' %}?next={{ request.path }}">登出</a>
     </li>
     {% else %}
-    <li class="mdui-list-item mdui-ripple">
+    <li class="mdui-list-item mdui-ripple login">
         <a class="mdui-list-item-content" href="{% url 'account_signup' %}?next={{ request.path }}">注册</a>
     </li>
-    <li class="mdui-list-item mdui-ripple">
+    <li class="mdui-list-item mdui-ripple login">
         <a class="mdui-list-item-content" href="{% url 'account_login' %}?next={{ request.path }}">登录</a>
     </li>
-    <li class="mdui-list-item mdui-ripple">
+    <li class="mdui-list-item mdui-ripple login">
         <a class="mdui-list-item-content" href="{% url 'oauth:github_login' %}">github登录</a>
     </li>
     

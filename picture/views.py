@@ -11,7 +11,7 @@ from actstream.signals import action
 from .models import Picture, Address
 from .forms import PictureCreateForm
 from index.pagination_data import pagination_data
-from index.redis_caches import *
+from index.redis_caches import update_views, get_views, is_likes
 from comment.forms import CommentCreationForm
 
 class IndexView(ListView):
@@ -58,12 +58,18 @@ class Detail(DetailView):
         comment_list = self.object.comments.all()[:20]
         form = CommentCreationForm()
         views = get_views('picture', self.picture)
-        
+
+        if self.request.user.is_authenticated():
+            is_like = is_likes('picture', self.picture, self.request.user)
+        else:
+            is_like = False
+
         context.update({
             'tag_list': tag_list,
             'comment_list': comment_list,
             'form': form,
-            'views': views
+            'views': views,
+            'is_like': is_like
         })
         return context
 
