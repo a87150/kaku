@@ -5,15 +5,15 @@
 {% endblock title %}
 
 {% block main %}
-
-<div id="picture-title">
-    <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
-    <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 点击: {{ views }}</p>
-    <p>{{ picture.created_time }}</p>
-</div>
-<hr>
-<div class="picture-body" id="picture-body">
-    <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ MEDIA_URL }}{{ picture.thematic }}/>
+<div>
+    <div id="picture-title">
+        <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
+        <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 点击: {{ views }} · {{ article.created_time }}</p>
+    </div>
+    <hr>
+    <div class="picture-body" id="picture-body">
+        <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ MEDIA_URL }}{{ picture.thematic }}/>
+    </div>
 </div>
 <hr>
 {% include 'post_like.html' %}

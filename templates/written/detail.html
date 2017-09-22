@@ -9,8 +9,7 @@
 <article>
     <div id="article-title">
         <a href="edit/" id="title"><h3>{{ article.title }}</h3></a>
-        <p><a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a> · 点击: {{ views }}</p>
-        <p>{{ article.created_time }}</p>
+        <p><a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a> · 点击: {{ views }} · {{ article.created_time }}</p>
         {% include 'written/post_chapterid.html' %}
     </div>
     <hr>

@@ -22,7 +22,7 @@ from comment.forms import CommentCreationForm
 
 class IndexView(ListView):
 
-    paginate_by = 20
+    paginate_by = 10
     model = Article
     template_name = "written/index.html"
     context_object_name = "article_list"
@@ -40,12 +40,10 @@ class IndexView(ListView):
         # page_obj 是 Page 的一个实例，
         # is_paginated 是一个布尔变量，用于指示是否已分页。
         # 例如如果规定每页 10 个数据，而本身只有 5 个数据，其实就用不着分页，此时 is_paginated=False。
-        paginator = context.get('paginator')
-        page = context.get('page_obj')
-        is_paginated = context.get('is_paginated')
-
         # 调用自己写的 pagination_data 方法获得显示分页导航条需要的数据，见下方。
-        page_data = pagination_data(paginator, page, is_paginated)
+        page_data = pagination_data(context.get('paginator'), 
+                                    context.get('page_obj'),
+                                    context.get('is_paginated'))
 
         # 将分页导航条的模板变量更新到 context 中，注意 page_data 方法返回的也是一个字典。
         context.update(page_data)

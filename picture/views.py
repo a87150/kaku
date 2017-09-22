@@ -16,7 +16,7 @@ from comment.forms import CommentCreationForm
 
 class IndexView(ListView):
 
-    paginate_by = 20
+    paginate_by = 10
     model = Picture
     template_name = "picture/index.html"
     context_object_name = "picture_list"
@@ -25,13 +25,11 @@ class IndexView(ListView):
         return Picture.objects.prefetch_related('tags')
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
-        paginator = context.get('paginator')
-        page = context.get('page_obj')
-        is_paginated = context.get('is_paginated')
+        page_data = pagination_data(context.get('paginator'), 
+                                    context.get('page_obj'),
+                                    context.get('is_paginated'))
 
-        page_data = pagination_data(paginator, page, is_paginated)
         context.update(page_data)
 
         return context
