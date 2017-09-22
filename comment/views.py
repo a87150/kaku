@@ -50,32 +50,31 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         
     def get_success_url(self):
         url = self.referrer
-        comment = self.request.POST['content']
         # 接受到评论会被 strip，不知道哪一步被处理的，临时为其补一个空格，防止@用户名在最后时无法解析
-
+        comment = self.request.POST['content'] + ' '
         nicknames = re.findall(r'@(?P<nickname>[a-zA-Z0-9\u0800-\u9fa5]+) ', comment)
-        users = User.objects.filter(nickname__in=nicknames)
-        comments = comment.strip() + ' '
         sender = self.request.user
-        author = self.obj.objects.get(id=self.ref[5]).author
         target = self.obj.objects.get(id=self.ref[5])
-
+        author = target.author
         mentioned = False
-        if users:
 
-            # 自己 @ 自己不会收到通知
-            recipients = users.exclude(pk=sender.pk)
+        if nicknames:
+            users = User.objects.filter(nickname__in=nicknames)
 
-            if author in recipients:
-                mentioned = True
+            if users:
+                # 自己 @ 自己不会收到通知
+                recipients = users.exclude(id=sender.id)
 
-            for recipient in recipients:
-                data = {
-                    'recipient': recipient,
-                    'verb': '@你',
-                    'target': target
-                }
-                notify.send(sender=sender, **data)
+                if author in recipients:
+                    mentioned = True
+
+                for recipient in recipients:
+                    data = {
+                        'recipient': recipient,
+                        'verb': '@你',
+                        'target': target
+                    }
+                    notify.send(sender=sender, **data)
 
         # 如果帖子作者没被 @ 并且回复者不是作者自己，则向作者发送一条通知
         if not mentioned and sender != author:

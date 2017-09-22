@@ -15,7 +15,8 @@
 <div class="picture-body" id="picture-body">
     <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ MEDIA_URL }}{{ picture.thematic }}/>
 </div>
-<br></br>
+<hr>
+{% include 'post_like.html' %}
 <hr>
 <br></br>
 {% include 'tag.html' %}

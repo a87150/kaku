@@ -96,7 +96,7 @@ class Detail(DetailView):
             is_like = is_likes('article', self.article, self.request.user)
         else:
             is_like = False
-        print(is_like)
+
         context.update({
             'tag_list': tag_list,
             'chapter_list': chapter_list,

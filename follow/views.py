@@ -20,9 +20,9 @@ class FollowView(LoginRequiredMixin, ListView):
     template_name = "follow/index.html"
 
     def get_queryset(self):
-        user = get_object_or_404(User, nickname=self.request.user)
-        follows = Follow.objects.filter(user=user)
+        follows = Follow.objects.filter(user=self.request.user)
         s = Action.objects.filter(actor_object_id='0')
+
         for f in follows:
             a = actor_stream(f.follow_object).filter(timestamp__gt = timezone.now() - timezone.timedelta(days=10))
             s = s | a
@@ -32,23 +32,23 @@ class FollowView(LoginRequiredMixin, ListView):
 class FollowCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        user = get_object_or_404(User, nickname=request.user)
-        object_id = get_object_or_404(User, id=request.POST['object_id'])
+        object = get_object_or_404(User, id=request.POST['object_id'])
+
         if request.POST['ftype'] == 'follow':
             try:
-                if user == object_id:
+                if request.user == object:
                     return HttpResponse('不能关注自己')
                 else:
-                    f = Follow(user=user, follow_object=object_id)
+                    f = Follow(user=request.user, follow_object=object)
                     f.save()
-                    action.send(request.user, verb='关注了', action_object=object_id)
+                    action.send(request.user, verb='关注了', action_object=object)
                     return HttpResponse('成功')
             except:
                 return HttpResponse('早已关注')
 
         else:
             try:
-                get_object_or_404(Follow, user=user, follow_object=object_id).delete()
+                get_object_or_404(Follow, user=request.user, follow_object=object).delete()
                 return HttpResponse('成功')
             except:
                 return HttpResponse('失败')
