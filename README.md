@@ -11,3 +11,5 @@
 >接着用   python manage.py createsuperuser  创建管理员账号
 
 >最后用   python manage.py runserver        启动
+
+>还可以用 python manage.py sync_cache       同步缓存到数据库

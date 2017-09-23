@@ -117,7 +117,9 @@ def sync_like(type):
     for id in REDIS_DB.smembers(type + 's'):
         l = []
         for i in REDIS_DB.smembers(id):
-            l.add(i)
-
-        o = object.objects.get(id=int(id[1:]))
-        o.likes.add(*l)
+            l.append(i)
+        try:
+            o = object.objects.get(id=int(id[1:]))
+            o.likes.add(*l)
+        except:
+            continue
