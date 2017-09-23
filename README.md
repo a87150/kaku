@@ -1,6 +1,6 @@
 好きなことをかく
 
-一个支持用markdown写文章和上传图片的社区，实现了评论、关注、点赞等功能，启用redis作为缓存。
+一个支持用markdown写文章和上传图片的社区，实现了评论、关注、点赞、OAuth等功能，启用redis作为缓存。
 
 >首先执行 pip install -r requirements.txt   安装需要的包
 

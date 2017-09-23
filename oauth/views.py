@@ -3,7 +3,6 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.contrib import auth
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
