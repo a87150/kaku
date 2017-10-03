@@ -40,7 +40,7 @@ def sync_views(type):
                 o.views = cache
                 o.save()
         except:
-            pass
+            continue
 
 
 def like(type, object, user):

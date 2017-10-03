@@ -33,7 +33,7 @@ class MugshotChangeView(LoginRequiredMixin, UpdateView):
     
     def post(self, request, *args, **kwargs):
         if len(request.FILES['mugshot']) >= 1024*1024:
-            return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/users/mugshot/change/\">返回</a>")
+            return HttpResponseForbidden(r'<h3>不能大于1mb</h3><a href="/users/mugshot/change/">返回</a>')
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):

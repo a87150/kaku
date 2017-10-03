@@ -133,8 +133,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-LOGIN_URL = "/users/login/"
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
@@ -150,6 +148,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # account
+
+LOGIN_URL = "/users/login/"
 
 AUTH_USER_MODEL = 'users.User'
 
