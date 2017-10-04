@@ -49,7 +49,7 @@ def like(type, object, user):
 
     if REDIS_DB.sismember(type, oid):
         if REDIS_DB.sismember(oid, user.id):
-            return
+            return None
         else:
             REDIS_DB.sadd(oid, user.id)
     else:
@@ -66,7 +66,7 @@ def dislike(type, object, user):
         if REDIS_DB.sismember(oid, user.id):
             REDIS_DB.srem(oid, user.id)
         else:
-            return
+            return None
     else:
         REDIS_DB.sadd(type, oid)
         for l in object.likes.all():
@@ -75,9 +75,9 @@ def dislike(type, object, user):
             if REDIS_DB.sismember(oid, user.id):
                 REDIS_DB.srem(oid, user.id)
             else:
-                return
+                return None
         else:
-            return
+            return None
 
 
 def get_like(type, object):
