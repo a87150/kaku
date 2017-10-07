@@ -17,4 +17,6 @@ powered by django
 
 >最后用   python manage.py runserver        启动
 
+>可以用   python manage.py collectstatic    收集静态文件
+
 >还可以用 python manage.py sync_cache       同步缓存到数据库
