@@ -7,7 +7,7 @@
 {% block main %}
 <div>
     <div id="picture-title">
-        <a href="{{ picture.get_absolute_url }}" id="title"><h3>{{ picture.title }}</h3></a>
+        <a href="{{ picture.get_absolute_url }}"><h3>{{ picture.title }}</h3></a>
         <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 点击: {{ views }} · {{ article.created_time }}</p>
     </div>
     <hr>
