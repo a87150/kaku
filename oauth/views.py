@@ -44,9 +44,8 @@ def github_auth(request):
         'redirect_uri': settings.GITHUB_CALLBACK,
     }
 
-    data = urlencode(data)
     # 请求参数需要bytes类型
-    binary_data = data.encode('utf-8')
+    binary_data = urlencode(data).encode('utf-8')
     # 设置请求返回的数据类型
     headers={'Accept': 'application/json'}
     req = Request(url, binary_data, headers)
@@ -58,7 +57,7 @@ def github_auth(request):
     response = urlopen(url).read().decode('utf-8')
     response = json.loads(response)
     print(response)
-    username = 'gh' + str(response['id'])
+    username = 'gh_' + str(response['id'])
     password = 'jiandandemima1'
 
     # 如果不存在username，则创建
