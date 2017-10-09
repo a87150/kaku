@@ -16,42 +16,6 @@
     </div>
 </div>
 <hr>
-<ul id="article_list">
-    <li class="mdui-list-item mdui-ripple">
-        <div class="mdui-list-item-content">{{ user.nickname }} 的文章</div>
-        <i class="mdui-list-item-icon mdui-icon material-icons">translate</i>
-    </li>
-    {% for article in article_list %}
-    <li class="mdui-list-item mdui-ripple">
-        <a class="nav-item" href="{{ article.get_absolute_url }}"> {{ article }} </a>
-    </li>
-    {% empty %}
-    <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
-    {% endfor %}
-    {% if article_list.count > 9 %}
-    <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:articles' user.username %}"
-        class="text-muted">{{ user.nickname }}更多文章>></a></li>
-    {% endif %}
-</ul>
-<hr>
-<ul id="picture_list">
-    <li class="mdui-list-item mdui-ripple">
-        <div class="mdui-list-item-content">{{ user.nickname }} 的图画</div>
-        <i class="mdui-list-item-icon mdui-icon material-icons">wallpaper</i>
-    </li>
-    {% for picture in picture_list %}
-    <li class="mdui-list-item mdui-ripple">
-        <a href="{{ picture.get_absolute_url }}"> <img src={{ MEDIA_URL }}{{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
-    </li>
-    {% empty %}
-    <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
-    {% endfor %}
-    {% if article_list.count > 9 %}
-    <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:picture' user.username %}"
-        class="text-muted">{{ user.nickname }}更多图画>></a></li>
-    {% endif %}
-</ul>
-<hr>
 {% if request.user.is_authenticated %}
 <ul id="activity_list">
     <li class="mdui-list-item mdui-ripple">
@@ -67,14 +31,51 @@
         <li class="mdui-list-item mdui-ripple">该用户下没有动态</li>
     {% endfor %}
     {% if action_list.count > 19 %}
-        <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:actions' user.username %}"
-        class="text-muted">{{ user.nickname }}的全部动态>></a></li>
+        <li class="mdui-list-item mdui-ripple">
+            <a href="{% url 'users:actions' user.username %}"class="text-muted">{{ user.nickname }}的全部动态>></a>
+        </li>
     {% endif %}
 </ul>
-    {% else %}
+{% else %}
     <div class="mdui-list-item mdui-ripple">
         需要登录才能查看用户动态
     </div>
+{% endif %}
+<hr>
+<ul id="article_list">
+    <li class="mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">{{ user.nickname }} 的文章</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">translate</i>
+    </li>
+    {% for article in article_list %}
+        <li class="mdui-list-item mdui-ripple">
+            <a class="nav-item" href="{{ article.get_absolute_url }}"> {{ article }} </a>
+        </li>
+    {% empty %}
+        <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
+    {% endfor %}
+    {% if article_list.count > 9 %}
+        <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:articles' user.username %}"
+            class="text-muted">{{ user.nickname }}更多文章>></a>
+        </li>
     {% endif %}
+</ul>
+<hr>
+<ul id="picture_list">
+    <li class="mdui-list-item mdui-ripple">
+        <div class="mdui-list-item-content">{{ user.nickname }} 的图画</div>
+        <i class="mdui-list-item-icon mdui-icon material-icons">wallpaper</i>
+    </li>
+    {% for picture in picture_list %}
+        <a href="{{ picture.get_absolute_url }}"> <img src={{ MEDIA_URL }}{{ picture.thematic }} class="img-rounded" width="50%" height="50%" style="float:left;"/> </a>
+    {% empty %}
+        <li class="mdui-list-item mdui-ripple">该用户下面没有</li>
+    {% endfor %}
+    {% if article_list.count > 9 %}
+        <li class="mdui-list-item mdui-ripple"><a href="{% url 'users:picture' user.username %}"
+            class="text-muted">{{ user.nickname }}更多图画>></a>
+        </li>
+    {% endif %}
+</ul>
 <hr>
 {% endblock main %}
