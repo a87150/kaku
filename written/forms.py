@@ -111,4 +111,4 @@ class ChapterCreationForm(forms.ModelForm):
         self.fields['article'].help_text = '选择文章'
 
         if use_pagedown:
-            self.fields['content'].widget = PagedownWidget()
+            self.fields['content'].widget = markdown()

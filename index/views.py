@@ -26,12 +26,12 @@ class TagCreateView(LoginRequiredMixin, View):
     template_name = 'post_tag.html'
 
     def post(self, request, *args, **kwargs):
-        id = request.POST['id']
+        pk = request.POST['pk']
 
         if request.POST['type'] == 'article':
-            obj = get_object_or_404(Article, id=id)
+            obj = get_object_or_404(Article, id=pk)
         else:
-            obj = get_object_or_404(Picture, id=id)
+            obj = get_object_or_404(Picture, id=pk)
 
         if obj.tags.count() >= 10:
             return HttpResponse("超过10个tag")
@@ -52,14 +52,14 @@ class LikeCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
 
-        id = request.POST['id']
+        pk = request.POST['pk']
         type = request.POST['type']
         user = request.user
 
         if request.POST['type'] == 'article':
-            obj = get_object_or_404(Article, id=id)
+            obj = get_object_or_404(Article, id=pk)
         else:
-            obj = get_object_or_404(Picture, id=id)
+            obj = get_object_or_404(Picture, id=pk)
 
         if request.POST['ltype']=='like':
             like(type, obj, user)

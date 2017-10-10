@@ -2,7 +2,7 @@
 {% for chapter in article.chapter_set.all %}
     <button type="button" class="mdui-btn mdui-btn-raised" >
         {{ chapter.title }}
-        <li hidden class="chaptersid">{{ chapter.id }}</li>
+        <li hidden id="chaptersid">{{ chapter.id }}</li>
     </button>
 {% endfor %}
 {% if user == article.author %}
@@ -17,10 +17,10 @@
 <script>
     $(document).ready(function(){
         $('div#chapters button.mdui-btn').click(function(){
-            var id = $(this).find('.chaptersid').text();
+            var pk = $(this).find('#chaptersid').text();
             $('div#chapters button.mdui-btn').removeAttr('disabled');
             $(this).attr("disabled","true");
-            $.post("/written/chapter/"+id+"/",{'id':id}, function(ret){
+            $.post("/written/chapter/" + pk + "/",{'pk':pk}, function(ret){
                 var jsonStr = JSON.stringify(ret);
                 var obj = JSON.parse(jsonStr);
                 $("#content").html("<div id=\"content\">" + obj.content + "</div>");

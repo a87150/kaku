@@ -128,8 +128,8 @@ class ChapterDetail(DetailView):
         return context
         
     def post(self, request, *args, **kwargs):
-        id = request.POST['id']
-        chap = get_object_or_404(Chapter, id=id)
+        pk = request.POST['pk']
+        chap = get_object_or_404(Chapter, pk=pk)
         response_data = {}
         response_data['content'] = html_clean(chap.content)
         return HttpResponse(json.dumps(response_data), content_type="application/json")

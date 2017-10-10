@@ -14,9 +14,9 @@
     $(document).ready(function(){
         $('#like-btn').click(function(){
             var $this = $(this);
-            var id = $('.id').text();
-            var type = $('.type').text();
-            $.post('/like/',{type: type, id: id, ltype: 'like'},
+            var pk = $('#pk').text();
+            var type = $('#type').text();
+            $.post('/like/',{type: type, pk: pk, ltype: 'like'},
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "dislike-btn");
@@ -33,9 +33,9 @@
     $(document).ready(function(){
         $('#dislike-btn').click(function(){
             var $this = $(this);
-            var id = $('.id').text();
-            var type = $('.type').text();
-            $.post('/like/',{type: type, id: id, ltype: 'dislike'},
+            var pk = $('#pk').text();
+            var type = $('#type').text();
+            $.post('/like/',{type: type, pk: pk, ltype: 'dislike'},
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "like-btn");

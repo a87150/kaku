@@ -22,8 +22,8 @@
 $(document).ready(function(){
     $("#tag_post").click(function(){
         var tag = $("#tag_input").val();
-        var id = $('.id').text();
-        var type = $('.type').text();
+        var pk = $('#pk').text();
+        var type = $('#type').text();
 
         if (tag == '') {
             alert('不能为空');
@@ -31,7 +31,7 @@ $(document).ready(function(){
         else{
             $(this).attr("disabled","true");
             setTimeout("$('#tag_post').removeAttr('disabled')",3000);
-            $.post("/tags/",{'tag':tag, 'id':id, 'type':type}, function(ret){
+            $.post("/tags/",{'tag':tag, 'pk':pk, 'type':type}, function(ret){
                 alert(ret);
             });
         }
