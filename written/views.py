@@ -140,19 +140,18 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
     template_name = 'written/post_written.html'
 
     def post(self, request, *args, **kwargs):
-        # TODO：add rate limit
         try:
             latest_article = self.request.user.a_author.latest('created_time')
             if latest_article.created_time + timezone.timedelta(seconds=60*3) > timezone.now():
                 return HttpResponseForbidden('您的发文间隔小于 3 分钟，请稍微休息一会')
-        except Article.DoesNotExist:
+        except:
             pass
 
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        action.send(self.request.user, verb='写了', action_object=self.object)
+        action.send(sender=self.request.user, verb='写了', action_object=self.object)
         return response
 
     def get_form_kwargs(self):
@@ -188,7 +187,7 @@ class ArticleEditView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        action.send(self.request.user, verb='编辑了', action_object=self.object)
+        action.send(sender=self.request.user, verb='编辑了', action_object=self.object)
         return response
 
 
@@ -219,5 +218,5 @@ class ChapterCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        action.send(self.request.user, verb='写了新章节', action_object=self.object)
+        action.send(sender=self.request.user, verb='写了新章节', action_object=self.object)
         return response

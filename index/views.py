@@ -1,16 +1,17 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from notifications.views import AllNotificationsList
 from notifications.models import Notification
+from actstream.signals import action
 
-from written.models import Article
-from picture.models import Picture
 from .models import Tag
 from .redis_caches import like, dislike
+from .util import *
+
 
 def index(request):
     return render(request, 'index.html', context={
@@ -27,11 +28,12 @@ class TagCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         pk = request.POST['pk']
+        type = what_type(request.POST['type'])
 
-        if request.POST['type'] == 'article':
-            obj = get_object_or_404(Article, id=pk)
+        if type:
+            obj = get_object_or_404(type, id=pk)
         else:
-            obj = get_object_or_404(Picture, id=pk)
+            return HttpResponseForbidden('类型错误')
 
         if obj.tags.count() >= 10:
             return HttpResponse("超过10个tag")
@@ -53,19 +55,20 @@ class LikeCreateView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
 
         pk = request.POST['pk']
-        type = request.POST['type']
         user = request.user
+        type = what_type(request.POST['type'])
 
-        if request.POST['type'] == 'article':
-            obj = get_object_or_404(Article, id=pk)
+        if type:
+            obj = get_object_or_404(type, id=pk)
         else:
-            obj = get_object_or_404(Picture, id=pk)
+            return HttpResponseForbidden('类型错误')
 
         if request.POST['ltype']=='like':
-            like(type, obj, user)
+            like(request.POST['type'], obj, user)
+            action.send(sender=user, verb='赞了', action_object=obj)
             return HttpResponse("成功")
         else:
-            dislike(type, obj, user)
+            dislike(request.POST['type'], obj, user)
             return HttpResponse("成功")
 
 

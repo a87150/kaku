@@ -79,18 +79,19 @@ class PictureCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         if len(request.FILES['thematic']) >= 1024*1024:
             return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/picture/new/\">返回</a>")
+
         try:
             latest_picture = self.request.user.p_author.latest('created_time')
             if latest_picture.created_time + timezone.timedelta(seconds=60*6) > timezone.now():
                 return HttpResponseForbidden('您的发图间隔小于 6 分钟，请稍微休息一会')
-        except Picture.DoesNotExist:
+        except:
             pass
 
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        action.send(self.request.user, verb='画了', action_object=self.object)
+        action.send(sender=self.request.user, verb='画了', action_object=self.object)
         return response
 
     def get_form_kwargs(self):

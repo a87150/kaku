@@ -13,8 +13,8 @@ from notifications.signals import notify
 
 from .models import Comment
 from .forms import CommentCreationForm
-from written.models import Article
-from picture.models import Picture
+# 引入 what_type 和模型类
+from index.util import *
 from users.models import User
 
 
@@ -28,8 +28,9 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
             latest_comment = request.user.comment_set.latest('created_time')
             if latest_comment.created_time + timezone.timedelta(seconds=60) > timezone.now():
                 return HttpResponseForbidden('间隔小于 1 分钟，请稍微休息一会')
-        except Comment.DoesNotExist:
+        except:
             pass
+
         return super().post(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
@@ -40,12 +41,13 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         self.referrer = self.request.META['HTTP_REFERER']
         self.ref = self.referrer.split('/')
-        if self.ref[4] == 'article':
-            self.obj = Article
+        self.type = what_type(self.ref[4])
+
+        if self.type:
+            kwargs.update({"user": self.request.user, "content_type": ContentType.objects.get_for_model(self.type), "object_id": self.ref[5]})
         else:
-            self.obj = Picture
-        # Update the existing form kwargs dict with the request's user.
-        kwargs.update({"user": self.request.user, "content_type": ContentType.objects.get_for_model(self.obj), "object_id": self.ref[5]})
+            return HttpResponseForbidden('类型错误')
+
         return kwargs
         
     def get_success_url(self):
@@ -54,7 +56,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         comment = self.request.POST['content'] + ' '
         nicknames = re.findall(r'@(?P<nickname>[a-zA-Z0-9\u0800-\u9fa5]+) ', comment)
         sender = self.request.user
-        target = self.obj.objects.get(id=self.ref[5])
+        target = self.type.objects.get(id=self.ref[5])
         author = target.author
         mentioned = False
 
