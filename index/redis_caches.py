@@ -3,103 +3,106 @@ from django_redis import get_redis_connection
 from written.models import Article
 from picture.models import Picture
 from users.models import User
+from .util import *
 
-REDIS_DB = get_redis_connection('default')
+rd = get_redis_connection('default')
 
-def update_views(type, object):
+def update_views(type, obj):
 
-    if REDIS_DB.hexists(type, object.id):
-        REDIS_DB.hincrby(type, object.id)
-
-    else:
-        REDIS_DB.hset(type, object.id, object.views + 1)
-
-
-def get_views(type, object):
-
-    if REDIS_DB.hexists(type, object.id):
-        return REDIS_DB.hget(type, object.id)
+    if rd.hexists(type, obj.id):
+        rd.hincrby(type, obj.id)
 
     else:
-        REDIS_DB.hset(type, object.id, object.views)
-        return object.views
+        rd.hset(type, obj.id, obj.views + 1)
+
+
+def get_views(type, obj):
+
+    if rd.hexists(type, obj.id):
+        return rd.hget(type, obj.id)
+
+    else:
+        rd.hset(type, obj.id, obj.views)
+        return obj.views
 
 
 def sync_views(type):
 
-    if type=='article':
-        object = Article
+    obj = what_type(type)
+
+    if obj:
+        for k in rd.hkeys(type):
+            try:
+                o = obj.objects.get(id=k)
+                cache = get_views(type, o)
+                if cache != o.views:
+                    o.views = cache
+                    o.save()
+            except:
+                continue
     else:
-        object = Picture
+        return None
 
-    for k in REDIS_DB.hkeys(type):
-        try:
-            o = object.objects.get(id=k)
-            cache = get_views(type, o)
-            if cache != o.views:
-                o.views = cache
-                o.save()
-        except:
-            continue
+    rd.delete(type)
 
 
-def like(type, object, user):
+def like(type, obj, user):
     type = type + 's'
-    oid = type[0] + str(object.id)
+    oid = type[0] + str(obj.id)
 
-    if REDIS_DB.sismember(type, oid):
-        if REDIS_DB.sismember(oid, user.id):
+    if rd.sismember(type, oid):
+        if rd.sismember(oid, user.id):
             return None
         else:
-            REDIS_DB.sadd(oid, user.id)
+            rd.sadd(oid, user.id)
     else:
-        REDIS_DB.sadd(type, oid)
-        for l in object.likes.all():
-            REDIS_DB.sadd(oid, l.id)
+        rd.sadd(type, oid)
+        for l in obj.likes.all():
+            rd.sadd(oid, l.id)
 
 
-def dislike(type, object, user):
+def dislike(type, obj, user):
     type = type + 's'
-    oid = type[0] + str(object.id)
+    oid = type[0] + str(obj.id)
 
-    if REDIS_DB.sismember(type, oid):
-        if REDIS_DB.sismember(oid, user.id):
-            REDIS_DB.srem(oid, user.id)
+    if rd.sismember(type, oid):
+        if rd.sismember(oid, user.id):
+            rd.srem(oid, user.id)
         else:
             return None
     else:
-        REDIS_DB.sadd(type, oid)
-        for l in object.likes.all():
-            REDIS_DB.sadd(oid, l.id)
-        if REDIS_DB.sismember(type, oid):
-            if REDIS_DB.sismember(oid, user.id):
-                REDIS_DB.srem(oid, user.id)
+        rd.sadd(type, oid)
+        for l in obj.likes.all():
+            rd.sadd(oid, l.id)
+        if rd.sismember(type, oid):
+            if rd.sismember(oid, user.id):
+                rd.srem(oid, user.id)
             else:
                 return None
         else:
             return None
 
 
-def get_like(type, object):
+def get_like(type, obj):
     type = type + 's'
-    oid = type[0] + str(object.id)
+    oid = type[0] + str(obj.id)
 
-    if REDIS_DB.sismember(type, oid):
-        return REDIS_DB.smembers(oid)
+    if rd.sismember(type, oid):
+        return rd.smembers(oid)
     else:
-        REDIS_DB.sadd(type, oid)
-        for l in object.likes.all():
-            REDIS_DB.sadd(oid, l.id)
+        rd.sadd(type, oid)
+        for l in obj.likes.all():
+            rd.sadd(oid, l.id)
         # set只能用for取值
-        return REDIS_DB.smembers(oid)
+        return rd.smembers(oid)
 
 
-def is_likes(type, object, user):
+def is_likes(type, obj, user):
     type = type + 's'
-    oid = type[0] + str(object.id)
+    oid = type[0] + str(obj.id)
     
-    if REDIS_DB.sismember(type, oid):
-        if REDIS_DB.sismember(oid, user.id):
+    if rd.sismember(type, oid):
+        if rd.sismember(oid, user.id):
             return True
         else:
             return False
@@ -108,18 +111,22 @@ def is_likes(type, object, user):
 
 
 def sync_like(type):
+    obj = what_type(type)
 
-    if type=='article':
-        object = Article
+    if obj:
+        type = type + 's'
+
+        for id in rd.smembers(type):
+            l = []
+            for i in rd.smembers(id):
+                l.append(i)
+            try:
+                o = obj.objects.get(id=int(id[1:]))
+                o.likes.add(*l)
+            except:
+                continue
+            rd.delete(id)
     else:
-        object = Picture
+        return None
 
-    for id in REDIS_DB.smembers(type + 's'):
-        l = []
-        for i in REDIS_DB.smembers(id):
-            l.append(i)
-        try:
-            o = object.objects.get(id=int(id[1:]))
-            o.likes.add(*l)
-        except:
-            continue
+    rd.delete(type)

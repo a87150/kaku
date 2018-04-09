@@ -19,24 +19,25 @@
 </div>
 
 <script>
-$(document).ready(function(){
-    $("#tag_post").click(function(){
-        var tag = $("#tag_input").val();
-        var pk = $('#pk').text();
-        var type = $('#type').text();
+    $(document).ready(function(){
+        $("#tag_post").click(function(){
+            var tag = $("#tag_input").val();
+            var url = location.href.split("/");
+            var type = url[4];
+            var pk = url[5];
 
-        if (tag == '') {
-            alert('不能为空');
-        }
-        else{
-            $(this).attr("disabled","true");
-            setTimeout("$('#tag_post').removeAttr('disabled')",3000);
-            $.post("/tags/",{'tag':tag, 'pk':pk, 'type':type}, function(ret){
-                alert(ret);
-            });
-        }
+            if (tag == '') {
+                alert('不能为空');
+            }
+            else{
+                $(this).attr("disabled","true");
+                setTimeout("$('#tag_post').removeAttr('disabled')",3000);
+                $.post("/tags/",{'tag':tag, 'pk':pk, 'type':type}, function(ret){
+                    alert(ret);
+                });
+            }
+        });
     });
-});
 </script>
 {% else %}
     <div class="card card-block">

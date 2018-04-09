@@ -8,11 +8,11 @@
 <div>
     <div id="picture-title">
         <a href="{{ picture.get_absolute_url }}"><h3>{{ picture.title }}</h3></a>
-        <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 点击: {{ views }} · {{ picture.created_time }}</p>
+        <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 发布时间: {{ picture.created_time }} · 点击: {{ views }}</p>
     </div>
     <hr>
     <div class="picture-body" id="picture-body">
-        <img id="thematic" style="  display:block;height:auto;max-width:100%;" src={{ MEDIA_URL }}{{ picture.thematic }}/>
+        <img src={{ MEDIA_URL }}{{ picture.thematic }} id="thematic" style="display:block; height:auto; max-width:100%;">
     </div>
 </div>
 <hr>
@@ -21,9 +21,6 @@
 <br></br>
 {% include 'tag.html' %}
 <br></br>
-<li hidden id="type">picture</li>
-<li hidden id="pk">{{ picture.id }}</li>
-
 {% include 'post_tag.html' %}
 <hr>
 {% include 'comment/comment.html' %}

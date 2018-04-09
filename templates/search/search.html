@@ -23,14 +23,14 @@
 </form>
 <hr>
 <ul>
-    {% for search in search_list %}
+    {% for result in result_list %}
         <li class="mdui-list-item mdui-ripple">
-            <a href="{{ search.get_absolute_url }}"> {{ search }} </a>
+            <a href="{{ result.get_absolute_url }}"> {{ result }} </a>
         </li>
     {% empty %}
         <li class="mdui-list-item mdui-ripple">empty</li>
     {% endfor %}
-    {% if search_list and paginator.num_pages > 1 %}
+    {% if result_list and paginator.num_pages > 1 %}
         {% bootstrap_paginate page_obj range=10 show_first_last='true' %}
     {% endif %}
 </ul>

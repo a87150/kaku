@@ -37,7 +37,7 @@ class markdown(PagedownWidget):
         }
         context = Context(context) if VERSION < (1, 9) else context
         return template.render(context)
-    
+
 
 class ArticleCreationForm(forms.ModelForm):
     class Meta:

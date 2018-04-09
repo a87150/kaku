@@ -12,8 +12,8 @@
     $(document).ready(function(){
         $('#follow-btn').click(function(){
             var $this = $(this);
-            var $objectId = $this.attr('userid');
-            $.post('/follow/create/',{object_id: $objectId,ftype: 'follow'},
+            var objectId = $this.attr('userid');
+            $.post('/follow/create/',{object_id: objectId,ftype: 'follow'},
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "unfollow-btn");
@@ -26,12 +26,10 @@
                 }
             );
         });
-    });
-    $(document).ready(function(){
         $('#unfollow-btn').click(function(){
             var $this = $(this);
-            var $objectId = $this.attr('userid');
-            $.post('/follow/create/',{object_id: $objectId, ftype: 'unfollow'},
+            var objectId = $this.attr('userid');
+            $.post('/follow/create/',{object_id: objectId, ftype: 'unfollow'},
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "follow-btn");

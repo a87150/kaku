@@ -14,7 +14,7 @@ from index.models import Tag
 class SearchView(ListView):
 
     template_name = "search/search.html"
-    context_object_name = "search_list"
+    context_object_name = "result_list"
 
     def get_queryset(self):
         q = self.request.GET['query']

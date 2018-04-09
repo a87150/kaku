@@ -12,11 +12,12 @@
 
 <script>
     $(document).ready(function(){
+        var url = location.href.split("/");
+        var type = url[4];
+        var pk = url[5];
         $('#like-btn').click(function(){
             var $this = $(this);
-            var pk = $('#pk').text();
-            var type = $('#type').text();
-            $.post('/like/',{type: type, pk: pk, ltype: 'like'},
+            $.post('/like/', {type: type, pk: pk, ltype: 'like'},
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "dislike-btn");
@@ -29,13 +30,9 @@
                 }
             );
         });
-    });
-    $(document).ready(function(){
         $('#dislike-btn').click(function(){
             var $this = $(this);
-            var pk = $('#pk').text();
-            var type = $('#type').text();
-            $.post('/like/',{type: type, pk: pk, ltype: 'dislike'},
+            $.post('/like/', {type: type, pk: pk, ltype: 'dislike'},
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "like-btn");

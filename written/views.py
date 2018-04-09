@@ -55,7 +55,6 @@ def html_clean(htmlstr):
     markdown = mistune.Markdown()
 
     # 采用bleach来清除不必要的标签，并linkify text
-
     tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img', 'table']
     tags.extend(['p','hr','br','pre','code','span','h1','h2','h3','h4','h5','del','dl','img','sub','sup','u'
                  'table','thead','tr','th','td','tbody','dd','caption','blockquote','section'])

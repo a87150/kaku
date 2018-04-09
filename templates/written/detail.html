@@ -1,16 +1,28 @@
 {% extends 'base.html' %}
 
-    {% block title %}
-    <title>{{ article.title }}</title>
-    {% endblock title %}
+{% block title %}
+<title>{{ article.title }}</title>
+{% endblock title %}
 
 {% block main %}
 
 <article>
     <div id="article-title">
-        <a href="edit/" ><h3>{{ article.title }}</h3></a>
-        <p><a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a> · 点击: {{ views }} · {{ article.created_time }}</p>
-        {% include 'written/post_chapterid.html' %}
+        <a href="{{ article.get_absolute_url }}" ><h3>{{ article.title }}</h3></a>
+        <p><a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a> · 发布时间: {{ article.created_time }} · 点击: {{ views }}</p>
+
+        {% if user == article.author %}
+        <div id="operation">
+            <button type="button" class="mdui-btn mdui-btn-raised" id="edit">
+                <a href="edit/">编辑</a>
+            </button>
+            <button type="button" class="mdui-btn mdui-btn-raised" id="addchapter">
+                <a href="new/">添加章节</a>
+            </button>
+        </div>
+        {% endif %}
+
+    {% include 'written/post_chapterid.html' %}
     </div>
     <hr>
     <div class="article-body" id="article-body">
@@ -23,8 +35,6 @@
 <br></br>
 {% include 'tag.html' %}
 <br></br>
-<li hidden id="type">article</li>
-<li hidden id="pk">{{ article.id }}</li>
 {% include 'post_tag.html' %}
 <hr>
 {% include 'comment/comment.html' %}
