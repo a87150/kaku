@@ -1,5 +1,5 @@
 django
-django-allauth==0.29.0
+django-allauth
 django-crispy-forms
 django-imagekit
 django-notifications-hq

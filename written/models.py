@@ -15,7 +15,7 @@ class Article(models.Model):
 
     id = models.AutoField(primary_key=True)
     title = models.CharField(_('title'), max_length=50)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('a_author'))
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('a_author'), on_delete=models.CASCADE)
     content = models.TextField(_('content'))
     excerpt = models.CharField(_('excerpt'), max_length=100, blank=True, null=True)
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
@@ -56,7 +56,7 @@ class Chapter(models.Model):
     content = models.TextField(_('content'))
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     last_modified_time = models.DateTimeField(_('last modified time'), auto_now=True)
-    article = models.ForeignKey(Article, blank=False, null=False, verbose_name=_('article'))
+    article = models.ForeignKey(Article, blank=False, null=False, verbose_name=_('article'), on_delete=models.CASCADE)
     
     def __str__(self):
         return self.title

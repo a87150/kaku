@@ -57,7 +57,7 @@ class Detail(DetailView):
         form = CommentCreationForm()
         views = get_views('picture', self.picture)
 
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             is_like = is_likes('picture', self.picture, self.request.user)
         else:
             is_like = False

@@ -4,8 +4,8 @@ from django.utils import timezone
 
 
 class Follow(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='followers')
-    follow_object = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='follows')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='followers', on_delete=models.CASCADE)
+    follow_object = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='follows', on_delete=models.CASCADE)
     started = models.DateTimeField(default=timezone.now)
 
 

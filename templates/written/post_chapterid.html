@@ -1,0 +1,30 @@
+<div id="chapters">
+{% for chapter in article.chapter_set.all %}
+    <button type="button" class="mdui-btn mdui-btn-raised" >
+        {{ chapter.title }}
+        <li hidden class="chaptersid">{{ chapter.id }}</li>
+    </button>
+{% endfor %}
+{% if user == article.author %}
+
+    <button type="button" class="mdui-btn mdui-btn-raised" id="addchapter">
+    <a href="new/">添加章节</a>
+    </button>
+
+{% endif %}
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('div#chapters button.mdui-btn').click(function(){
+            var id = $(this).find('.chaptersid').text();
+            $('div#chapters button.mdui-btn').removeAttr('disabled');
+            $(this).attr("disabled","true");
+            $.post("/written/chapter/"+id+"/",{'id':id}, function(ret){
+                var jsonStr = JSON.stringify(ret);
+                var obj = JSON.parse(jsonStr);
+                $("#content").html("<div id=\"content\">" + obj.content + "</div>");
+            });
+        });
+    });
+</script>

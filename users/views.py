@@ -56,7 +56,7 @@ class UserDetailView(DetailView):
         articles = self.object.a_author.all().defer('content')[:10]
         pictures = self.object.p_author.all()[:10]
 
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             actions = actor_stream(self.object)[:20]
             user = User.objects.get(nickname=self.request.user)
             try:

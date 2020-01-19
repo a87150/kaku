@@ -17,7 +17,7 @@ class Picture(models.Model):
 
     id = models.AutoField(primary_key=True)
     title = models.CharField(_('title'), max_length=50)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('p_author'))
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('p_author'), on_delete=models.CASCADE)
     thematic = models.ImageField(_('题图'), upload_to=pictures_path, )
     created_time = models.DateTimeField(_('created_time'), auto_now_add=True)
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)
@@ -39,5 +39,5 @@ class Picture(models.Model):
 
 class Address(models.Model):
 
-    picture = models.ForeignKey(Picture, blank=False, null=False, verbose_name=_('picture'))
+    picture = models.ForeignKey(Picture, blank=False, null=False, verbose_name=_('picture'), on_delete=models.CASCADE)
     address = models.TextField(max_length=6000, verbose_name=_('address'))
