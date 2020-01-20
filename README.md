@@ -4,7 +4,9 @@ powered by django
 
 一个支持用markdown写文章和上传图片分享的社区，实现了评论、关注、点赞、动态、通知、OAuth等功能。
 
-使用redis作为缓存，实现了保存页面和点赞点击功能。
+使用redis作为缓存，实现了保存页面和点赞、点击功能。
+
+django更新之后出了好多bug，比如没有six这个包了。
 
 
 >首先执行 pip install -r requirements.txt   安装需要的包，不用MySQL可以删除 mysqlclient
