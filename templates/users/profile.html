@@ -1,59 +1,125 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
+
+{% block title %}
+<title>个人设置 - kaku demo</title>
+{% endblock title %}
+
 {% block main %}
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
 
-    <div class="card card-block">
-        <h3 class="card-title">个人资料</h3>
-        <hr>
-        <ul class="list-unstyled">
-            <a href="{% url 'users:profile_change' %}"><i class="fa fa-pencil-square-o"aria-hidden="true"></i> 修改</a>
-            <li class="mb-1">
-                <strong>用户名：</strong>{{ user.username }}
-            </li>
-            <li class="mb-1">
-                <strong>昵称：</strong>{{ user.nickname }}
-            </li>
-            <li class="mb-1">
-                <strong>个性签名：</strong>{{ user.signature|default:"这个人很懒，什么也没留下" }}
-            </li>
-        </ul>
-    </div>
-    <div class="card card-block">
-        <h3 class="card-title">头像上传</h3>
-        <hr>
-        <p>当前头像</p>
-        <img src="{{ user.mugshot_thumbnail.url }}" alt=""
-             style="width: 96px;"/>
-         <br></br>
-        <div>
-            <a href="{% url 'users:mugshot_change' %}">上传新头像</a>
+        <!-- 账号概览 -->
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-content">
+                <div style="display:flex; align-items:center; flex-wrap:wrap;">
+                    <img src="{{ user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 72px; height: 72px; margin-right: 20px;"/>
+                    <div style="flex:1;">
+                        <div class="mdui-typo-title" style="font-size: 20px;">{{ user.nickname }}</div>
+                        <div class="kaku-meta mdui-p-t-1">@{{ user.username }} · {{ user.email|default:"未绑定邮箱" }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="card card-block">
-        <h3 class="card-title">安全</h3>
-        <hr>
-        <ul class="list-unstyled">
-            <li><a href="{% url 'account_change_password' %}"><i class="fa fa-key" aria-hidden="true"></i> 修改密码</a>
-            </li>
-            <br></br>
-            <li class="mb-1">
-                <strong>邮箱：</strong>
-                <ul class="list-unstyled">
-                    {% for emailaddress in user.emailaddress_set.all %}
-                        <li>{{ emailaddress.email }}
-                            {% if emailaddress.verified %}
-                                <span class="verified small">已验证</span>
-                            {% else %}
-                                <span class="unverified small">未验证</span>
-                            {% endif %}
-                            {% if emailaddress.primary %}
-                                <span class="primary small" style="color:red">主邮箱</span>{% endif %}</li>
-                    {% endfor %}
-                </ul>
-            </li>
-            <li><a href="{% url 'account_email' %}"><i class="fa fa-envelope" aria-hidden="true"></i> 修改绑定邮箱</a>
-            </li>
-        </ul>
-    </div>
 
+        <!-- 个人资料 -->
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">个人资料</div>
+                <div class="mdui-card-primary-subtitle">
+                    <a href="{% url 'users:profile_change' %}" class="mdui-btn mdui-btn-dense mdui-btn-raised mdui-color-grey-200 kaku-text-dark">
+                        <i class="mdui-icon material-icons" style="font-size:16px; margin-right:4px;">edit</i>修改资料
+                    </a>
+                </div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content">
+                <table class="mdui-table mdui-table-hoverable">
+                    <tbody>
+                        <tr>
+                            <td style="width:120px; color:rgba(0,0,0,.45);">用户名</td>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <td style="color:rgba(0,0,0,.45);">昵称</td>
+                            <td>{{ user.nickname }}</td>
+                        </tr>
+                        <tr>
+                            <td style="color:rgba(0,0,0,.45);">个性签名</td>
+                            <td>{{ user.signature|default:"这个人很懒，什么也没留下" }}</td>
+                        </tr>
+                        <tr>
+                            <td style="color:rgba(0,0,0,.45);">加入时间</td>
+                            <td>{{ user.date_joined }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 头像 -->
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">头像</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content" style="display:flex; align-items:center;">
+                <img src="{{ user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 64px; height: 64px; margin-right: 20px;"/>
+                <div>
+                    <div class="kaku-meta mdui-p-b-1">上传后立即生效，支持 JPG / PNG</div>
+                    <a href="{% url 'users:mugshot_change' %}" class="mdui-btn mdui-btn-raised mdui-color-grey-200 kaku-text-dark mdui-ripple">
+                        <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">add_a_photo</i>上传新头像
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 安全 -->
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">账号安全</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content">
+                <table class="mdui-table mdui-table-hoverable">
+                    <tbody>
+                        <tr>
+                            <td style="width:120px; color:rgba(0,0,0,.45);">登录密码</td>
+                            <td>••••••••</td>
+                            <td style="width:140px; text-align:right;">
+                                <a href="{% url 'account_change_password' %}" class="mdui-btn mdui-btn-dense mdui-btn-raised mdui-color-grey-200 kaku-text-dark">修改密码</a>
+                            </td>
+                        </tr>
+                        {% for emailaddress in user.emailaddress_set.all %}
+                        <tr>
+                            <td style="color:rgba(0,0,0,.45);">邮箱</td>
+                            <td>
+                                {{ emailaddress.email }}
+                                {% if emailaddress.primary %}<span class="mdui-chip" style="height:22px;"><span class="mdui-chip-title" style="font-size:11px;">主邮箱</span></span>{% endif %}
+                                {% if emailaddress.verified %}
+                                    <span class="mdui-chip" style="height:22px;"><span class="mdui-chip-title" style="font-size:11px;">已验证</span></span>
+                                {% else %}
+                                    <span class="mdui-chip" style="height:22px;"><span class="mdui-chip-title" style="font-size:11px;">未验证</span></span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:right;">
+                                <a href="{% url 'account_email' %}" class="mdui-btn mdui-btn-dense kaku-text-muted">管理邮箱</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td style="color:rgba(0,0,0,.45);">邮箱</td>
+                            <td colspan="2">
+                                未绑定邮箱
+                                <a href="{% url 'account_email' %}" class="mdui-btn mdui-btn-dense mdui-btn-raised mdui-color-grey-200 kaku-text-dark" style="margin-left:12px;">绑定邮箱</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock main %}

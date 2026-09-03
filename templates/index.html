@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 
-{% block style %}
-
-{% endblock style %}
-
 {% block main %}
-<h1 style="padding-bottom:50%">{{ welcome }}</h1>
-<script type="text/javascript" color="0,0,255" opacity='0.7' zIndex="-2" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.min.js"></script>
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card mdui-text-center" style="padding: 72px 24px; background: rgba(255,255,255,0.88);">
+            <i class="mdui-icon material-icons" style="font-size: 72px; color: #757575;">edit</i>
+            <div class="mdui-typo-display-1 mdui-p-t-2 kaku-text-dark">{{ welcome }}</div>
+            <p class="mdui-typo mdui-text-color-grey-600 mdui-p-t-1">一个支持用 Markdown 写文章和上传图片分享的社区</p>
+            <div class="kaku-meta mdui-p-t-2">使用顶部导航浏览内容，或点左上角菜单查看创作工具</div>
+        </div>
+    </div>
+</div>
 {% endblock main %}

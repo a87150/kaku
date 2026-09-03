@@ -1,5 +1,3 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django.views.generic import ListView
 from django.db.models import Q
 
@@ -7,7 +5,6 @@ from itertools import chain
 
 from written.models import Article
 from picture.models import Picture
-from users.models import User
 from index.models import Tag
 
 
@@ -17,39 +14,37 @@ class SearchView(ListView):
     context_object_name = "result_list"
 
     def get_queryset(self):
-        q = self.request.GET['query']
-        
+        q = self.request.GET.get('query', '')
+
         if not q:
-            return HttpResponseNotFound
+            return []
 
-        if 'type' in self.request.GET:
-            type = self.request.GET['type']
+        search_type = self.request.GET.get('type', 'all')
 
-            if type=='article':
-                try:
-                    t = Tag.objects.get(name=q)
-                    a_list = Article.objects.filter(Q(title__icontains=q) | Q(content__icontains=q)).defer('content') | Article.objects.filter(tags=t).defer('content')
-                except:
-                    a_list = Article.objects.filter(Q(title__icontains=q) | Q(content__icontains=q)).defer('content')
-                return a_list[:20]
-
-            elif type=='picture':
-                try:
-                    t = Tag.objects.get(name=q)
-                    p_list = Picture.objects.filter(title__icontains=q) | Picture.objects.filter(tags=t)
-                except:
-                    p_list = Picture.objects.filter(title__icontains=q)
-                return p_list[:20]
-                
-            else:
-                return HttpResponseNotFound
-
-        else:
+        def _search_articles():
             try:
                 t = Tag.objects.get(name=q)
-                a_list = Article.objects.filter(Q(title__icontains=q) | Q(content__icontains=q)).defer('content') | Article.objects.filter(tags=t).defer('content')
-                p_list = Picture.objects.filter(title__icontains=q) | Picture.objects.filter(tags=t)
-            except:
-                a_list = Article.objects.filter(Q(title__icontains=q) | Q(content__icontains=q)).defer('content')
-                p_list = Picture.objects.filter(title__icontains=q)
-            return chain(a_list[:20], p_list[:20])
+                return (Article.objects
+                        .filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(tags=t))
+                        .defer('content').distinct())
+            except Tag.DoesNotExist:
+                return (Article.objects
+                        .filter(Q(title__icontains=q) | Q(content__icontains=q))
+                        .defer('content').distinct())
+
+        def _search_pictures():
+            try:
+                t = Tag.objects.get(name=q)
+                return (Picture.objects
+                        .filter(Q(title__icontains=q) | Q(tags=t)).distinct())
+            except Tag.DoesNotExist:
+                return Picture.objects.filter(title__icontains=q).distinct()
+
+        if search_type == 'article':
+            return list(_search_articles()[:20])
+
+        elif search_type == 'picture':
+            return list(_search_pictures()[:20])
+
+        else:  # all
+            return list(chain(_search_articles()[:20], _search_pictures()[:20]))

@@ -2,7 +2,7 @@ from django import forms
 from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.utils.html import mark_safe
-from django.utils.translation import pgettext, ugettext_lazy as _, ugettext
+from django.utils.translation import pgettext, gettext_lazy as _, gettext
 
 from allauth.account.forms import (
     LoginForm as AllAuthLoginForm,
@@ -21,6 +21,7 @@ class LoginForm(AllAuthLoginForm):
         self.helper = FormHelper(self)
         self.helper.form_action = 'account_login'
         self.helper.form_method = 'post'
+        self.helper.add_input(Submit('login', '登录'))
         self.fields['login'].widget.attrs['class']='mdui-textfield-input'
         self.fields['password'].widget.attrs['class']='mdui-textfield-input'
 

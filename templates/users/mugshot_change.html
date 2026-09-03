@@ -1,40 +1,55 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load crispy_forms_tags %}
 
-{% block main %}
+{% block title %}
+<title>更换头像 - kaku demo</title>
+{% endblock title %}
 
-<div class="card card-block">
-    <h3 class="card-title">头像上传</h3>
-    <hr>
-    <span>当前头像</span>
-    <img src="{{ user.mugshot_thumbnail.url }}" alt=""
-         style="width: 96px;">
-    {% crispy form %}
-    <p>不能大于1mb</p>
-    <script>
-    $(document).ready(function(){
-        var objfile = document.getElementById('id_mugshot');
-        var input = $('#id_mugshot')
-        objfile.addEventListener('change', function () {
-            var filepath = objfile.value;
-            if (!filepath) {
-                alert("请先选择上传文件");
-                return;
-            }
-            var file = objfile.files[0];
-            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
-                alert("不是有效的图片文件!");
-                input.val('');
-                return;
-            } else if (file.size > 1024*1024) {
-                alert("图片超过1mb");
-                input.val('');
-                return;
-            }
-        });
-     });
-    </script>
+{% block main %}
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">更换头像</div>
+                <div class="mdui-card-primary-subtitle kaku-text-muted">支持 JPG / PNG / GIF，不能大于 1MB</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content">
+                <div style="display:flex; align-items:center; margin-bottom: 16px;">
+                    <img src="{{ user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 72px; height: 72px; margin-right: 16px;"/>
+                    <span class="kaku-text-muted">当前头像</span>
+                </div>
+                {% crispy form %}
+                <div class="kaku-text-muted" style="font-size: 12px; margin-top: 8px;">选择图片后确认上传即可替换头像</div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+        var objfile = document.getElementById('id_mugshot');
+        if (objfile) {
+            var input = $('#id_mugshot');
+            objfile.addEventListener('change', function () {
+                var filepath = objfile.value;
+                if (!filepath) {
+                    alert("请先选择上传文件");
+                    return;
+                }
+                var file = objfile.files[0];
+                if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
+                    alert("不是有效的图片文件!");
+                    input.val('');
+                    return;
+                } else if (file.size > 1024 * 1024) {
+                    alert("图片超过1mb");
+                    input.val('');
+                    return;
+                }
+            });
+        }
+    });
+</script>
 {% endblock main %}

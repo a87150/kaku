@@ -1,25 +1,36 @@
 {% extends 'base.html' %}
 
-{% load bootstrap_pagination %}
+{% block title %}
+<title>用户动态 - kaku demo</title>
+{% endblock title %}
 
 {% block main %}
-    {% if request.user.is_authenticated %}
-
-<ul class="list-group">
-    {% for act in action_list %}
-        <li class="mdui-list-item mdui-ripple">{{ act }}</li>
-    {% empty %}
-        <li class="mdui-list-item mdui-ripple">该用户下没有动态</li>
-    {% endfor %}
-    {% else %}
-        <div class="mdui-list-item mdui-ripple">
-            需要登录才能查看用户动态
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        {% if request.user.is_authenticated %}
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">用户动态</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <ul class="mdui-list" style="padding-top:0; padding-bottom:0;">
+                {% for act in action_list %}
+                    <li class="mdui-list-item mdui-ripple">
+                        <div class="mdui-list-item-content">{{ act }}</div>
+                    </li>
+                {% empty %}
+                    <li class="mdui-list-item">
+                        <div class="mdui-list-item-content kaku-text-muted">该用户下没有动态</div>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
-    {% endif %}
-
-    {% if action_list and paginator.num_pages > 1 %}
-        {% bootstrap_paginate page_obj range=10 show_first_last='true' %}
-    {% endif %}
-</ul>
-
+        {% include 'pagination_snippet.html' %}
+        {% else %}
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-content mdui-text-center mdui-typo">需要登录才能查看用户动态</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock main %}

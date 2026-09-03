@@ -1,36 +1,54 @@
 {% load crispy_forms_tags %}
 
-<div class="conment" id="conment" ><h3>评论</h3>
-    {% if request.user.is_authenticated %}
-        {% crispy form %}
-    {% else %}
-        <div class="card card-block">
-            需要登录才能评论
-        </div>
-    {% endif %}
-
-    {% for comment in comment_list %}
-    <div class="conments" id="conments" style="margin:20px 20px 20px 0px;">
-        <li class="mdui-list-item mdui-ripple"> 
-            <a href="{{ comment.author.get_absolute_url }}" class="author">
-                <img src="{{ comment.author.mugshot_thumbnail.url}}" width="22%" height="22%"/> {{ comment.author }}
-            </a>
-            <button type="button" class="mdui-btn" id="reply">回复 {{ comment.author }}</button>
-        </li>
-        <li class="mdui-list-item mdui-ripple">{{ comment.content }}</li>
-        <li class="mdui-list-item mdui-ripple">{{ comment.created_time }}</li>
+<div class="mdui-card kaku-card">
+    <div class="mdui-card-primary">
+        <div class="mdui-card-primary-title">评论</div>
     </div>
     <div class="mdui-divider"></div>
-    {% empty %}
-        <li class="mdui-list-item mdui-ripple">没有评论</li>
-    {% endfor %}
+
+    <div class="mdui-card-content">
+        {% if request.user.is_authenticated %}
+            {% crispy form %}
+        {% else %}
+            <p class="kaku-text-muted">需要登录才能评论</p>
+            <a href="{% url 'account_login' %}?next={{ request.path }}" class="mdui-btn mdui-btn-raised mdui-color-grey-800">去登录</a>
+        {% endif %}
+    </div>
+
+    <div class="mdui-divider"></div>
+    <ul class="mdui-list" style="padding-top:0; padding-bottom:0;">
+        {% for comment in comment_list %}
+        <li class="mdui-list-item">
+            <div class="mdui-list-item-avatar">
+                <img src="{{ comment.author.mugshot_thumbnail.url }}" class="kaku-comment-avatar"/>
+            </div>
+            <div class="mdui-list-item-content">
+                <div>
+                    <strong><a href="{{ comment.author.get_absolute_url }}">{{ comment.author }}</a></strong>
+                    <button type="button" class="mdui-btn mdui-btn-dense mdui-btn-raised mdui-color-grey-200 kaku-text-muted" style="font-size:12px; margin-left:8px;" data-reply-to="{{ comment.author }}">回复</button>
+                </div>
+                <div class="mdui-p-t-1">{{ comment.content }}</div>
+                <div class="kaku-text-muted" style="font-size: 12px; margin-top:4px;">{{ comment.created_time }}</div>
+            </div>
+        </li>
+        <li class="mdui-divider"></li>
+        {% empty %}
+        <li class="mdui-list-item">
+            <div class="mdui-list-item-content kaku-text-muted">还没有评论，快来抢沙发</div>
+        </li>
+        {% endfor %}
+    </ul>
 </div>
 
 <script>
     $(document).ready(function(){
-        $('div.conments button.mdui-btn').click(function(){
-            var id = $(this).text().substring(3);
-            $('#comment-content').val('@'+id+' ');
+        $('button[data-reply-to]').click(function(){
+            var nickname = $(this).attr('data-reply-to');
+            var $input = $('#comment-content');
+            if ($input.length) {
+                $input.val('@' + nickname + ' ');
+                $input.focus();
+            }
         });
     });
 </script>

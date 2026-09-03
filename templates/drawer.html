@@ -1,24 +1,15 @@
-
 {% load notifications_tags %}
-
-    <form class="navbar-form navbar-left" role="search" method="get" id="searchform" action="{% url 'search:search' %}">
-        <div class="input-group">
-            <input id="search" class="form-control" type="search" name="query" placeholder="搜索" />
-            <span class="input-group-btn">
-                <button class="btn btn-default" type="submit">搜索</button>
-            </span>
-        </div>
-    </form>
+<ul class="mdui-list">
     {% if request.user.is_authenticated %}
     <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'users:detail' request.user.username %}">{{ request.user.nickname }}</a>
-        <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url }}" /></div>
+        <div class="mdui-list-item-avatar"><img src="{{ request.user.mugshot_thumbnail.url }}" style="width:32px;height:32px;border-radius:50%;"/></div>
     </li>
     <li class="mdui-list-item mdui-ripple">
         {% notifications_unread as unread_count %}
-        <a href="{% url 'index:notifications' %}"
-           {% if unread_count %}style="color: red"
-           {% endif %} class="mdui-list-item-content"aria-hidden="true"> {{ unread_count }} 条未读提醒</a>
+        <a href="{% url 'index:notifications' %}" class="mdui-list-item-content">
+            未读提醒 {% if unread_count %}<span class="mdui-badge mdui-color-grey-700">{{ unread_count }}</span>{% endif %}
+        </a>
     </li>
     <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'written:create' %}">发文</a>
@@ -32,18 +23,18 @@
     <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'users:profile' %}">设置</a>
     </li>
-    <li class="mdui-list-item mdui-ripple login">
+    <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'account_logout' %}?next={{ request.path }}">登出</a>
     </li>
     {% else %}
-    <li class="mdui-list-item mdui-ripple login">
+    <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'account_signup' %}?next={{ request.path }}">注册</a>
     </li>
-    <li class="mdui-list-item mdui-ripple login">
+    <li class="mdui-list-item mdui-ripple">
         <a class="mdui-list-item-content" href="{% url 'account_login' %}?next={{ request.path }}">登录</a>
     </li>
-    <li class="mdui-list-item mdui-ripple login">
-        <a class="mdui-list-item-content" href="{% url 'oauth:github_login' %}">github登录</a>
+    <li class="mdui-list-item mdui-ripple">
+        <a class="mdui-list-item-content" href="{% url 'oauth:github_login' %}">GitHub 登录</a>
     </li>
-    
     {% endif %}
+</ul>

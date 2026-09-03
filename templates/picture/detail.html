@@ -1,28 +1,37 @@
 {% extends 'base.html' %}
 
 {% block title %}
-<title>{{ picture.title }}</title>
+<title>{{ picture.title }} - kaku demo</title>
 {% endblock title %}
 
 {% block main %}
-<div>
-    <div id="picture-title">
-        <a href="{{ picture.get_absolute_url }}"><h3>{{ picture.title }}</h3></a>
-        <p><a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a> · 发布时间: {{ picture.created_time }} · 点击: {{ views }}</p>
-    </div>
-    <hr>
-    <div class="picture-body" id="picture-body">
-        <img src={{ MEDIA_URL }}{{ picture.thematic }} id="thematic" style="display:block; height:auto; max-width:100%;">
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title mdui-typo-headline">{{ picture.title }}</div>
+                <div class="mdui-card-primary-subtitle">
+                    <span class="kaku-meta">
+                        <a href="{{ picture.author.get_absolute_url }}">{{ picture.author }}</a>
+                        &nbsp;·&nbsp; {{ picture.created_time }} &nbsp;·&nbsp; 浏览 {{ views }}
+                    </span>
+                </div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content mdui-text-center">
+                <img src="{{ MEDIA_URL }}{{ picture.thematic }}" style="max-width:100%; height:auto; border-radius:4px;"/>
+            </div>
+        </div>
+
+        {% include 'post_like.html' %}
+
+        {% include 'tag.html' %}
+
+        {% if request.user.is_authenticated %}
+        {% include 'post_tag.html' %}
+        {% endif %}
+
+        {% include 'comment/comment.html' %}
     </div>
 </div>
-<hr>
-{% include 'post_like.html' %}
-<hr>
-<br></br>
-{% include 'tag.html' %}
-<br></br>
-{% include 'post_tag.html' %}
-<hr>
-{% include 'comment/comment.html' %}
-
 {% endblock main %}

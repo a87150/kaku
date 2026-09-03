@@ -1,6 +1,7 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseForbidden, HttpResponse
+from django.http import Http404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.utils import timezone
@@ -39,14 +40,18 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        self.referrer = self.request.META['HTTP_REFERER']
+        self.referrer = self.request.META.get('HTTP_REFERER', '')
+
+        if not self.referrer:
+            raise Http404('缺少来源页面')
+
         self.ref = self.referrer.split('/')
         self.type = what_type(self.ref[4])
 
         if self.type:
             kwargs.update({"user": self.request.user, "content_type": ContentType.objects.get_for_model(self.type), "object_id": self.ref[5]})
         else:
-            return HttpResponseForbidden('类型错误')
+            raise Http404('类型错误')
 
         return kwargs
         

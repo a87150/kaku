@@ -1,25 +1,41 @@
 {% extends 'base.html' %}
 
-{% load bootstrap_pagination %}
+{% block title %}
+<title>通知 - kaku demo</title>
+{% endblock title %}
 
 {% block main %}
-{% for notice in notice_list %}
-    <div class="alert alert-block alert-{{ notice.level }}">
-        <a class="close pull-right" href="{% url 'notifications:mark_as_read' notice.slug %}">
-            <i class="icon-close"></i>
-        </a>
-
-        <h4>
-            <i class="icon-mail{% if notice.unread %}-alt{% endif %}"></i>
-            {{ notice.actor }} 
-            {% if notice.target %}
-                在 {{ notice.target }}
-            {% endif %}
-            {{ notice.verb }}
-        </h4>
-        <p>{{ notice.timesince }} 之前</p>
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">通知</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <ul class="mdui-list" style="padding-top:0; padding-bottom:0;">
+                {% for notice in notice_list %}
+                    <li class="mdui-list-item mdui-ripple">
+                        <div class="mdui-list-item-content">
+                            <div>
+                                <strong>{{ notice.actor }}</strong>
+                                {{ notice.verb }}
+                                {% if notice.target %}《{{ notice.target }}》{% endif %}
+                            </div>
+                            <div class="mdui-list-item-text-light">{{ notice.timesince }} 之前</div>
+                        </div>
+                        {% if notice.unread %}
+                        <span class="mdui-badge mdui-color-grey-700">未读</span>
+                        {% endif %}
+                        <a class="mdui-list-item-content" style="max-width: 64px; text-align:right;" href="{% url 'notifications:mark_as_read' notice.slug %}">标记已读</a>
+                    </li>
+                {% empty %}
+                    <li class="mdui-list-item">
+                        <div class="mdui-list-item-content kaku-text-muted">暂时没有通知</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% include 'pagination_snippet.html' %}
     </div>
-{% empty %}
-    <li class="mdui-list-item mdui-ripple">什么都没有</li>
-{% endfor %}
+</div>
 {% endblock main %}

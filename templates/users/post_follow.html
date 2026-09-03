@@ -1,6 +1,6 @@
 {% if request.user != user and request.user.is_authenticated %}
     {% if is_follow %}
-    <button class="mdui-btn mdui-color-theme-accent mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
+    <button class="mdui-btn mdui-color-grey-700 mdui-ripple" id="unfollow-btn" userid={{ user.id }}>取关</button>
     {% else %}
     <button class="mdui-btn mdui-btn-raised mdui-ripple" id="follow-btn" userid={{ user.id }}>关注</button>
     {% endif %}
@@ -17,7 +17,7 @@
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "unfollow-btn");
-                        $this.attr('class', "mdui-btn mdui-color-theme-accent mdui-ripple");
+                        $this.attr('class', "mdui-btn mdui-color-grey-700 mdui-ripple");
                         $this.text('取关');
                         $this.off('click');
                     }else{

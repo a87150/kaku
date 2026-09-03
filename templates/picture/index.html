@@ -1,30 +1,51 @@
 {% extends 'base.html' %}
+
+{% block title %}
+<title>图画 - kaku demo</title>
+{% endblock title %}
+
 {% block main %}
-{% for picture in picture_list %}
-<div>
-    <h3>
-        <a href="{{ picture.get_absolute_url }}">{{ picture.title }}</a>
-    </h3>
-    <a href="{{ picture.author.get_absolute_url }}" class="author">作者: {{ picture.author }}</a>
-    <br></br>
-    <div>
-        <a href="{{ picture.get_absolute_url }}"> <img src={{ MEDIA_URL }}{{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
-    </div>
-    <br>
-    <p>{{ picture.created_time }}</p>
-    <span class="tag-single">
-        {% for tag in picture.tags.all %}
-            <a class="badge" id="tags" href="/search/?query={{ tag }}" target="_blank">{{ tag }}</a>
-    </span>
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-row">
+        {% for picture in picture_list %}
+            <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-p-t-1 mdui-p-b-1">
+                <div class="mdui-card mdui-hoverable" style="height: 100%;">
+                    <a href="{{ picture.get_absolute_url }}">
+                        <img class="kaku-picture-thumb" src="{{ MEDIA_URL }}{{ picture.thematic }}" alt="{{ picture.title }}"/>
+                    </a>
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">
+                            <a href="{{ picture.get_absolute_url }}">{{ picture.title }}</a>
+                        </div>
+                        <div class="mdui-card-primary-subtitle">
+                            <span class="kaku-meta">
+                                <a href="{{ picture.author.get_absolute_url }}">{{ picture.author }}</a>
+                                &nbsp;·&nbsp; {{ picture.created_time }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mdui-card-actions">
+                        {% for tag in picture.tags.all %}
+                            <a class="mdui-chip" href="/search/?query={{ tag }}" target="_blank">
+                                <span class="mdui-chip-title">#{{ tag }}</span>
+                            </a>
+                        {% empty %}
+                            <span class="kaku-text-muted">暂无标签</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         {% empty %}
-            <div class="no-tag">暂时还没有tag</div>
+            <div class="mdui-col-xs-12">
+                <div class="mdui-card kaku-card">
+                    <div class="mdui-card-content mdui-text-center mdui-typo">暂时还没有图片</div>
+                </div>
+            </div>
         {% endfor %}
+        </div>
+
+        {% include 'pagination.html' %}
+    </div>
 </div>
-<hr>
-{% empty %}
-    <div class="no-picture">暂时还没有图片</div>
-{% endfor %}
-
-{% include 'pagination.html' %}
-
 {% endblock main %}

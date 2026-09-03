@@ -1,38 +1,67 @@
 {% extends 'base.html' %}
 
-{% load bootstrap_pagination %}
+{% block title %}
+<title>搜索 - kaku demo</title>
+{% endblock title %}
 
 {% block main %}
-<form class="form" role="search" method="get" id="searchform" action="{% url 'search:search' %}">
-    <div class="input-group">
-        <input id="search" class="form-control" type="search" name="query" placeholder="搜索" required />
-        <span class="input-group-btn">
-            <button class="btn btn-default" type="submit">搜索</button>
-        </span>
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-content">
+                <form method="get" action="{% url 'search:search' %}" class="mdui-form">
+                    <div class="mdui-textfield" style="padding-top:0;">
+                        <input class="mdui-textfield-input" type="search" name="query" placeholder="搜索文章或图画" value="{{ request.GET.query }}"/>
+                    </div>
+                    <div class="mdui-radio mdui-p-r-1">
+                        <label>
+                            <input type="radio" name="type" value="all" {% if not request.GET.type or request.GET.type == 'all' %}checked{% endif %}/>
+                            <i class="mdui-radio-icon"></i>
+                            全部
+                        </label>
+                    </div>
+                    <div class="mdui-radio mdui-p-r-1">
+                        <label>
+                            <input type="radio" name="type" value="article" {% if request.GET.type == 'article' %}checked{% endif %}/>
+                            <i class="mdui-radio-icon"></i>
+                            文章
+                        </label>
+                    </div>
+                    <div class="mdui-radio">
+                        <label>
+                            <input type="radio" name="type" value="picture" {% if request.GET.type == 'picture' %}checked{% endif %}/>
+                            <i class="mdui-radio-icon"></i>
+                            图画
+                        </label>
+                    </div>
+                    <div class="mdui-p-t-1">
+                        <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple">搜索</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">搜索结果</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <ul class="mdui-list" style="padding-top:0; padding-bottom:0;">
+                {% for result in result_list %}
+                    <li class="mdui-list-item mdui-ripple">
+                        <div class="mdui-list-item-content">
+                            <a href="{{ result.get_absolute_url }}">{{ result }}</a>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="mdui-list-item">
+                        <div class="mdui-list-item-content kaku-text-muted">
+                            {% if request.GET.query %}没有找到与“{{ request.GET.query }}”相关的内容{% else %}输入关键词开始搜索{% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
-    <label class="mdui-radio">
-        <input type="radio" name="type" value="article"/>
-        <i class="mdui-radio-icon"></i>
-        搜文章
-    </label>
-    <label class="mdui-radio">
-        <input type="radio" name="type" value="picture""/>
-        <i class="mdui-radio-icon"></i>
-        搜图
-    </label>
-</form>
-<hr>
-<ul>
-    {% for result in result_list %}
-        <li class="mdui-list-item mdui-ripple">
-            <a href="{{ result.get_absolute_url }}"> {{ result }} </a>
-        </li>
-    {% empty %}
-        <li class="mdui-list-item mdui-ripple">empty</li>
-    {% endfor %}
-    {% if result_list and paginator.num_pages > 1 %}
-        {% bootstrap_paginate page_obj range=10 show_first_last='true' %}
-    {% endif %}
-</ul>
-<hr>
+</div>
 {% endblock main %}

@@ -1,9 +1,5 @@
-from django import VERSION, forms
+from django import forms
 from django.conf import settings
-from django.template import Context, loader
-from django.forms.utils import flatatt
-from django.utils.html import conditional_escape
-from django.utils.encoding import force_text as force_unicode
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -13,30 +9,6 @@ from .models import Article, Chapter
 
 
 use_pagedown = getattr(settings, 'USE_PAGEDOWN')
-
-
-class markdown(PagedownWidget):
-
-    def render(self, name, value, attrs=None):
-        if value is None:
-            value = ""
-        if VERSION < (1, 11):
-            final_attrs = self.build_attrs(attrs, name=name)
-        else:
-            final_attrs = self.build_attrs(attrs, {'name': name})
-
-        if "class" not in final_attrs:
-            final_attrs["class"] = ""
-        final_attrs["class"] += "textInput form-control wmd-input"
-        template = loader.get_template(self.template)
-        context = {
-            "attrs": flatatt(final_attrs),
-            "body": conditional_escape(force_unicode(value)),
-            "id": final_attrs["id"],
-            "show_preview": self.show_preview,
-        }
-        context = Context(context) if VERSION < (1, 9) else context
-        return template.render(context)
 
 
 class ArticleCreationForm(forms.ModelForm):
@@ -62,7 +34,7 @@ class ArticleCreationForm(forms.ModelForm):
         self.fields['tags'].help_text = '选择标签, 可按Ctrl多选'
 
         if use_pagedown:
-            self.fields['content'].widget = markdown()
+            self.fields['content'].widget = PagedownWidget(attrs={'class': 'textInput form-control'})
 
     def save(self, commit=True):
         if self.user:
@@ -90,7 +62,7 @@ class ArticleEditForm(forms.ModelForm):
         self.fields['tags'].help_text = '选择文章标签'
 
         if use_pagedown:
-            self.fields['content'].widget = markdown()
+            self.fields['content'].widget = PagedownWidget(attrs={'class': 'textInput form-control'})
             
             
 class ChapterCreationForm(forms.ModelForm):
@@ -111,4 +83,4 @@ class ChapterCreationForm(forms.ModelForm):
         self.fields['article'].help_text = '选择文章'
 
         if use_pagedown:
-            self.fields['content'].widget = markdown()
+            self.fields['content'].widget = PagedownWidget(attrs={'class': 'textInput form-control'})

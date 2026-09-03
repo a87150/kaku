@@ -1,42 +1,47 @@
 {% extends 'base.html' %}
 
 {% block title %}
-<title>{{ article.title }}</title>
+<title>{{ article.title }} - kaku demo</title>
 {% endblock title %}
 
 {% block main %}
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title mdui-typo-headline">{{ article.title }}</div>
+                <div class="mdui-card-primary-subtitle">
+                    <span class="kaku-meta">
+                        <a href="{{ article.author.get_absolute_url }}">{{ article.author }}</a>
+                        &nbsp;·&nbsp; {{ article.created_time }} &nbsp;·&nbsp; 浏览 {{ views }}
+                    </span>
+                </div>
+                {% if user == article.author %}
+                <div class="mdui-p-t-1">
+                    <a href="{% url 'written:edit' article.pk %}" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple">编辑</a>
+                    <a href="{% url 'written:create_chapter' article.pk %}" class="mdui-btn mdui-btn-raised mdui-color-grey-700 mdui-ripple">添加章节</a>
+                </div>
+                {% endif %}
+            </div>
 
-<article>
-    <div id="article-title">
-        <a href="{{ article.get_absolute_url }}" ><h3>{{ article.title }}</h3></a>
-        <p><a href="{{ article.author.get_absolute_url }}" class="author">作者: {{ article.author }}</a> · 发布时间: {{ article.created_time }} · 点击: {{ views }}</p>
+            {% include 'written/post_chapterid.html' %}
 
-        {% if user == article.author %}
-        <div id="operation">
-            <button type="button" class="mdui-btn mdui-btn-raised" id="edit">
-                <a href="edit/">编辑</a>
-            </button>
-            <button type="button" class="mdui-btn mdui-btn-raised" id="addchapter">
-                <a href="new/">添加章节</a>
-            </button>
+            <div class="mdui-divider"></div>
+
+            <div class="mdui-card-content kaku-article-body" id="content">
+                {{ article.content|safe }}
+            </div>
         </div>
+
+        {% include 'post_like.html' %}
+
+        {% include 'tag.html' %}
+
+        {% if request.user.is_authenticated %}
+        {% include 'post_tag.html' %}
         {% endif %}
 
-    {% include 'written/post_chapterid.html' %}
+        {% include 'comment/comment.html' %}
     </div>
-    <hr>
-    <div class="article-body" id="article-body">
-        <div id="content">{{ article.content|safe }}</div>
-    </div>
-</article>
-<hr>
-{% include 'post_like.html' %}
-<hr>
-<br></br>
-{% include 'tag.html' %}
-<br></br>
-{% include 'post_tag.html' %}
-<hr>
-{% include 'comment/comment.html' %}
-
+</div>
 {% endblock main %}

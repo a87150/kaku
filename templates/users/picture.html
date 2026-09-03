@@ -1,20 +1,36 @@
 {% extends 'base.html' %}
 
-{% load bootstrap_pagination %}
+{% block title %}
+<title>图画列表 - kaku demo</title>
+{% endblock title %}
 
 {% block main %}
-
-<ul class="list-group">
-    {% for picture in picture_list %}
-        <li class="mdui-list-item mdui-ripple">
-            <a href="{{ picture.get_absolute_url }}"> <img src={{ picture.thematic }} class="img-rounded" width="50%" height="50%"/> </a>
-        </li>
-    {% empty %}
-        <li class="mdui-list-item mdui-ripple">该用户没写什么</li>
-    {% endfor %}
-    {% if picture_list and paginator.num_pages > 1 %}
-        {% bootstrap_paginate page_obj range=10 show_first_last='true' %}
-    {% endif %}
-</ul>
-
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-row">
+        {% for picture in picture_list %}
+            <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-p-t-1 mdui-p-b-1">
+                <div class="mdui-card mdui-hoverable" style="height: 100%;">
+                    <a href="{{ picture.get_absolute_url }}">
+                        <img class="kaku-picture-thumb" src="{{ MEDIA_URL }}{{ picture.thematic }}" alt="{{ picture.title }}"/>
+                    </a>
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">
+                            <a href="{{ picture.get_absolute_url }}">{{ picture.title }}</a>
+                        </div>
+                        <div class="mdui-card-primary-subtitle kaku-meta">{{ picture.created_time }}</div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="mdui-col-xs-12">
+                <div class="mdui-card kaku-card">
+                    <div class="mdui-card-content mdui-text-center mdui-typo">该用户没发过图</div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        {% include 'pagination_snippet.html' %}
+    </div>
+</div>
 {% endblock main %}

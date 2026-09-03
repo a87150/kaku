@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>注册 - kaku demo</title>
+{% endblock title %}
+
+{% block main %}
+<div class="mdui-row">
+    <div class="mdui-col-md-6 mdui-col-offset-md-3 mdui-col-xs-10 mdui-col-offset-xs-1">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title mdui-typo-title">注册新账号</div>
+                <div class="mdui-card-primary-subtitle kaku-text-muted">
+                    已有账号？<a href="{% url 'account_login' %}">直接登录</a>
+                </div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content">
+                <form method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="mdui-p-b-1">
+                            {% for err in form.non_field_errors %}
+                            <div class="mdui-text-color-red">{{ err }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% for field in form %}
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% else %}
+                            <div class="mdui-textfield" style="padding-top: 8px;">
+                                <label class="mdui-textfield-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for err in field.errors %}
+                                    <div class="mdui-textfield-error">{{ err }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <div class="kaku-text-muted" style="font-size: 12px;">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                    {% endif %}
+                    <div class="mdui-p-t-2">
+                        <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple">注册</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main %}

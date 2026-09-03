@@ -1,46 +1,44 @@
 {% if request.user.is_authenticated %}
-<div class="panel panel-default" style="width: 100px;">
-    <div class="panel-heading">
-        <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion" 
-               href="#collapseOne">
-                添加标签
-            </a>
-        </h4>
-    </div>
-    <div id="collapseOne" class="panel-collapse collapse">
-        <div class="input-group" id="addtag" style="width: 200px;">
-            <input type="text" class="form-control" placeholder="tag" id="tag_input"/>
-            <span class="input-group-btn">
-                <button type="button" class="btn btn-default" id="tag_post">添加</button>
-            </span>
+<div class="mdui-card kaku-card">
+    <div class="mdui-card-content">
+        <div class="mdui-textfield" style="display:flex; align-items:center;">
+            <input class="mdui-textfield-input" type="text" placeholder="输入标签后回车或点击添加" id="tag_input" style="flex:1; margin-right:8px;"/>
+            <button type="button" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple" id="tag_post">添加</button>
         </div>
     </div>
 </div>
 
 <script>
     $(document).ready(function(){
-        $("#tag_post").click(function(){
+        function postTag(){
             var tag = $("#tag_input").val();
             var url = location.href.split("/");
             var type = url[4];
             var pk = url[5];
 
             if (tag == '') {
-                alert('不能为空');
+                alert('标签不能为空');
+                return;
             }
-            else{
-                $(this).attr("disabled","true");
-                setTimeout("$('#tag_post').removeAttr('disabled')",3000);
-                $.post("/tags/",{'tag':tag, 'pk':pk, 'type':type}, function(ret){
-                    alert(ret);
-                });
+            var $btn = $("#tag_post");
+            $btn.attr("disabled","true");
+            setTimeout(function(){ $btn.removeAttr('disabled'); }, 3000);
+            $.post("/tags/",{'tag':tag, 'pk':pk, 'type':type}, function(ret){
+                alert(ret);
+                if (ret == '成功') {
+                    location.reload();
+                }
+            });
+        }
+        $("#tag_post").click(postTag);
+        $("#tag_input").keypress(function(e){
+            if (e.which == 13) {
+                e.preventDefault();
+                postTag();
             }
         });
     });
 </script>
 {% else %}
-    <div class="card card-block">
-        需要登录才能添加
-    </div>
+    <div class="kaku-text-muted">需要登录才能添加标签</div>
 {% endif %}

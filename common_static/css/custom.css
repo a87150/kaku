@@ -1,0 +1,274 @@
+/* Kaku 自定义样式 —— 配合 mdui v1 */
+
+/* 顶栏头像 */
+.kaku-avatar-nav {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* 内容区排版 */
+.kaku-card {
+    margin-bottom: 16px;
+}
+
+/* 卡片轻微半透明，让背景粒子动画透出（文字仍清晰） */
+.mdui-card {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.kaku-article-body {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(0, 0, 0, .78);
+    word-break: break-word;
+}
+
+.kaku-article-body img {
+    max-width: 100%;
+    height: auto;
+}
+
+.kaku-article-body pre {
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.kaku-article-body code {
+    background: #f5f5f5;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 90%;
+}
+
+.kaku-article-body pre code {
+    background: none;
+    padding: 0;
+}
+
+.kaku-article-body blockquote {
+    border-left: 4px solid #c5cae9;
+    margin: 8px 0;
+    padding: 4px 16px;
+    color: rgba(0,0,0,.54);
+    background: #f5f5f5;
+}
+
+/* 元信息行 */
+.kaku-meta {
+    color: rgba(0, 0, 0, .45);
+    font-size: 13px;
+}
+
+.kaku-meta a {
+    color: rgba(0, 0, 0, .45);
+    text-decoration: none;
+}
+
+.kaku-meta a:hover {
+    color: #3f51b5;
+}
+
+/* 图片网格中的卡片图片 */
+.kaku-picture-thumb {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+/* 评论用户头像 */
+.kaku-comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+}
+
+/* 隐藏 bootstrap 遗留可能出现的样式残留 */
+a {
+    text-decoration: none;
+}
+
+/* 文本工具 */
+.kaku-text-muted {
+    color: rgba(0, 0, 0, .45);
+}
+
+/* 浅灰顶栏上的深色文字（用于 kaku demo 标题与导航按钮） */
+.kaku-text-dark {
+    color: rgba(0, 0, 0, .78) !important;
+}
+
+.kaku-text-dark:hover {
+    background-color: rgba(0, 0, 0, .06) !important;
+}
+
+/* 顶栏按钮激活态 */
+.mdui-toolbar a.mdui-btn-active {
+    color: #212121 !important;
+    background-color: rgba(0, 0, 0, .08) !important;
+    font-weight: 500;
+}
+
+/* 顶栏通知铃铛的未读徽标（右上角红点数字） */
+.kaku-badge {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background-color: #e53935;
+    color: #fff;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* 账号下拉菜单（白底浅灰主题） */
+.mdui-menu {
+    background-color: #ffffff;
+}
+.mdui-menu-item {
+    color: rgba(0, 0, 0, .75);
+}
+.mdui-menu-item:hover {
+    background-color: rgba(0, 0, 0, .05);
+}
+
+/* 残留 bootstrap 表单按钮统一为黑白灰深灰（主题一致） */
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #424242 !important;
+    border-color: #424242 !important;
+    color: #ffffff !important;
+}
+
+/* 通知下拉小窗 —— 原生 details/summary 折叠，无需 JS */
+.kaku-notify-details {
+    position: relative;
+    display: inline-block;
+}
+
+/* 铃铛按钮：去掉 summary 默认三角，垂直居中 */
+.kaku-notify-bell {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    min-width: 48px;
+    padding: 0 10px;
+    color: rgba(0, 0, 0, .75);
+    border-radius: 2px;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    outline: none;
+}
+
+.kaku-notify-bell:hover {
+    background-color: rgba(0, 0, 0, .06);
+}
+
+.kaku-notify-bell::-webkit-details-marker {
+    display: none;
+}
+
+.kaku-notify-bell::marker {
+    display: none;
+}
+
+/* 默认隐藏（details 未展开时） */
+.kaku-notify-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
+    width: 320px;
+    max-width: 80vw;
+    border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+    overflow: hidden;
+    z-index: 1200;
+    background-color: #fff;
+}
+
+/* details 展开时显示面板 */
+.kaku-notify-details[open] .kaku-notify-panel {
+    display: block;
+}
+
+.kaku-notify-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, .78);
+    border-bottom: 1px solid #eeeeee;
+}
+
+.kaku-notify-body {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.kaku-notify-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.kaku-notify-item:hover {
+    background-color: #f7f7f7;
+}
+
+.kaku-notify-item.is-unread {
+    background-color: #f0f4ff;
+}
+
+.kaku-notify-text {
+    font-size: 13px;
+    color: rgba(0, 0, 0, .75);
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.kaku-notify-time {
+    font-size: 12px;
+    color: rgba(0, 0, 0, .4);
+    margin-top: 3px;
+}
+
+.kaku-notify-empty {
+    padding: 24px 14px;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(0, 0, 0, .4);
+}
+
+.kaku-notify-footer {
+    display: block;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 13px;
+    color: rgba(0, 0, 0, .6);
+    border-top: 1px solid #eeeeee;
+    background: #fafafa;
+}
+
+.kaku-notify-footer:hover {
+    background: #f0f0f0;
+    text-decoration: none;
+}

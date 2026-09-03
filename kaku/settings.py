@@ -12,12 +12,19 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+# 应用 Python 3.13+/3.14 兼容补丁（修复 Django 4.2 中 BaseContext.__copy__ 崩溃）
+try:
+    from .compat_py314 import apply_python314_compat
+    apply_python314_compat()
+except Exception:
+    pass
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '%jf93$!gf@r4d$5lqtlqzvz^hx3w@hj$a@8j%*j2u57e9gvcx+'
@@ -47,7 +54,6 @@ INSTALLED_APPS = [
     'pagedown',
     'actstream',
     'notifications',
-    'bootstrap_pagination',
     'imagekit',
     
     'users',
@@ -68,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'kaku.urls'
@@ -84,6 +91,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'kaku.context_processors.recent_notifications',
             ],
         },
     },
@@ -93,7 +101,7 @@ WSGI_APPLICATION = 'kaku.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -102,8 +110,15 @@ DATABASES = {
     }
 }
 
+# 保持旧项目使用 AutoField 作为隐式主键，避免引入迁移
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 
 # cache
+# 说明：未运行 Redis 时自动降级（IGNORE_EXCEPTIONS + 关闭重试退避），页面不会因 Redis 不可用而变慢或报错
+
+from redis.retry import Retry
+from redis.backoff import NoBackoff
 
 CACHES = {
     "default": {
@@ -112,13 +127,32 @@ CACHES = {
         "KEY_PREFIX": "example",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 100,
+                "retry": Retry(NoBackoff(), 1),
+                "socket_connect_timeout": 0.3,
+            },
+            "IGNORE_EXCEPTIONS": True,
         }
     }
 }
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.10/topics/i18n/
+# https://docs.djangoproject.com/en/2.2/topics/i18n/
+
+# File storage
+# https://docs.djangoproject.com/en/4.2/ref/settings/#storages
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 LANGUAGE_CODE = 'zh-hans'
 
@@ -174,7 +208,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 USE_PAGEDOWN = True
 
 # Password validation
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {

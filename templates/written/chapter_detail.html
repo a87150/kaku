@@ -1,16 +1,30 @@
 {% extends 'base.html' %}
-    {% block title %}
-    <title>{{ article.title }}</title>
-    {% endblock title %}
+
+{% block title %}
+<title>{{ article.title }} - kaku demo</title>
+{% endblock title %}
 
 {% block main %}
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title mdui-typo-headline">{{ article.title }}</div>
+                <div class="mdui-card-primary-subtitle">
+                    <span class="kaku-meta">
+                        <a href="{{ article.article.author.get_absolute_url }}">{{ article.article.author }}</a>
+                        &nbsp;·&nbsp;
+                        <a href="{{ article.article.get_absolute_url }}">所属文章：{{ article.article.title }}</a>
+                    </span>
+                </div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content kaku-article-body" id="content">
+                {{ article.content|safe }}
+            </div>
+        </div>
 
-<div class="page-header" id="article-title">
-    <a href="{{ article.get_absolute_url }}" id="title"><h3>{{ article.title }}</h3></a>
+        {% include 'tag.html' %}
+    </div>
 </div>
-<div class="article-body" id="article-body">
-    <div id="content">{{ article.content|safe }}</div>
-</div>
-
-{% include 'tag.html' %}
 {% endblock main %}

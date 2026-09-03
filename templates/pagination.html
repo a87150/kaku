@@ -1,27 +1,27 @@
 {% if is_paginated %}
-<div class="pagination">
+<div class="mdui-p-t-2 mdui-p-b-2 mdui-text-center">
     {% if first %}
-        <li><a href="?page=1">1</a></li>
+        <a href="?page=1" class="mdui-btn mdui-ripple">1</a>
     {% endif %}
     {% if left %}
         {% if left_has_more %}
-            <li><a>...</a></a></li>
+            <span class="mdui-btn mdui-btn-icon" disabled>…</span>
         {% endif %}
         {% for i in left %}
-            <li><a href="?page={{ i }}">{{ i }}</a></li>
+            <a href="?page={{ i }}" class="mdui-btn mdui-ripple">{{ i }}</a>
         {% endfor %}
     {% endif %}
-    <li><a href="?page={{ page_obj.number }}" style="color: black">{{ page_obj.number }}</a></li>
+    <a href="?page={{ page_obj.number }}" class="mdui-btn mdui-btn-raised mdui-color-grey-800">{{ page_obj.number }}</a>
     {% if right %}
         {% for i in right %}
-            <li><a href="?page={{ i }}">{{ i }}</a></li>
+            <a href="?page={{ i }}" class="mdui-btn mdui-ripple">{{ i }}</a>
         {% endfor %}
-    {% if right_has_more %}
-        <li><a>...</a></a></li>
-    {% endif %}
+        {% if right_has_more %}
+            <span class="mdui-btn mdui-btn-icon" disabled>…</span>
+        {% endif %}
     {% endif %}
     {% if last %}
-        <li><a href="?page={{ paginator.num_pages }}">{{ paginator.num_pages }}</a></li>
+        <a href="?page={{ paginator.num_pages }}" class="mdui-btn mdui-ripple">{{ paginator.num_pages }}</a>
     {% endif %}
 </div>
 {% endif %}

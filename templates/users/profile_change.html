@@ -1,13 +1,24 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load crispy_forms_tags %}
+
+{% block title %}
+<title>修改个人资料 - kaku demo</title>
+{% endblock title %}
+
 {% block main %}
-    <div class="col-md-8">
-        <div class="card card-block">
-            <h3 class="card-title">修改个人资料
-            </h3>
-            <hr>
-            {% crispy form %}
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title">修改个人资料</div>
+                <div class="mdui-card-primary-subtitle kaku-text-muted">昵称与个性签名</div>
+            </div>
+            <div class="mdui-divider"></div>
+            <div class="mdui-card-content">
+                {% crispy form %}
+            </div>
         </div>
     </div>
+</div>
 {% endblock main %}

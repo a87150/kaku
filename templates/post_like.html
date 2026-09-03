@@ -1,12 +1,12 @@
-<div>
+<div class="mdui-p-t-2 mdui-p-b-2 mdui-text-center">
     {% if request.user.is_authenticated %}
         {% if is_like %}
-        <button class="mdui-btn mdui-color-theme-accent mdui-ripple mdui-color-indigo-50" id="dislike-btn" style="margin-left: 45%;">取消</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-grey-200 mdui-ripple" id="dislike-btn" style="margin-left: 45%;">取消</button>
         {% else %}
-        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent mdui-color-pink-500" id="like-btn" style="margin-left: 45%;">点赞</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-grey-700 mdui-ripple" id="like-btn" style="margin-left: 45%;">点赞</button>
         {% endif %}
     {% else %}
-
+        <a href="{% url 'account_login' %}?next={{ request.path }}" class="kaku-text-muted">登录后可以点赞</a>
     {% endif %}
 </div>
 
@@ -21,7 +21,7 @@
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "dislike-btn");
-                        $this.attr('class', "mdui-btn mdui-color-theme-accent mdui-ripple mdui-color-indigo-50");
+                        $this.attr('class', "mdui-btn mdui-btn-raised mdui-color-grey-200 mdui-ripple");
                         $this.text('取消');
                         $this.off('click');
                     }else{
@@ -36,7 +36,7 @@
                 function(ret){
                     if (ret=='成功'){
                         $this.attr('id', "like-btn");
-                        $this.attr('class', "mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent mdui-color-pink-500");
+                        $this.attr('class', "mdui-btn mdui-btn-raised mdui-color-grey-700 mdui-ripple");
                         $this.text('点赞');
                         $this.off('click');
                     }else{

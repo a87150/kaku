@@ -1,7 +1,7 @@
-from django.conf.urls import url
+from django.urls import path
 from . import views
 
 app_name = 'comment'
 urlpatterns = [
-    url(r'^$', views.CommentCreateView.as_view(), name='create'),
+    path('', views.CommentCreateView.as_view(), name='create'),
 ]

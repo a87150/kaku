@@ -52,7 +52,7 @@ class IndexView(ListView):
 
 
 def html_clean(htmlstr):
-    markdown = mistune.Markdown()
+    markdown = mistune.create_markdown(escape=False)
 
     # 采用bleach来清除不必要的标签，并linkify text
     tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img', 'table']

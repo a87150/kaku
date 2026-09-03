@@ -1,0 +1,21 @@
+{% if is_paginated and paginator.num_pages > 1 %}
+<div class="mdui-p-t-2 mdui-p-b-2 mdui-text-center">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="mdui-btn mdui-ripple">
+            <i class="mdui-icon material-icons">chevron_left</i>
+        </a>
+    {% endif %}
+    {% for num in paginator.page_range %}
+        {% if num == page_obj.number %}
+            <span class="mdui-btn mdui-btn-raised mdui-color-grey-800">{{ num }}</span>
+        {% elif num > page_obj.number|add:"-4" and num < page_obj.number|add:"4" %}
+            <a href="?page={{ num }}" class="mdui-btn mdui-ripple">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="mdui-btn mdui-ripple">
+            <i class="mdui-icon material-icons">chevron_right</i>
+        </a>
+    {% endif %}
+</div>
+{% endif %}

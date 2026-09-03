@@ -1,130 +1,207 @@
 <!DOCTYPE html>
 {% load static %}
 {% load notifications_tags %}
-<html>
+<html lang="zh-Hans">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <link rel="shortcut icon" type="image/x-icon" href="{{ MEDIA_URL }}favicon.ico"/>
-    <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href={% static '/css/mdui.min.css' %} rel="stylesheet"/>
     {% block title %}
     <title>kaku demo</title>
     {% endblock title %}
+    <!-- 表单/设置页沿用 bootstrap 样式；mdui 在其后加载用于覆盖浏览页 -->
+    <link href={% static '/css/bootstrap.min.css' %} rel="stylesheet"/>
+    <link href={% static '/css/mdui.min.css' %} rel="stylesheet"/>
+    <link href={% static '/css/custom.css' %}?v=20260904b rel="stylesheet"/>
+    <!-- 通知面板核心样式：内嵌，避免外部 CSS 缓存导致不生效 -->
     <style>
-        body {
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 16px;
-            font-weight: 300;
-            line-height: 1.428571429;
-            color: #333333;
-            background-color: #f8f9fa;
-            word-wrap: break-word;
+        .kaku-notify-details { position: relative; display: inline-block; }
+        .kaku-notify-bell {
+            list-style: none; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; height: 48px; min-width: 48px; padding: 0 10px;
+            color: rgba(0,0,0,.75); border-radius: 2px; box-sizing: border-box;
+            user-select: none; -webkit-user-select: none; outline: none;
         }
-
-        .article-body {
-            line-height: 30px;
+        .kaku-notify-bell:hover { background-color: rgba(0,0,0,.06); }
+        .kaku-notify-bell::-webkit-details-marker { display: none; }
+        .kaku-notify-bell::marker { display: none; }
+        .kaku-notify-panel {
+            display: none; position: absolute; top: calc(100% + 2px); right: 0;
+            width: 320px; max-width: 80vw; border-radius: 4px;
+            box-shadow: 0 6px 16px rgba(0,0,0,.18); overflow: hidden;
+            z-index: 1200; background-color: #fff;
         }
-
-        .conment {
-            height:auto;
-            line-height: 30px;
-        }
-        
-        .mdui-radio-icon {
-        border-color: #448AFF;
-        margin-left: 8px;
-        }
-
-        #div_id_tags {
-            width: 35%;
-        }
+        .kaku-notify-details[open] .kaku-notify-panel { display: block; }
+        .kaku-notify-header { display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; font-size: 14px; font-weight: 500; color: rgba(0,0,0,.78);
+            border-bottom: 1px solid #eee; }
+        .kaku-notify-body { max-height: 320px; overflow-y: auto; }
+        .kaku-notify-item { padding: 10px 14px; border-bottom: 1px solid #f2f2f2; }
+        .kaku-notify-item:hover { background-color: #f7f7f7; }
+        .kaku-notify-item.is-unread { background-color: #f0f4ff; }
+        .kaku-notify-text { font-size: 13px; color: rgba(0,0,0,.75); line-height: 1.5; word-break: break-word; }
+        .kaku-notify-time { font-size: 12px; color: rgba(0,0,0,.4); margin-top: 3px; }
+        .kaku-notify-empty { padding: 24px 14px; text-align: center; font-size: 13px; color: rgba(0,0,0,.4); }
+        .kaku-notify-footer { display: block; text-align: center; padding: 10px 0; font-size: 13px;
+            color: rgba(0,0,0,.6); border-top: 1px solid #eee; background: #fafafa; text-decoration: none; }
+        .kaku-notify-footer:hover { background: #f0f0f0; }
+        .kaku-badge { position: absolute; top: -4px; right: -8px; min-width: 18px; height: 18px;
+            padding: 0 5px; border-radius: 9px; background-color: #e53935; color: #fff;
+            font-size: 11px; line-height: 18px; text-align: center; font-weight: 500; }
     </style>
     {% block style %}
     {% endblock style %}
-
-    <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-    <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src={% static '/js/mdui.min.js' %}></script>
-    <script>
-        $.ajaxSetup({
-            data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
-        });
-
-        $(document).ready(function() {
-            $(".captcha").click(function () {
-                var form = $(this).parents('form');
-                $.getJSON('/captcha/refresh/', {}, function (json) {
-                    form.find('input[name="captcha_0"]').val(json.key);
-                    form.find('img.captcha').attr('src', json.image_url);
-                });
-                return false;
-            });
-        });
-    </script>
-    {% block script %}
-    {% endblock script %}
 </head>
-<body class="mdui-drawer-body-right">
-    <header>
-    <nav class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse"
-                        data-target="#example-navbar-collapse">
-                    <span class="sr-only">切换导航</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/">kaku demo</a>
-            </div>
-            <div class="collapse navbar-collapse" id="example-navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="/written">文章</a></li>
-                    <li><a href="/picture">图画</a></li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            option <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">没想好</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <button class="mdui-btn" style="height:50px;" mdui-drawer="{target: '#right-drawer', swipe: true}">open or close right drawer</button>
-            </div>
+<body class="mdui-appbar-with-toolbar" style="background-color: #f0f2f5; padding-bottom: 40px;">
+
+<!-- 顶栏（浅灰主题） -->
+<div class="mdui-appbar mdui-appbar-fixed">
+    <div class="mdui-toolbar mdui-color-grey-50" style="box-shadow: 0 1px 4px rgba(0,0,0,.08);">
+        <a href="/" class="mdui-typo-headline kaku-text-dark" style="font-size: 20px;">kaku demo</a>
+        <!-- 左侧导航：文章 / 图画 / 搜索 -->
+        <a href="/written/" class="mdui-btn mdui-hidden-sm-down kaku-text-dark {% if request.path == '/written/' or request.path|slice:':9' == '/written/' %}mdui-btn-active{% endif %}">文章</a>
+        <a href="/picture/" class="mdui-btn mdui-hidden-sm-down kaku-text-dark {% if request.path == '/picture/' or request.path|slice:':9' == '/picture/' %}mdui-btn-active{% endif %}">图画</a>
+        <a href="/search/" class="mdui-btn mdui-hidden-sm-down kaku-text-dark {% if request.path == '/search/' or request.path|slice:':8' == '/search/' %}mdui-btn-active{% endif %}">搜索</a>
+        <div class="mdui-toolbar-spacer"></div>
+        {% if request.user.is_authenticated %}
+            <span id="notify-bell" class="kaku-notify-bell" title="通知"
+                  onclick="var p=document.getElementById('notify-panel'); if (!p) return; p.style.display=(p.style.display==='none'||p.style.display==='')?'block':'none';">
+                    <span style="position:relative; display:inline-block;">
+                        <i class="mdui-icon material-icons">notifications</i>
+                        {% notifications_unread as unread_count %}
+                        {% if unread_count %}
+                        <span class="kaku-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </span>
+            </span>
+        {% else %}
+            <a href="{% url 'account_login' %}?next={{ request.path }}" class="mdui-btn kaku-text-muted">登录</a>
+            <a href="{% url 'account_signup' %}?next={{ request.path }}" class="mdui-btn mdui-btn-raised mdui-color-grey-200">注册</a>
+        {% endif %}
+        <!-- 侧边栏开关：最右 -->
+        <a href="javascript:;" class="mdui-btn mdui-btn-icon kaku-text-dark" mdui-drawer="{target: '#drawer'}">
+            <i class="mdui-icon material-icons">menu</i>
+        </a>
+    </div>
+</div>
+
+<!-- 右侧抽屉导航 -->
+<div class="mdui-drawer mdui-drawer-right" id="drawer">
+    <div class="mdui-drawer-header" style="padding: 16px; border-bottom: 1px solid #eeeeee;">
+        {% if request.user.is_authenticated %}
+        <div style="text-align:center; padding: 4px 0 12px;">
+            <a href="{% url 'users:detail' request.user.username %}">
+                <img src="{{ request.user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 64px; height: 64px;"/>
+            </a>
+            <div class="mdui-list-item-title mdui-p-t-1">{{ request.user.nickname }}</div>
+            <div class="mdui-list-item-text-light kaku-text-muted">{{ request.user.username }}</div>
         </div>
-    </nav>
-    </header>
-    
+        <div style="display:flex; gap: 8px; justify-content:center;">
+            <a href="{% url 'users:profile' %}" class="mdui-btn mdui-btn-dense mdui-color-grey-200 kaku-text-dark">
+                <i class="mdui-icon material-icons" style="font-size:16px; margin-right:4px;">settings</i>个人设置
+            </a>
+            <a href="{% url 'account_logout' %}?next={{ request.path }}" class="mdui-btn mdui-btn-dense mdui-color-grey-200 kaku-text-dark">
+                <i class="mdui-icon material-icons" style="font-size:16px; margin-right:4px;">exit_to_app</i>退出登录
+            </a>
+        </div>
+        {% else %}
+        <div class="kaku-text-muted" style="padding: 8px 0; text-align:center;">未登录</div>
+        {% endif %}
+    </div>
+    <ul class="mdui-list">
+        <li class="mdui-subheader">创作</li>
+        <li class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons">edit</i>
+            <a class="mdui-list-item-content" href="{% url 'written:create' %}">发布文章</a>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons">add_a_photo</i>
+            <a class="mdui-list-item-content" href="{% url 'picture:create' %}">发布图片</a>
+        </li>
+        <li class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons">whatshot</i>
+            <a class="mdui-list-item-content" href="{% url 'follow:follow' %}">关注动态</a>
+        </li>
+    </ul>
+</div>
 
-    <div class="mdui-drawer mdui-drawer-right" id="right-drawer">
+<!-- 通知面板：位于 body 顶层，fixed 固定视口右上角，不受任何容器裁剪 -->
+{% if request.user.is_authenticated %}
+<div id="notify-panel" style="display:none; position:fixed; top:56px; right:8px; width:320px; max-width:calc(100vw - 16px); background:#fff; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:99999; overflow:hidden;">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; font-size:14px; font-weight:600; color:rgba(0,0,0,.8); border-bottom:1px solid #eee;">
+        <span>最近通知</span>
+        <span style="color:rgba(0,0,0,.4); font-size:12px; font-weight:400;">{{ recent_notifications|length }} 条</span>
+    </div>
+    <div style="max-height:320px; overflow-y:auto;">
+        {% for notice in recent_notifications %}
+        <div style="padding:12px 16px; border-bottom:1px solid #f2f2f2; {% if notice.unread %}background:#f4f6ff;{% endif %}">
+            <div style="font-size:13px; color:rgba(0,0,0,.78); line-height:1.5; word-break:break-word;">
+                <strong>{{ notice.actor }}</strong> {{ notice.verb }}
+                {% if notice.target %}《{{ notice.target }}》{% endif %}
+            </div>
+            <div style="font-size:12px; color:rgba(0,0,0,.4); margin-top:4px;">{{ notice.timesince }} 前</div>
+        </div>
+        {% empty %}
+        <div style="padding:32px 16px; text-align:center; font-size:13px; color:rgba(0,0,0,.4);">暂时没有通知</div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'index:notifications' %}" style="display:block; text-align:center; padding:12px 0; font-size:13px; color:rgba(0,0,0,.65); border-top:1px solid #eee; background:#fafafa; text-decoration:none;">查看详细 ›</a>
+</div>
+{% endif %}
 
-        <script>
-            $(document).ready(function() {
-                var target = $('#right-drawer');
-                var link = location.pathname;
-                $.get('/drawer/', {}, function (ret) {
-                    var r = ret.replace(/\/drawer\//g, link);
-                    target.html(r);
-                });
+<div class="mdui-container mdui-p-t-1">
+    {% block content %}
+        {% block main %}
+        {% endblock main %}
+    {% endblock content %}
+</div>
+
+<script src={% static '/js/mdui.min.js' %}></script>
+<script src={% static '/js/jquery.min.js' %}></script>
+<script>
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    });
+
+    // 通知铃铛双保险：原生 details 之外，手动切换 open（兼容任何浏览器）
+    document.addEventListener('click', function (e) {
+        var sum = e.target && e.target.closest ? e.target.closest('summary.kaku-notify-bell') : null;
+        if (!sum) {
+            return;
+        }
+        var det = sum.parentElement;
+        if (det && det.tagName === 'DETAILS') {
+            e.preventDefault();
+            var willOpen = !det.hasAttribute('open');
+            if (willOpen) {
+                det.setAttribute('open', 'open');
+            } else {
+                det.removeAttribute('open');
+            }
+        }
+    });
+
+    $(document).ready(function() {
+        $(".captcha").click(function () {
+            var form = $(this).parents('form');
+            $.getJSON('/captcha/refresh/', {}, function (json) {
+                form.find('input[name="captcha_0"]').val(json.key);
+                form.find('img.captcha').attr('src', json.image_url);
             });
-        </script>
+            return false;
+        });
+    });
+</script>
+{% block script %}
+{% endblock script %}
 
-    </div>
-    
-    <div class="container" style="max-width:100%;">
-        {% block content %}
-            {% block main %}
-            {% endblock main %}
-        {% endblock content %}
-    </div>
-
-    <div style="padding-top: 10px;margin-left: 40%;">
-        <p>2017 - 2020, powered by django</p>
-    </div>
-
+<!-- 全站背景粒子动画 -->
+<script type="text/javascript"
+        color="96,106,120"
+        opacity="0.6"
+        zIndex="-2"
+        count="170"
+        src="{% static '/js/canvas-nest.min.js' %}">
+</script>
 </body>
-
 </html>
