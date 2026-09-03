@@ -13,9 +13,23 @@
     margin-bottom: 16px;
 }
 
-/* 卡片轻微半透明，让背景粒子动画透出（文字仍清晰） */
+/* 卡片半透明白，让壁纸透出（文字仍清晰） */
 .mdui-card {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* 顶栏半透明，融入壁纸 */
+.mdui-toolbar.mdui-color-grey-50 {
+    background-color: rgba(245, 245, 245, 0.85) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* 抽屉背景 */
+.mdui-drawer {
+    background-color: rgba(255, 255, 255, 0.95);
 }
 
 .kaku-article-body {

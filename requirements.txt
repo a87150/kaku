@@ -13,3 +13,4 @@ Pillow==12.3.0
 bleach==6.0.0
 sqlparse==0.4.4
 setuptools==69.5.1
+requests==2.34.2

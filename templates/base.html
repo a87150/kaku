@@ -52,7 +52,7 @@
     {% block style %}
     {% endblock style %}
 </head>
-<body class="mdui-appbar-with-toolbar" style="background-color: #f0f2f5; padding-bottom: 40px;">
+<body class="mdui-appbar-with-toolbar" style="background: #f0f2f5 url('{% static 'wallpaper.jpg' %}') no-repeat center center fixed; background-size: cover; padding-bottom: 40px;">
 
 <!-- 顶栏（浅灰主题） -->
 <div class="mdui-appbar mdui-appbar-fixed">
@@ -195,12 +195,12 @@
 {% block script %}
 {% endblock script %}
 
-<!-- 全站背景粒子动画 -->
+<!-- 全站背景粒子动画（壁纸上叠加一层细线点缀） -->
 <script type="text/javascript"
-        color="96,106,120"
-        opacity="0.6"
-        zIndex="-2"
-        count="170"
+        color="255,255,255"
+        opacity="0.22"
+        zIndex="-1"
+        count="80"
         src="{% static '/js/canvas-nest.min.js' %}">
 </script>
 </body>

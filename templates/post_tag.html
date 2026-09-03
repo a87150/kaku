@@ -9,8 +9,8 @@
 </div>
 
 <script>
-    $(document).ready(function(){
-        function postTag(){
+    $(document).ready(function () {
+        function postTag() {
             var tag = $("#tag_input").val();
             var url = location.href.split("/");
             var type = url[4];
@@ -21,17 +21,17 @@
                 return;
             }
             var $btn = $("#tag_post");
-            $btn.attr("disabled","true");
-            setTimeout(function(){ $btn.removeAttr('disabled'); }, 3000);
-            $.post("/tags/",{'tag':tag, 'pk':pk, 'type':type}, function(ret){
-                alert(ret);
-                if (ret == '成功') {
+            $btn.attr("disabled", "true");
+            setTimeout(function () { $btn.removeAttr('disabled'); }, 3000);
+            $.post("/tags/", {tag: tag, pk: pk, type: type}, function (ret) {
+                alert(ret && ret.msg ? ret.msg : (ret || '失败'));
+                if (ret && ret.ok) {
                     location.reload();
                 }
             });
         }
         $("#tag_post").click(postTag);
-        $("#tag_input").keypress(function(e){
+        $("#tag_input").keypress(function (e) {
             if (e.which == 13) {
                 e.preventDefault();
                 postTag();

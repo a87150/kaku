@@ -1,10 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, UpdateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseForbidden
 
 from actstream.models import actor_stream, Action
-from allauth.account.views import LoginView, SignupView
 
 from written.models import Article
 from picture.models import Picture
@@ -32,7 +31,9 @@ class MugshotChangeView(LoginRequiredMixin, UpdateView):
     success_url = '/users/profile'
     
     def post(self, request, *args, **kwargs):
-        if len(request.FILES['mugshot']) >= 1024*1024:
+        # 用 UploadedFile.size 判断大小；缺少文件时交给表单校验
+        mugshot = request.FILES.get('mugshot')
+        if mugshot is not None and mugshot.size >= 1024 * 1024:
             return HttpResponseForbidden(r'<h3>不能大于1mb</h3><a href="/users/mugshot/change/">返回</a>')
         return super().post(request, *args, **kwargs)
 
@@ -58,12 +59,10 @@ class UserDetailView(DetailView):
 
         if self.request.user.is_authenticated:
             actions = actor_stream(self.object)[:20]
-            user = User.objects.get(nickname=self.request.user)
-            try:
-                user.followers.get(follow_object=self.object.id)
-                is_follow = True
-            except:
-                is_follow = False
+            # 当前登录用户是否已关注被查看的用户
+            is_follow = Follow.objects.filter(
+                user=self.request.user, follow_object=self.object
+            ).exists()
         else:
             actions = {}
             is_follow = False

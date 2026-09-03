@@ -1,18 +1,14 @@
+from django.core.exceptions import ObjectDoesNotExist
+
 from django_redis import get_redis_connection
 from django_redis.exceptions import ConnectionInterrupted
 from redis.exceptions import RedisError
 
-from written.models import Article
 from picture.models import Picture
-from users.models import User
-from .util import *
+from written.models import Article
+from .util import what_type
 
 rd = get_redis_connection('default')
-
-
-def _redis_down():
-    """返回 True 表示 Redis 不可用（连接池惰性，出错时才抛异常）。"""
-    return False
 
 
 def update_views(type, obj):
@@ -45,22 +41,23 @@ def get_views(type, obj):
 def sync_views(type):
 
     obj = what_type(type)
-
-    if obj:
-        try:
-            for k in rd.hkeys(type):
-                try:
-                    o = obj.objects.get(id=k)
-                    cache = get_views(type, o)
-                    if cache != o.views:
-                        o.views = cache
-                        o.save()
-                except:
-                    continue
-        except (ConnectionInterrupted, RedisError):
-            return None
-    else:
+    if not obj:
         return None
+
+    try:
+        keys = rd.hkeys(type)
+    except (ConnectionInterrupted, RedisError):
+        return None
+
+    for k in keys:
+        try:
+            o = obj.objects.get(id=k)
+            cache = get_views(type, o)
+            if cache != o.views:
+                o.views = cache
+                o.save(update_fields=['views'])
+        except (ObjectDoesNotExist, ValueError):
+            continue
 
     try:
         rd.delete(type)
@@ -146,25 +143,22 @@ def is_likes(type, obj, user):
 
 def sync_like(type):
     obj = what_type(type)
-
-    if obj:
-        type = type + 's'
-
-        try:
-            for id in rd.smembers(type):
-                l = []
-                for i in rd.smembers(id):
-                    l.append(i)
-                try:
-                    o = obj.objects.get(id=int(id[1:]))
-                    o.likes.add(*l)
-                except:
-                    continue
-                rd.delete(id)
-        except (ConnectionInterrupted, RedisError):
-            return None
-    else:
+    if not obj:
         return None
+
+    type = type + 's'
+    try:
+        ids = rd.smembers(type)
+    except (ConnectionInterrupted, RedisError):
+        return None
+
+    for id in ids:
+        try:
+            likes = rd.smembers(id)
+            o = obj.objects.get(id=int(id[1:]))
+            o.likes.add(*likes)
+        except (ObjectDoesNotExist, ValueError, TypeError, ConnectionInterrupted, RedisError):
+            continue
 
     try:
         rd.delete(type)

@@ -23,16 +23,40 @@ except Exception:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def _load_dotenv(path=None):
+    """极简 .env 读取：把 KEY=VALUE 写入环境变量（不覆盖已有值）。"""
+    env_file = path or os.path.join(BASE_DIR, '.env')
+    if not os.path.exists(env_file):
+        return
+    with open(env_file, encoding='utf-8') as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, _, value = line.partition('=')
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ.setdefault(key, value)
+
+
+_load_dotenv()
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '%jf93$!gf@r4d$5lqtlqzvz^hx3w@hj$a@8j%*j2u57e9gvcx+'
+# 默认值仅用于本地开发；生产/上线请通过环境变量 DJANGO_SECRET_KEY 注入
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'dev-only-do-not-use-in-production-key-4f8a2c9e1b7d6f5a3c0e2b8d9f1a4c7e'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['takanashi.site', '192.168.1.104', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = (os.environ.get('DJANGO_ALLOWED_HOSTS', 'takanashi.site,127.0.0.1,localhost,192.168.1.104').split(','))
 SITE_ID = 1
 
 # Application definition
@@ -225,14 +249,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# github oauth
+# github oauth —— 通过环境变量注入，避免把密钥写进代码仓库
+# 本地可新建 .env（参照 .env.example）或在 shell 设置环境变量：
+#   GITHUB_CLIENTID / GITHUB_CLIENTSECRET / GITHUB_CALLBACK / DJANGO_SECRET_KEY
 
 GITHUB_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
-GITHUB_CLIENTID = 'dd3d055a11113c51b0f0'
-GITHUB_CLIENTSECRET = '8348bc8ed5b6694d0519b4c18de44d3716c841e1'
+GITHUB_CLIENTID = os.environ.get('GITHUB_CLIENTID', '')
+GITHUB_CLIENTSECRET = os.environ.get('GITHUB_CLIENTSECRET', '')
 
 # 这里是github认证处理的url,就是自己处理登陆逻辑
-GITHUB_CALLBACK = 'http://takanashi.site/oauth/github/'
+GITHUB_CALLBACK = os.environ.get('GITHUB_CALLBACK', 'http://127.0.0.1:8000/oauth/github/')
 
 '''
 LOGGING = {

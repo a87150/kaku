@@ -201,36 +201,45 @@ CACHES = {
 }
 ```
 
+### 环境变量配置（推荐）
+
+从 v3.1 起，敏感配置改为通过环境变量注入，不再硬编码在代码里。
+本地开发：复制 `.env.example` 为 `.env` 并填入你自己的值（.env 已被 git 忽略）：
+
+```bash
+cp .env.example .env   # 然后编辑 .env
+```
+
+支持的环境变量：
+
+| 变量 | 用途 | 示例 |
+|------|------|------|
+| `DJANGO_SECRET_KEY` | Django 密钥（生产必改） | 一长串随机字符 |
+| `DJANGO_DEBUG` | `True`/`False` | 生产设为 `False` |
+| `DJANGO_ALLOWED_HOSTS` | 逗号分隔主机名 | `mydomain.com,127.0.0.1` |
+| `GITHUB_CLIENTID` | GitHub OAuth Client ID | — |
+| `GITHUB_CLIENTSECRET` | GitHub OAuth Client Secret | — |
+| `GITHUB_CALLBACK` | GitHub OAuth 回调地址 | `http://127.0.0.1:8000/oauth/github/` |
+
+或在 shell 中直接 export（Linux/Mac）或 `$env:`（Windows PowerShell）后运行。
+
 ### GitHub OAuth 配置
 
-要启用 GitHub 登录，需要：
-
-1. 在 GitHub 创建 OAuth App
-2. 在 `kaku/settings.py` 中配置：
-
-```python
-GITHUB_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
-GITHUB_CLIENTID = 'your_client_id'
-GITHUB_CLIENTSECRET = 'your_client_secret'
-GITHUB_CALLBACK = 'http://yourdomain.com/oauth/github/'
-```
+1. 在 [GitHub OAuth Apps](https://github.com/settings/developers) 创建应用
+2. 把 Client ID / Secret / 回调地址填入 `.env`（见上表）
 
 ### 允许的主机
 
-在 `kaku/settings.py` 中修改 `ALLOWED_HOSTS`：
-
-```python
-ALLOWED_HOSTS = ['yourdomain.com', '127.0.0.1', 'localhost']
-```
+默认已含 `127.0.0.1`、`localhost`、`takanashi.site`；如需更多，通过环境变量 `DJANGO_ALLOWED_HOSTS` 或直接编辑 `kaku/settings.py` 中 `ALLOWED_HOSTS` 设置。
 
 ### 安全配置
 
 生产环境中务必：
 
-1. 修改 `SECRET_KEY`
-2. 设置 `DEBUG = False`
-3. 配置静态文件服务
-4. 配置邮件后端
+1. 通过 `DJANGO_SECRET_KEY` 注入随机密钥
+2. 设置 `DJANGO_DEBUG=False`
+3. 配置静态文件服务（`collectstatic` + nginx）
+4. 配置邮件后端（邮件在 `.env` 对应 SMTP 或 settings 修改）
 
 ## 项目结构
 

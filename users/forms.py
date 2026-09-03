@@ -68,6 +68,9 @@ class UserProfileForm(forms.ModelForm):
         nickname = self.cleaned_data['nickname']
         if len(nickname) > 10:
             raise forms.ValidationError("昵称长度不能超过10个字符")
+        # 排除自己后检查唯一
+        if User.objects.filter(nickname=nickname).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("该昵称已被使用，换一个吧")
         return nickname
 
 

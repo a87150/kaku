@@ -1,14 +1,13 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView, CreateView
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
-from notifications.views import AllNotificationsList
 from actstream.signals import action
 
-from .models import Picture, Address
+from .models import Picture
 from .forms import PictureCreateForm
 from index.pagination_data import pagination_data
 from index.redis_caches import update_views, get_views, is_likes
@@ -77,15 +76,16 @@ class PictureCreateView(LoginRequiredMixin, CreateView):
     template_name = 'picture/post_picture.html'
 
     def post(self, request, *args, **kwargs):
-        if len(request.FILES['thematic']) >= 1024*1024:
+        if 'thematic' in request.FILES and len(request.FILES['thematic']) >= 1024*1024:
             return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/picture/new/\">返回</a>")
 
         try:
             latest_picture = self.request.user.p_author.latest('created_time')
-            if latest_picture.created_time + timezone.timedelta(seconds=60*6) > timezone.now():
-                return HttpResponseForbidden('您的发图间隔小于 6 分钟，请稍微休息一会')
-        except:
-            pass
+        except ObjectDoesNotExist:
+            latest_picture = None
+        if (latest_picture is not None
+                and latest_picture.created_time + timezone.timedelta(seconds=60*6) > timezone.now()):
+            return HttpResponseForbidden('您的发图间隔小于 6 分钟，请稍微休息一会')
 
         return super().post(request, *args, **kwargs)
 

@@ -29,9 +29,30 @@ class User(AbstractUser):
     def __str__(self):
         return self.nickname
 
-    def save(self, *args, **kwargs):
+    def _ensure_unique_nickname(self):
+        """保证 nickname 唯一：冲突时自动追加数字后缀。"""
         if not self.nickname:
             self.nickname = self.username
+
+        base = self.nickname
+        candidate = base
+        suffix = 1
+        max_len = self._meta.get_field('nickname').max_length
+        qs = User.objects.filter(nickname=candidate)
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        while qs.exists():
+            tail = str(suffix)
+            candidate = base[: max_len - len(tail)] + tail
+            suffix += 1
+            qs = User.objects.filter(nickname=candidate)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+        self.nickname = candidate
+
+    def save(self, *args, **kwargs):
+        # 注册/导入等未显式提供昵称时，先用用户名兜底
+        self._ensure_unique_nickname()
 
         if not self.mugshot:
             avatar = Avatar(rows=10, columns=10)

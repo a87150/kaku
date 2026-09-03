@@ -1,14 +1,14 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseForbidden, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
 
 import json
 
-from notifications.views import AllNotificationsList
 from actstream.signals import action
 import mistune
 import bleach
@@ -56,8 +56,8 @@ def html_clean(htmlstr):
 
     # 采用bleach来清除不必要的标签，并linkify text
     tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img', 'table']
-    tags.extend(['p','hr','br','pre','code','span','h1','h2','h3','h4','h5','del','dl','img','sub','sup','u'
-                 'table','thead','tr','th','td','tbody','dd','caption','blockquote','section'])
+    tags.extend(['p', 'hr', 'br', 'pre', 'code', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'del', 'dl', 'img', 'sub', 'sup', 'u',
+                 'table', 'thead', 'tr', 'th', 'td', 'tbody', 'dd', 'caption', 'blockquote', 'section'])
     attributes = {'a': ['href', 'title', 'target'],'img':['src', 'width', 'height']}
     return bleach.linkify(bleach.clean(markdown(htmlstr),tags=tags,attributes=attributes))
 
@@ -127,11 +127,11 @@ class ChapterDetail(DetailView):
         return context
         
     def post(self, request, *args, **kwargs):
-        pk = request.POST['pk']
+        pk = request.POST.get('pk')
+        if not pk:
+            return JsonResponse({'ok': False, 'msg': '缺少参数'}, status=400)
         chap = get_object_or_404(Chapter, pk=pk)
-        response_data = {}
-        response_data['content'] = html_clean(chap.content)
-        return HttpResponse(json.dumps(response_data), content_type="application/json")
+        return JsonResponse({'content': html_clean(chap.content)})
 
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
@@ -141,10 +141,11 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         try:
             latest_article = self.request.user.a_author.latest('created_time')
-            if latest_article.created_time + timezone.timedelta(seconds=60*3) > timezone.now():
-                return HttpResponseForbidden('您的发文间隔小于 3 分钟，请稍微休息一会')
-        except:
-            pass
+        except ObjectDoesNotExist:
+            latest_article = None
+        if (latest_article is not None
+                and latest_article.created_time + timezone.timedelta(seconds=60*3) > timezone.now()):
+            return HttpResponseForbidden('您的发文间隔小于 3 分钟，请稍微休息一会')
 
         return super().post(request, *args, **kwargs)
 
