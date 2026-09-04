@@ -22,13 +22,16 @@ class LoginForm(AllAuthLoginForm):
         self.helper.form_action = 'account_login'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('login', '登录'))
-        self.fields['login'].widget.attrs['class']='mdui-textfield-input'
-        self.fields['password'].widget.attrs['class']='mdui-textfield-input'
+        self.fields['login'].widget.attrs['class'] = 'mdui-textfield-input'
+        self.fields['password'].widget.attrs['class'] = 'mdui-textfield-input'
 
 
 class SignupForm(AllAuthSignupForm):
     captcha = CaptchaField(label='验证码',
                            help_text='如果看不清验证码，请点击图片刷新')
+
+    # Django 中子类新字段默认排在父类字段之前，这里显式把验证码放到“确认密码”之后
+    field_order = ['username', 'email', 'password1', 'password2', 'captcha']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,10 +41,12 @@ class SignupForm(AllAuthSignupForm):
         self.helper.add_input(Submit('submit', '注册'))
         self.fields['username'].help_text = '用户名只能包含数字和字母'
         self.fields['password1'].help_text = '不能使用纯数字作为密码，至少8个字符'
-        self.fields['username'].widget.attrs['class']='mdui-textfield-input'
-        self.fields['email'].widget.attrs['class']='mdui-textfield-input'
-        self.fields['password1'].widget.attrs['class']='mdui-textfield-input'
-        self.fields['password2'].widget.attrs['class']='mdui-textfield-input'
+        self.fields['username'].widget.attrs['class'] = 'mdui-textfield-input'
+        self.fields['email'].widget.attrs['class'] = 'mdui-textfield-input'
+        self.fields['password1'].widget.attrs['class'] = 'mdui-textfield-input'
+        self.fields['password2'].widget.attrs['class'] = 'mdui-textfield-input'
+        # captcha 是组合控件（图片 + 隐藏 key + 答案输入框），让答案输入框与其它输入框同为下划线风格
+        self.fields['captcha'].widget.widgets[1].attrs['class'] = 'mdui-textfield-input'
 
 
 class UserProfileForm(forms.ModelForm):
