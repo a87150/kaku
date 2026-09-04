@@ -1,12 +1,10 @@
-from django.urls import path, re_path
-from django.views.decorators.cache import cache_page
+from django.urls import path
 
 from . import views
 
 app_name = 'index'
 urlpatterns = [
     path('', views.index, name='index'),
-    re_path(r'^drawer/.*$', views.drawer, name='drawer'),
     path('tags/', views.TagCreateView.as_view(), name='tags'),
     path('like/', views.LikeCreateView.as_view(), name='like'),
     path('notifications/', views.NotificationsListView.as_view(), name='notifications'),

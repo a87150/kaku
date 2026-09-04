@@ -24,7 +24,7 @@ class IndexView(ListView):
     context_object_name = "article_list"
 
     def get_queryset(self):
-        return Article.objects.defer('content').prefetch_related('tags')
+        return Article.objects.defer('content').select_related('author').prefetch_related('tags')
         
     def get_context_data(self, **kwargs):
 

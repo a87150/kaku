@@ -271,7 +271,6 @@ kaku/
 | django-imagekit | 6.1.0 | 图片处理 |
 | django-notifications-hq | 1.8.0 | 通知系统 |
 | django-simple-captcha | 0.7.0 | 验证码 |
-| django-pagedown | 2.2.1 | Markdown 编辑器（旧，界面已改 EasyMDE，依赖保留） |
 | django-activity-stream | 2.0.0 | 活动流 |
 | django-redis | 5.2.0 | Redis 缓存 |
 | mistune | 2.0.4 | Markdown 解析 |

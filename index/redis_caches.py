@@ -29,12 +29,13 @@ def get_views(type, obj):
 
     try:
         if rd.hexists(type, obj.id):
-            return rd.hget(type, obj.id)
+            # Redis 返回的是 bytes，统一转成 int，避免模板输出 b'123'
+            return int(rd.hget(type, obj.id))
 
         else:
             rd.hset(type, obj.id, obj.views)
             return obj.views
-    except (ConnectionInterrupted, RedisError):
+    except (ConnectionInterrupted, RedisError, TypeError, ValueError):
         return obj.views
 
 

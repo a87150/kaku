@@ -21,7 +21,7 @@ class IndexView(ListView):
     context_object_name = "picture_list"
 
     def get_queryset(self):
-        return Picture.objects.prefetch_related('tags')
+        return Picture.objects.select_related('author').prefetch_related('tags')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

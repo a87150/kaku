@@ -16,10 +16,6 @@ def index(request):
     return render(request, 'index.html', context={'welcome': '欢迎访问kaku'})
 
 
-def drawer(request):
-    return render(request, 'drawer.html', context={})
-
-
 class TagCreateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):

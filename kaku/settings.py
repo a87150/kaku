@@ -75,7 +75,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'crispy_forms',
     'captcha',
-    'pagedown',
     'actstream',
     'notifications',
     'imagekit',
@@ -228,8 +227,6 @@ ACCOUNT_FORMS = {
 ACCOUNT_USERNAME_MIN_LENGTH = 3
 ACCOUNT_USERNAME_VALIDATORS = 'users.validators.ASCIIUsernameValidator'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
-USE_PAGEDOWN = True
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
