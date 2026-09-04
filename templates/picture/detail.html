@@ -26,12 +26,12 @@
             </div>
         </div>
 
-        {% include 'post_like.html' %}
+        {% include 'post_like.html' with like_type='picture' like_pk=picture.pk is_liked=is_like %}
 
         {% include 'tag.html' %}
 
         {% if request.user.is_authenticated %}
-        {% include 'post_tag.html' %}
+        {% include 'post_tag.html' with tags_type='picture' tags_pk=picture.pk %}
         {% endif %}
 
         {% include 'comment/comment.html' %}

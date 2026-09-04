@@ -1,41 +1,53 @@
 {% if request.user != user and request.user.is_authenticated %}
     {% if is_follow %}
-    <button class="mdui-btn mdui-color-grey-700 mdui-ripple" id="unfollow-btn" userid="{{ user.id }}">取关</button>
+    <button class="mdui-btn mdui-color-grey-700 mdui-ripple" id="unfollow-btn" data-userid="{{ user.id }}">取关</button>
     {% else %}
-    <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-grey-700" id="follow-btn" userid="{{ user.id }}">关注</button>
+    <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-grey-700" id="follow-btn" data-userid="{{ user.id }}">关注</button>
     {% endif %}
 {% endif %}
 
 <script>
-    $(document).ready(function () {
-        function bindFollow() {
-            var followBtn = $('#follow-btn');
-            var unfollowBtn = $('#unfollow-btn');
-            followBtn.off('click').on('click', function () {
-                var $this = $(this);
-                var objectId = $this.attr('userid');
-                $.post('/follow/create/', {object_id: objectId, ftype: 'follow'}, function (ret) {
-                    if (ret && ret.ok) {
-                        $this.replaceWith('<button class="mdui-btn mdui-color-grey-700 mdui-ripple" id="unfollow-btn" userid="' + objectId + '">取关</button>');
-                        bindFollow();
-                    } else {
-                        alert(ret && ret.msg ? ret.msg : '操作失败');
-                    }
-                });
-            });
-            unfollowBtn.off('click').on('click', function () {
-                var $this = $(this);
-                var objectId = $this.attr('userid');
-                $.post('/follow/create/', {object_id: objectId, ftype: 'unfollow'}, function (ret) {
-                    if (ret && ret.ok) {
-                        $this.replaceWith('<button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-grey-700" id="follow-btn" userid="' + objectId + '">关注</button>');
-                        bindFollow();
-                    } else {
-                        alert(ret && ret.msg ? ret.msg : '操作失败');
-                    }
-                });
-            });
+    (function () {
+        'use strict';
+
+        function buttonHtml(mode, userId) {
+            if (mode === 'follow') {
+                return '<button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-grey-700" id="follow-btn" data-userid="' + userId + '">关注</button>';
+            }
+            return '<button class="mdui-btn mdui-color-grey-700 mdui-ripple" id="unfollow-btn" data-userid="' + userId + '">取关</button>';
         }
-        bindFollow();
-    });
+
+        function bind() {
+            var followBtn = document.getElementById('follow-btn');
+            var unfollowBtn = document.getElementById('unfollow-btn');
+
+            if (followBtn) {
+                followBtn.addEventListener('click', function () {
+                    var userId = followBtn.getAttribute('data-userid');
+                    window.KakuAjax.post('/follow/create/', {object_id: userId, ftype: 'follow'}, function (ret) {
+                        if (ret && ret.ok) {
+                            followBtn.outerHTML = buttonHtml('unfollow', userId);
+                            bind();
+                        } else {
+                            alert(ret && ret.msg ? ret.msg : '操作失败');
+                        }
+                    });
+                });
+            }
+            if (unfollowBtn) {
+                unfollowBtn.addEventListener('click', function () {
+                    var userId = unfollowBtn.getAttribute('data-userid');
+                    window.KakuAjax.post('/follow/create/', {object_id: userId, ftype: 'unfollow'}, function (ret) {
+                        if (ret && ret.ok) {
+                            unfollowBtn.outerHTML = buttonHtml('follow', userId);
+                            bind();
+                        } else {
+                            alert(ret && ret.msg ? ret.msg : '操作失败');
+                        }
+                    });
+                });
+            }
+        }
+        bind();
+    })();
 </script>

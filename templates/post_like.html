@@ -1,45 +1,56 @@
+{% if like_type %}
 <div class="mdui-p-t-2 mdui-p-b-2 mdui-text-center">
     {% if request.user.is_authenticated %}
-        {% if is_like %}
-        <button class="mdui-btn mdui-btn-raised mdui-color-grey-200 mdui-ripple" id="dislike-btn" style="margin-left: 45%;">取消</button>
-        {% else %}
-        <button class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple" id="like-btn" style="margin-left: 45%;">点赞</button>
-        {% endif %}
+    <button type="button"
+            class="mdui-btn mdui-btn-raised mdui-ripple kaku-like-btn
+                   {% if is_liked %}mdui-color-grey-200{% else %}mdui-color-grey-800{% endif %}"
+            id="{% if is_liked %}dislike-btn{% else %}like-btn{% endif %}"
+            data-type="{{ like_type }}" data-pk="{{ like_pk }}"
+            data-mode="{% if is_liked %}dislike{% else %}like{% endif %}"
+            style="margin-left:45%;">{% if is_liked %}取消{% else %}点赞{% endif %}</button>
     {% else %}
         <a href="{% url 'account_login' %}?next={{ request.path }}" class="kaku-text-muted">登录后可以点赞</a>
     {% endif %}
 </div>
 
 <script>
-    $(document).ready(function () {
-        function bindLike() {
-            var url = location.href.split("/");
-            var type = url[4];
-            var pk = url[5];
+    (function () {
+        'use strict';
 
-            $('#like-btn').off('click').on('click', function () {
-                var $this = $(this);
-                $.post('/like/', {type: type, pk: pk, ltype: 'like'}, function (ret) {
+        function buttonHtml(mode, type, pk) {
+            if (mode === 'like') {
+                return '<button type="button" id="like-btn" class="mdui-btn mdui-btn-raised mdui-ripple kaku-like-btn mdui-color-grey-800" data-type="' + type + '" data-pk="' + pk + '" data-mode="like" style="margin-left:45%;">点赞</button>';
+            }
+            return '<button type="button" id="dislike-btn" class="mdui-btn mdui-btn-raised mdui-ripple kaku-like-btn mdui-color-grey-200" data-type="' + type + '" data-pk="' + pk + '" data-mode="dislike" style="margin-left:45%;">取消</button>';
+        }
+
+        function bind() {
+            var btn = document.querySelector('.kaku-like-btn');
+            if (!btn) {
+                return;
+            }
+            btn.addEventListener('click', function () {
+                var type = btn.dataset.type;
+                var pk = btn.dataset.pk;
+                var mode = btn.dataset.mode; // like / dislike
+                if (!type || !pk || !mode) {
+                    return;
+                }
+                window.KakuAjax.post('/like/', {type: type, pk: pk, ltype: mode}, function (ret) {
                     if (ret && ret.ok) {
-                        $this.replaceWith('<button class="mdui-btn mdui-btn-raised mdui-color-grey-200 mdui-ripple" id="dislike-btn" style="margin-left: 45%;">取消</button>');
-                        bindLike();
-                    } else {
-                        alert(ret && ret.msg ? ret.msg : '操作失败');
-                    }
-                });
-            });
-            $('#dislike-btn').off('click').on('click', function () {
-                var $this = $(this);
-                $.post('/like/', {type: type, pk: pk, ltype: 'dislike'}, function (ret) {
-                    if (ret && ret.ok) {
-                        $this.replaceWith('<button class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple" id="like-btn" style="margin-left: 45%;">点赞</button>');
-                        bindLike();
+                        var wrap = btn.parentElement;
+                        var nextMode = mode === 'like' ? 'dislike' : 'like';
+                        if (wrap) {
+                            wrap.innerHTML = buttonHtml(nextMode, type, pk);
+                        }
+                        bind();
                     } else {
                         alert(ret && ret.msg ? ret.msg : '操作失败');
                     }
                 });
             });
         }
-        bindLike();
-    });
+        bind();
+    })();
 </script>
+{% endif %}

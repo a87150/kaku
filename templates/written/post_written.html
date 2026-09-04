@@ -288,11 +288,12 @@
     <script src="{% static 'vendor/easymde/easymde.min.js' %}"></script>
     <script src="{% static 'js/kaku-md-init.js' %}"></script>
     <script>
-        $(function () {
-            $('#kaku-editor-form').on('submit', function () {
-                var $btn = $(this).find('button[type="submit"]');
-                $btn.prop('disabled', true).text('发布中…');
-            });
+        document.getElementById('kaku-editor-form').addEventListener('submit', function () {
+            var btn = this.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '发布中…';
+            }
         });
     </script>
 {% endblock script %}

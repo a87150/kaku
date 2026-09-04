@@ -1,43 +1,54 @@
-{% if request.user.is_authenticated %}
+{% if request.user.is_authenticated and tags_type %}
 <div class="mdui-card kaku-card">
     <div class="mdui-card-content">
         <div class="mdui-textfield" style="display:flex; align-items:center;">
             <input class="mdui-textfield-input" type="text" placeholder="输入标签后回车或点击添加" id="tag_input" style="flex:1; margin-right:8px;"/>
-            <button type="button" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple" id="tag_post">添加</button>
+            <button type="button" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple" id="tag_post"
+                    data-type="{{ tags_type }}" data-pk="{{ tags_pk }}">添加</button>
         </div>
     </div>
 </div>
 
 <script>
-    $(document).ready(function () {
-        function postTag() {
-            var tag = $("#tag_input").val();
-            var url = location.href.split("/");
-            var type = url[4];
-            var pk = url[5];
+    (function () {
+        'use strict';
+        var input = document.getElementById('tag_input');
+        var btn = document.getElementById('tag_post');
+        if (!input || !btn) {
+            return;
+        }
 
-            if (tag == '') {
+        function postTag() {
+            var tag = input.value.trim();
+            if (!tag) {
                 alert('标签不能为空');
                 return;
             }
-            var $btn = $("#tag_post");
-            $btn.attr("disabled", "true");
-            setTimeout(function () { $btn.removeAttr('disabled'); }, 3000);
-            $.post("/tags/", {tag: tag, pk: pk, type: type}, function (ret) {
-                alert(ret && ret.msg ? ret.msg : (ret || '失败'));
+            var type = btn.getAttribute('data-type');
+            var pk = btn.getAttribute('data-pk');
+            if (!type || !pk) {
+                return;
+            }
+            btn.disabled = true;
+            setTimeout(function () {
+                btn.disabled = false;
+            }, 3000);
+            window.KakuAjax.post('/tags/', {tag: tag, pk: pk, type: type}, function (ret) {
+                alert(ret && ret.msg ? ret.msg : '操作失败');
                 if (ret && ret.ok) {
                     location.reload();
                 }
             });
         }
-        $("#tag_post").click(postTag);
-        $("#tag_input").keypress(function (e) {
-            if (e.which == 13) {
+
+        btn.addEventListener('click', postTag);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
                 e.preventDefault();
                 postTag();
             }
         });
-    });
+    })();
 </script>
 {% else %}
     <div class="kaku-text-muted">需要登录才能添加标签</div>

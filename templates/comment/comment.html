@@ -41,13 +41,13 @@
 </div>
 
 <script>
-    $(document).ready(function(){
-        $('button[data-reply-to]').click(function(){
-            var nickname = $(this).attr('data-reply-to');
-            var $input = $('#comment-content');
-            if ($input.length) {
-                $input.val('@' + nickname + ' ');
-                $input.focus();
+    document.querySelectorAll('button[data-reply-to]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var nickname = btn.getAttribute('data-reply-to');
+            var inputEl = document.getElementById('comment-content');
+            if (inputEl) {
+                inputEl.value = '@' + nickname + ' ';
+                inputEl.focus();
             }
         });
     });

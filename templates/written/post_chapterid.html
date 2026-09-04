@@ -15,18 +15,28 @@
 </div>
 
 <script>
-    $(document).ready(function(){
-        $('div#chapters button.mdui-btn').click(function(){
-            var id = $(this).find('.chaptersid').text();
-            $('div#chapters button.mdui-btn').removeAttr('disabled');
-            $(this).attr("disabled","true");
-            $.post("/written/chapter/"+id+"/",{'id':id}, function(ret){
-                var jsonStr = JSON.stringify(ret);
-                var obj = JSON.parse(jsonStr);
-                $("#content").html("<div id=\"content\">" + obj.content + "</div>");
-                // 章节内容已整体替换，重建文章目录
-                if (window.KakuTOC) { window.KakuTOC.rebuild(); }
+    (function () {
+        'use strict';
+        var buttons = document.querySelectorAll('#chapters button.mdui-btn');
+        Array.prototype.forEach.call(buttons, function (btn) {
+            btn.addEventListener('click', function () {
+                var li = btn.querySelector('.chaptersid');
+                if (!li) {
+                    return; // “添加章节”按钮等不含章节 id
+                }
+                var id = li.textContent.trim();
+                Array.prototype.forEach.call(buttons, function (b) { b.disabled = false; });
+                btn.disabled = true;
+                window.KakuAjax.post('/written/chapter/' + id + '/', {id: id}, function (ret) {
+                    var content = (ret && ret.content) ? ret.content : '';
+                    var contentEl = document.getElementById('content');
+                    if (contentEl) {
+                        contentEl.innerHTML = content;
+                    }
+                    // 章节内容已整体替换，重建文章目录
+                    if (window.KakuTOC) { window.KakuTOC.rebuild(); }
+                });
             });
         });
-    });
+    })();
 </script>

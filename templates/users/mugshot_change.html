@@ -28,28 +28,28 @@
 </div>
 
 <script>
-    $(document).ready(function () {
+    (function () {
         var objfile = document.getElementById('id_mugshot');
-        if (objfile) {
-            var input = $('#id_mugshot');
-            objfile.addEventListener('change', function () {
-                var filepath = objfile.value;
-                if (!filepath) {
-                    alert("请先选择上传文件");
-                    return;
-                }
-                var file = objfile.files[0];
-                if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
-                    alert("不是有效的图片文件!");
-                    input.val('');
-                    return;
-                } else if (file.size > 1024 * 1024) {
-                    alert("图片超过1mb");
-                    input.val('');
-                    return;
-                }
-            });
+        if (!objfile) {
+            return;
         }
-    });
+        objfile.addEventListener('change', function () {
+            var file = objfile.files && objfile.files[0];
+            if (!file || !objfile.value) {
+                alert("请先选择上传文件");
+                return;
+            }
+            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
+                alert("不是有效的图片文件!");
+                objfile.value = '';
+                return;
+            }
+            if (file.size > 1024 * 1024) {
+                alert("图片超过1mb");
+                objfile.value = '';
+                return;
+            }
+        });
+    })();
 </script>
 {% endblock main %}

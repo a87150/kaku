@@ -443,9 +443,12 @@
                 }
             });
 
-            $('#kaku-picture-form').on('submit', function () {
-                var $btn = $(this).find('button[type="submit"]');
-                $btn.prop('disabled', true).text('发布中…');
+            document.getElementById('kaku-picture-form').addEventListener('submit', function () {
+                var submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '发布中…';
+                }
             });
         })();
     </script>
