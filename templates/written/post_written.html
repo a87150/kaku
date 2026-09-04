@@ -73,6 +73,11 @@
         }
         .kaku-md-bar button:hover { background: #eceff1; color: #263238; }
         .kaku-md-bar button:active { background: #dde3e8; }
+        .kaku-md-bar button.is-active {
+            background: #e8eaf6;
+            color: #3949ab;
+            font-weight: 600;
+        }
         .kaku-md-bar-sep {
             width: 1px;
             height: 18px;
@@ -86,6 +91,57 @@
             border-top-left-radius: 0;
             border-top-right-radius: 0;
         }
+        /* 自绘“实时预览”面板 */
+        .kaku-live-preview {
+            margin-top: 10px;
+            border: 1px solid #cfd8dc;
+            border-radius: 6px;
+            background: #fff;
+            padding: 14px 18px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #263238;
+            word-break: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .kaku-live-preview::before {
+            content: '实时预览';
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #78909c;
+            border-bottom: 1px solid #eceff1;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        /* 自绘“全屏”：把编辑区固定到整个视口 */
+        .kaku-md-host.is-fullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #fff;
+            padding: 12px 3vw 24px;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(0, 0, 0, .3);
+        }
+        .kaku-md-host.is-fullscreen .kaku-md-bar {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            border-radius: 6px;
+            border: 1px solid #cfd8dc;
+            border-bottom: none;
+        }
+        .kaku-md-host.is-fullscreen .EasyMDEContainer .CodeMirror {
+            min-height: 70vh;
+        }
+        .kaku-md-host.is-fullscreen .kaku-live-preview {
+            max-height: 70vh;
+        }
+        body.kaku-md-fs-lock { overflow: hidden; }
+        /* 预览/全屏按钮激活态的悬停不被覆盖 */
+        .kaku-md-bar button.is-active:hover { background: #e8eaf6; color: #3949ab; }
         .kaku-editor-form .editor-preview,
         .kaku-editor-form .editor-preview-side {
             background: #fff;
@@ -177,11 +233,11 @@
                         <button type="button" data-md-method="undo">撤销</button>
                         <button type="button" data-md-method="redo">重做</button>
                         <span class="kaku-md-bar-sep"></span>
-                        <button type="button" data-md-method="togglePreview">预览</button>
-                        <button type="button" data-md-method="toggleSideBySide">左右分屏</button>
-                        <button type="button" data-md-method="toggleFullScreen">全屏</button>
+                        <button type="button" data-md-action="preview">实时预览</button>
+                        <button type="button" data-md-action="fullscreen">全屏</button>
                     </div>
                     {{ form.content }}
+                    <div class="kaku-live-preview" data-live-preview hidden></div>
                 </div>
                 {% if form.content.errors %}<div class="kaku-field-errors">{{ form.content.errors }}</div>{% endif %}
 
