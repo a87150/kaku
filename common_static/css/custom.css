@@ -146,23 +146,6 @@ a {
     font-weight: 500;
 }
 
-/* 账号下拉菜单（白底浅灰主题） */
-.mdui-menu {
-    background-color: #ffffff;
-}
-.mdui-menu-item {
-    color: rgba(0, 0, 0, .75);
-}
-.mdui-menu-item:hover {
-    background-color: rgba(0, 0, 0, .05);
-}
-
-/* 残留 bootstrap 表单按钮统一为黑白灰深灰（主题一致） */
-.btn-primary,
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active {
-    background-color: #424242 !important;
     border-color: #424242 !important;
     color: #ffffff !important;
 }

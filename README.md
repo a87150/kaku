@@ -269,13 +269,13 @@ kaku/
 | django-allauth | 0.63.6 | 认证系统 |
 | django-crispy-forms | 1.14.0 | 表单渲染 |
 | django-imagekit | 6.1.0 | 图片处理 |
-| django-notifications-hq | 1.8.0 | 通知系统 |
+| django-notifications-hq | 1.8.3 | 通知系统 |
 | django-simple-captcha | 0.7.0 | 验证码 |
 | django-activity-stream | 2.0.0 | 活动流 |
 | django-redis | 5.2.0 | Redis 缓存 |
 | mistune | 2.0.4 | Markdown 解析 |
 | Pillow | 12.3.0 | 图像处理 |
-| bleach | 6.0.0 | HTML 清理 |
+| bleach | 6.4.0 | HTML 清理 |
 | sqlparse | 0.6.0 | SQL 解析（Django 依赖） |
 | setuptools | 70.1.1 | 提供 pkg_resources（勿升 ≥84：已移除 pkg_resources） |
 
@@ -310,7 +310,10 @@ A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py`
 - django-simple-captcha 0.6.0 → 0.7.0
 - sqlparse 0.4.4 → 0.6.0（修复 CVE-2024-43485 ReDoS）
 - setuptools 69.5.1 → 70.1.1（修复 CVE-2024-6345；勿再升 ≥84，其已移除 pkg_resources）
+- bleach 6.0.0 → 6.4.0（6.x 安全修复线）
+- django-notifications-hq 1.8.0 → 1.8.3（1.8 线安全/兼容修复）
 - Pillow / requests 已是最新安全版本，未改动
+- 移除停更的 django-pagedown（编辑器已改用 EasyMDE）
 - 升级后 `manage.py check` 无问题，79 项测试全绿
 
 ### v3.0 — Django 4.2 升级
