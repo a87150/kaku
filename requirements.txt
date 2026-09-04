@@ -13,5 +13,5 @@ mistune==2.0.4
 Pillow==12.3.0
 bleach==6.0.0
 sqlparse==0.6.0
-setuptools==70.1.1
+setuptools==83.0.0
 requests==2.34.2
