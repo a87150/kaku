@@ -5,19 +5,123 @@
 <title>个人设置 - kaku demo</title>
 {% endblock title %}
 
+{% block style %}
+    <style>
+        /* 顶部头像：悬停提示 + 点击展开“更换头像”面板 */
+        .kaku-avatar-edit {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            margin-right: 20px;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 50%;
+            flex: 0 0 auto;
+        }
+        .kaku-avatar-edit img { display: block; border-radius: 50%; }
+        .kaku-avatar-mask {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .45);
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity .15s ease;
+        }
+        .kaku-avatar-edit:hover .kaku-avatar-mask { opacity: 1; }
+        .kaku-avatar-cam {
+            position: absolute;
+            right: -2px;
+            bottom: -2px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #546e7a;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+        #avatar-upload-panel {
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px dashed #b0bec5;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        #avatar-upload-panel .kaku-avatar-current {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        #avatar-upload-panel .kaku-avatar-current img { border-radius: 50%; }
+        #avatar-upload-panel .form-control-file {
+            display: block;
+            margin: 10px 0 6px;
+            font-size: 14px;
+            color: #455a64;
+        }
+        .kaku-avatar-msg { font-size: 13px; color: #607d8b; margin-top: 6px; }
+        .kaku-avatar-msg.is-error { color: #c62828; }
+        .kaku-avatar-actions { display: flex; gap: 10px; margin-top: 12px; }
+    </style>
+{% endblock style %}
+
 {% block main %}
 <div class="mdui-row">
     <div class="mdui-col-md-8 mdui-col-offset-md-2">
 
-        <!-- 账号概览 -->
+        <!-- 账号概览（头像可点击更换） -->
         <div class="mdui-card kaku-card">
             <div class="mdui-card-content">
                 <div style="display:flex; align-items:center; flex-wrap:wrap;">
-                    <img src="{{ user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 72px; height: 72px; margin-right: 20px;"/>
+                    <button type="button" class="kaku-avatar-edit" id="btn-avatar-change"
+                            title="点击更换头像" aria-label="更换头像">
+                        <img src="{{ user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 84px; height: 84px;"
+                             alt="我的头像"/>
+                        <span class="kaku-avatar-mask">
+                            <i class="mdui-icon material-icons" style="font-size:20px;">photo_camera</i>
+                            更换头像
+                        </span>
+                        <span class="kaku-avatar-cam"><i class="mdui-icon material-icons" style="font-size:15px;">edit</i></span>
+                    </button>
                     <div style="flex:1;">
                         <div class="mdui-typo-title" style="font-size: 20px;">{{ user.nickname }}</div>
                         <div class="kaku-meta mdui-p-t-1">@{{ user.username }} · {{ user.email|default:"未绑定邮箱" }}</div>
                     </div>
+                </div>
+
+                <!-- 更换头像面板（点击头像展开） -->
+                <div id="avatar-upload-panel" hidden>
+                    <div class="kaku-avatar-current">
+                        <img id="avatar-upload-preview" src="{{ user.mugshot_thumbnail.url }}"
+                             style="width: 64px; height: 64px; margin-right: 4px;" alt="新头像预览"/>
+                        <div>
+                            <div style="font-size:14px; font-weight:600; color:#37474f;">更换头像</div>
+                            <div class="kaku-meta">支持 JPG / PNG / GIF / WebP，不能大于 1MB</div>
+                        </div>
+                    </div>
+                    <form method="post" action="{% url 'users:mugshot_change' %}" enctype="multipart/form-data" id="avatar-form">
+                        {% csrf_token %}
+                        <input type="file" name="mugshot" id="id_mugshot"
+                               accept="image/jpeg,image/png,image/gif,image/webp"
+                               class="form-control-file"/>
+                        <div class="kaku-avatar-msg" id="avatar-upload-msg"></div>
+                        <div class="kaku-avatar-actions">
+                            <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple">上传并更换</button>
+                            <button type="button" class="mdui-btn mdui-color-grey-200 kaku-text-dark" id="avatar-cancel">取消</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -54,23 +158,6 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- 头像 -->
-        <div class="mdui-card kaku-card">
-            <div class="mdui-card-primary">
-                <div class="mdui-card-primary-title">头像</div>
-            </div>
-            <div class="mdui-divider"></div>
-            <div class="mdui-card-content" style="display:flex; align-items:center;">
-                <img src="{{ user.mugshot_thumbnail.url }}" class="mdui-img-circle" style="width: 64px; height: 64px; margin-right: 20px;"/>
-                <div>
-                    <div class="kaku-meta mdui-p-b-1">上传后立即生效，支持 JPG / PNG</div>
-                    <a href="{% url 'users:mugshot_change' %}" class="mdui-btn mdui-btn-raised mdui-color-grey-200 kaku-text-dark mdui-ripple">
-                        <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">add_a_photo</i>上传新头像
-                    </a>
-                </div>
             </div>
         </div>
 
@@ -123,3 +210,78 @@
     </div>
 </div>
 {% endblock main %}
+
+{% block script %}
+<script>
+    (function () {
+        'use strict';
+        var btn = document.getElementById('btn-avatar-change');
+        var panel = document.getElementById('avatar-upload-panel');
+        var cancelBtn = document.getElementById('avatar-cancel');
+        var fileInput = document.getElementById('id_mugshot');
+        var preview = document.getElementById('avatar-upload-preview');
+        var msg = document.getElementById('avatar-upload-msg');
+        var MAX_SIZE = 1024 * 1024;
+        var ACCEPTED = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        function setMsg(text, isError) {
+            msg.textContent = text || '';
+            msg.classList.toggle('is-error', !!isError);
+        }
+
+        function openPanel() {
+            panel.hidden = false;
+            setMsg('');
+            btn.focus();
+        }
+
+        function closePanel() {
+            panel.hidden = true;
+            fileInput.value = '';
+            setMsg('');
+        }
+
+        if (btn) {
+            btn.addEventListener('click', openPanel);
+        }
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closePanel);
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                var file = fileInput.files && fileInput.files[0];
+                if (!file) {
+                    setMsg('');
+                    return;
+                }
+                if (ACCEPTED.indexOf(file.type) === -1) {
+                    setMsg('不支持的图片格式（支持 JPG / PNG / GIF / WebP）', true);
+                    fileInput.value = '';
+                    return;
+                }
+                if (file.size > MAX_SIZE) {
+                    setMsg('图片超过 1MB，请压缩后再试', true);
+                    fileInput.value = '';
+                    return;
+                }
+                var url = URL.createObjectURL(file);
+                preview.src = url;
+                setMsg('已选择：' + file.name + '（' + Math.max(1, Math.round(file.size / 1024)) + ' KB），点“上传并更换”生效');
+            });
+        }
+
+        var avatarForm = document.getElementById('avatar-form');
+        if (avatarForm) {
+            avatarForm.addEventListener('submit', function (e) {
+                var file = fileInput && fileInput.files && fileInput.files[0];
+                if (!file) {
+                    e.preventDefault();
+                    setMsg('请先选择一张头像图片', true);
+                    if (fileInput) { fileInput.focus(); }
+                }
+            });
+        }
+    })();
+</script>
+{% endblock script %}
