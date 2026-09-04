@@ -46,10 +46,19 @@
         }
         #test-image-preview.has-image { border-style: solid; border-color: #90a4ae; }
         .kaku-preview-empty { color: #90a4ae; text-align: center; }
+        /* 题图上传入口：原生 file input 视觉隐藏，由“选择本地图片”标签触发 */
+        .kaku-file-hidden { position: relative; }
+        .kaku-file-hidden input[type="file"] {
+            position: absolute;
+            top: 0; left: -10000px;
+            width: 1px; height: 1px;
+            opacity: 0; overflow: hidden;
+        }
         .kaku-picture-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .kaku-file-status { font-size: 13px; color: #546e7a; margin-top: 8px; }
-        .kaku-picture-actions .mdui-btn { color: #263238; background: #eceff1; }
+        .kaku-picture-actions .mdui-btn { color: #263238; background: #eceff1; cursor: pointer; }
+        .kaku-picture-actions label.mdui-btn { display: inline-flex; align-items: center; }
         .kaku-picture-actions .mdui-btn:hover { background: #e0e0e0; }
+        .kaku-file-status { font-size: 13px; color: #546e7a; margin-top: 8px; }
         .kaku-field-errors .errorlist { margin: 6px 0 0; padding-left: 0; list-style: none; }
         .kaku-field-errors .errorlist li,
         .kaku-tags-errors {
@@ -117,14 +126,14 @@
                     <div class="kaku-preview-empty" style="line-height:320px;">还没有图片 — 上传文件或在画板里画一幅</div>
                 </div>
                 <div class="kaku-picture-actions">
-                    <button type="button" class="mdui-btn mdui-btn-raised mdui-ripple" id="btn-choose-file">
+                    <label for="id_thematic" class="mdui-btn mdui-btn-raised mdui-ripple" role="button" tabindex="0">
                         <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">image</i>选择本地图片
-                    </button>
+                    </label>
                     <button type="button" class="mdui-btn mdui-btn-raised mdui-ripple" id="btn-open-painterro">
                         <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">brush</i>打开在线画板
                     </button>
                 </div>
-                {{ form.thematic }}
+                <span class="kaku-file-hidden">{{ form.thematic }}</span>
                 <div class="kaku-hint">支持 JPG / PNG / GIF / WebP，不能大于 1MB（画板导出超限时可缩小画布再保存）</div>
                 <div class="kaku-file-status" id="kaku-file-status"></div>
                 {% if form.thematic.errors %}<div class="kaku-field-errors">{{ form.thematic.errors }}</div>{% endif %}
@@ -201,17 +210,16 @@
                 return true;
             }
 
-            // 本地文件选择
-            document.getElementById('btn-choose-file').addEventListener('click', function () {
-                fileInput.click();
-            });
+            // 本地文件选择（由“选择本地图片”<label> 触发原生 input）
             fileInput.addEventListener('change', function () {
                 var file = fileInput.files && fileInput.files[0];
                 if (file && validateFile(file)) {
                     showPreview(file);
                 } else {
                     fileInput.value = '';
-                    fileInput.files = new DataTransfer().files;
+                    if (window.DataTransfer) {
+                        fileInput.files = new DataTransfer().files;
+                    }
                 }
             });
 
@@ -295,7 +303,7 @@
                     ptro = window.Painterro({
                         language: 'zh',
                         translation: {name: 'zh', strings: zhStrings},
-                        defaultSize: '1280x800',
+                        defaultSize: '1024x640',
                         defaultTool: 'brush',
                         activeColor: '#37474f',
                         backgroundFillColor: '#ffffff',
@@ -317,6 +325,12 @@
                 }
                 // 每次打开都给一块新画布
                 ptro.show({});
+                // 打开后按可用区域自动缩放画布，避免画布太大被遮挡
+                setTimeout(function () {
+                    if (ptro && ptro.setZoom) {
+                        ptro.setZoom(100);
+                    }
+                }, 150);
             }
 
             document.getElementById('btn-open-painterro').addEventListener('click', openPainterro);

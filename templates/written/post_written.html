@@ -6,6 +6,8 @@
 {% endblock title %}
 
 {% block style %}
+    <!-- EasyMDE 工具栏图标依赖 Font Awesome 类名（fa fa-*），本地化引入 -->
+    <link href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet"/>
     <link href="{% static 'vendor/easymde/easymde.min.css' %}" rel="stylesheet"/>
     <style>
         /* ===== 编辑页排版（白卡片内高对比文字，避免壁纸干扰） ===== */
