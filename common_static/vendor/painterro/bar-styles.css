@@ -1,0 +1,169 @@
+.color-diwget-btn {
+    height: 32px;
+    width: 32px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.color-diwget-btn-substrate {
+    width: 32px;
+}
+
+select.ptro-input[data-id='fontName'] {
+    width: 45px;
+}
+
+.ptro-bar .ptro-tool-ctl-name {
+    padding: 0 2px 0 0;
+    font-family: "Open Sans", sans-serif;
+    line-height: 22px;
+}
+
+.ptro-bar .ptro-tool-ctl-name {
+    margin-left: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    padding-left: 3px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.ptro-info {
+    font-family: "Open Sans", sans-serif;
+    font-size: 10px;
+    padding: 4px;
+    margin-left: auto;
+    word-break: keep-all;
+    white-space: normal;
+    text-align: right;
+}
+
+.ptro-info > span {
+    opacity: 0.5;
+}
+
+@media screen and (max-width: 768px) {
+    .ptro-bar > div {
+        white-space: nowrap;
+    }
+    span.ptro-bar-right {
+        float: none;
+    }
+    span.ptro-info {
+        display: none;
+    }
+    
+}
+
+.ptro-bar .ptro-input {
+    height: 32px;
+    line-height: 32px;
+    font-family: "Open Sans", sans-serif;
+    font-size: 16px;
+    position: relative;
+    padding-left: 2px;
+    padding-right: 0;
+}
+
+.ptro-bar .ptro-input[type="number"] {
+    width: 42px;
+}
+
+.ptro-bar .ptro-named-btn p {
+    margin: 0;
+}
+
+.ptro-bar {
+    bottom: 0;
+    position: absolute;
+    width: 100%;
+    font-size: 16px;
+    line-height: normal;
+}
+
+.ptro-bar > div {
+    position: relative;
+}
+
+.ptro-bar > div::-webkit-scrollbar {
+    height: 2px;
+}
+    
+/* Track */
+.ptro-bar > div::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+    
+/* Handle */
+.ptro-bar > div::-webkit-scrollbar-thumb {
+    background: #888;
+}
+    
+/* Handle on hover */
+.ptro-bar > div::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.ptro-bar .ptro-icon-btn {
+}
+
+button.ptro-icon-right:first-of-type {
+    margin-right: 4px;
+}
+
+button.ptro-input[data-value="false"],button.ptro-input[data-value="true"] {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 0px;
+    cursor: pointer;
+    outline: 0;
+}
+
+button.ptro-input[data-value="true"]::after {
+    content: '✔';
+    font-size: 20px;
+    line-height: 12px;
+    width: 12px;
+    height: 12px;
+    border: 0;
+    /* background: rgba(0,0,0,0.5); */
+    display: inline-block;
+}
+
+@-webkit-keyframes ptro-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes ptro-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+
+.ptro-spinning {
+    -webkit-animation: ptro-spin 0.5s infinite steps(9);
+    animation: ptro-spin 0.8s infinite steps(9);
+    display: inline-block;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+#container-bar {
+    display: block;
+}

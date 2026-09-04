@@ -52,13 +52,78 @@ class ArticleViewTests(TestCase):
         self.assertContains(resp, 'data-toc-for="#content"')
         self.assertContains(resp, 'data-toc-list')
 
-    def test_editor_page_loads_live_preview(self):
-        """发布页应输出 pagedown 实时预览所需资源（form.media 与预览面板）。"""
+    def test_editor_page_loads_easymde(self):
+        """发布页应输出 EasyMDE 编辑器与安全预览所需资源。"""
         self.client.login(username='writer', password='pass-1234')
         resp = self.client.get(reverse('written:create'))
         self.assertEqual(resp.status_code, 200)
-        # pagedown 2.2.1 widget 面板 ID 约定：wmd-<面板>-id_content
-        self.assertContains(resp, 'id="wmd-input-id_content"')        # 编辑器 textarea
-        self.assertContains(resp, 'id="wmd-button-bar-id_content"')   # 工具栏容器
-        self.assertContains(resp, 'id="wmd-preview-id_content"')      # 实时预览容器
-        self.assertContains(resp, 'pagedown_init.js')                 # 编辑器初始化脚本
+        # 编辑器 textarea 由 EasyMDE 接管
+        self.assertContains(resp, 'data-md-editor')
+        self.assertContains(resp, 'kaku-md-editor')
+        # 本地化脚本（EasyMDE / marked / DOMPurify / 初始化）
+        self.assertContains(resp, 'vendor/easymde/easymde.min.js')
+        self.assertContains(resp, 'vendor/marked/marked.min.js')
+        self.assertContains(resp, 'vendor/dompurify/purify.min.js')
+        self.assertContains(resp, 'js/kaku-md-init.js')
+        # 标签选择器数据注入
+        self.assertContains(resp, 'kaku-available-tags')
+        self.assertContains(resp, 'kaku-tags-picker')
+
+
+class ArticleCreateTagTests(TestCase):
+    """发布文章时“选择/新建标签”整链路。"""
+
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username='writer', password='pass-1234')
+        self.client.login(username='writer', password='pass-1234')
+
+    def post_article(self, tags_raw='', **extra):
+        data = {
+            'title': '标签测试文',
+            'content': '正文内容',
+            'excerpt': '',
+            'tags_raw': tags_raw,
+        }
+        data.update(extra)
+        return self.client.post(reverse('written:create'), data)
+
+    def test_create_with_existing_and_new_tags(self):
+        # 预置一个已有标签
+        from index.models import Tag
+        Tag.objects.create(name='python')
+        resp = self.post_article(tags_raw='python, 风景，生活')
+        self.assertEqual(resp.status_code, 302)
+        article = Article.objects.get(title='标签测试文')
+        names = set(article.tags.values_list('name', flat=True))
+        self.assertEqual(names, {'python', '风景', '生活'})
+        # 新标签已入库
+        self.assertTrue(Tag.objects.filter(name='生活').exists())
+
+    def test_create_without_tags(self):
+        resp = self.post_article(tags_raw='')
+        self.assertEqual(resp.status_code, 302)
+        article = Article.objects.get(title='标签测试文')
+        self.assertEqual(article.tags.count(), 0)
+
+    def test_too_many_tags_rejected(self):
+        many = ', '.join('标签%d' % i for i in range(11))
+        resp = self.post_article(tags_raw=many)
+        self.assertEqual(resp.status_code, 200)  # 表单重新渲染
+        self.assertContains(resp, '标签最多选择 10 个')
+        self.assertFalse(Article.objects.filter(title='标签测试文').exists())
+
+    def test_edit_replaces_tags(self):
+        from index.models import Tag
+        a = Article.objects.create(author=self.user, title='原标题', content='x')
+        Tag.objects.create(name='old')
+        a.tags.set(Tag.objects.filter(name='old'))
+        resp = self.client.post(reverse('written:edit', args=[a.pk]), {
+            'title': '改后标题',
+            'content': '改后内容',
+            'excerpt': '',
+            'tags_raw': 'newtag',
+        })
+        self.assertEqual(resp.status_code, 302)
+        a.refresh_from_db()
+        self.assertEqual(list(a.tags.values_list('name', flat=True)), ['newtag'])

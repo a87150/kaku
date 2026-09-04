@@ -1,0 +1,130 @@
+@font-face {
+	font-family: "ptroiconfont";
+	src: url("ptroiconfont.woff?9d16276326db52747d3405a7ca0e1306") format("woff"),
+url("ptroiconfont.ttf?9d16276326db52747d3405a7ca0e1306") format("truetype");
+	font-weight: normal;
+    font-style: normal;
+}
+
+.ptro-icon {
+}
+
+.ptro-icon:before {
+	font-family: ptroiconfont !important;
+	font-style: normal !important;
+	font-weight: normal !important;
+	font-variant: normal !important;
+	text-transform: none !important;
+	speak: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.ptro-icon-apply:before {
+	content: "\f101";
+}
+.ptro-icon-arrow:before {
+	content: "\f102";
+}
+.ptro-icon-brush:before {
+	content: "\f103";
+}
+.ptro-icon-bucket:before {
+	content: "\f104";
+}
+.ptro-icon-clear:before {
+	content: "\f105";
+}
+.ptro-icon-close:before {
+	content: "\f106";
+}
+.ptro-icon-crop:before {
+	content: "\f107";
+}
+.ptro-icon-ellipse:before {
+	content: "\f108";
+}
+.ptro-icon-eraser:before {
+	content: "\f109";
+}
+.ptro-icon-filters:before {
+	content: "\f10a";
+}
+.ptro-icon-line:before {
+	content: "\f10b";
+}
+.ptro-icon-linked:before {
+	content: "\f10c";
+}
+.ptro-icon-loading:before {
+	content: "\f10d";
+}
+.ptro-icon-mirror:before {
+	content: "\f10e";
+}
+.ptro-icon-open:before {
+	content: "\f10f";
+}
+.ptro-icon-painterro0:before {
+	content: "\f110";
+}
+.ptro-icon-paste_extend_down:before {
+	content: "\f111";
+}
+.ptro-icon-paste_extend_left:before {
+	content: "\f112";
+}
+.ptro-icon-paste_extend_right:before {
+	content: "\f113";
+}
+.ptro-icon-paste_extend_top:before {
+	content: "\f114";
+}
+.ptro-icon-paste_fit:before {
+	content: "\f115";
+}
+.ptro-icon-paste_over:before {
+	content: "\f116";
+}
+.ptro-icon-pipette:before {
+	content: "\f117";
+}
+.ptro-icon-pixelize:before {
+	content: "\f118";
+}
+.ptro-icon-rect:before {
+	content: "\f119";
+}
+.ptro-icon-redo:before {
+	content: "\f11a";
+}
+.ptro-icon-resize:before {
+	content: "\f11b";
+}
+.ptro-icon-rotate:before {
+	content: "\f11c";
+}
+.ptro-icon-save:before {
+	content: "\f11d";
+}
+.ptro-icon-select:before {
+	content: "\f11e";
+}
+.ptro-icon-settings:before {
+	content: "\f11f";
+}
+.ptro-icon-text:before {
+	content: "\f120";
+}
+.ptro-icon-undo:before {
+	content: "\f121";
+}
+.ptro-icon-unlinked:before {
+	content: "\f122";
+}
+.ptro-icon-zoomin:before {
+	content: "\f123";
+}
+.ptro-icon-zoomout:before {
+	content: "\f124";
+}

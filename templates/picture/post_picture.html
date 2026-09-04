@@ -1,43 +1,330 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+<title>发布图画 - kaku demo</title>
+{% endblock title %}
+
+{% block style %}
+    <style>
+        /* ===== 发布图画页排版（白卡片内高对比文字） ===== */
+        .kaku-editor-card .mdui-card-primary { padding-bottom: 4px; }
+        .kaku-picture-form { padding: 8px 24px 28px; }
+        .kaku-picture-form label {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #37474f;
+            margin: 18px 0 6px;
+        }
+        .kaku-picture-form .kaku-hint {
+            font-size: 13px;
+            color: #607d8b;
+            margin: 4px 0 8px;
+            line-height: 1.6;
+        }
+        .kaku-picture-form .form-control,
+        .kaku-picture-form .form-control-file {
+            background: #fff;
+            border: 1px solid #cfd8dc;
+            border-radius: 6px;
+            font-size: 15px;
+            color: #263238;
+        }
+        .kaku-picture-form .form-control { padding: 10px 12px; box-sizing: border-box; }
+        .kaku-picture-form .form-control:focus {
+            border-color: #78909c;
+            box-shadow: 0 0 0 2px rgba(120, 144, 156, .25);
+            outline: none;
+        }
+        /* 题图预览区 */
+        #test-image-preview {
+            border: 2px dashed #b0bec5;
+            background-color: #fafafa;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        #test-image-preview.has-image { border-style: solid; border-color: #90a4ae; }
+        .kaku-preview-empty { color: #90a4ae; text-align: center; }
+        .kaku-picture-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .kaku-file-status { font-size: 13px; color: #546e7a; margin-top: 8px; }
+        .kaku-picture-actions .mdui-btn { color: #263238; background: #eceff1; }
+        .kaku-picture-actions .mdui-btn:hover { background: #e0e0e0; }
+        .kaku-field-errors .errorlist { margin: 6px 0 0; padding-left: 0; list-style: none; }
+        .kaku-field-errors .errorlist li,
+        .kaku-tags-errors {
+            color: #c62828;
+            font-size: 13.5px;
+            background: #ffebee;
+            border-radius: 4px;
+            padding: 6px 10px;
+            margin-top: 6px;
+        }
+        /* 标签选择器 */
+        .kaku-tags-picker { margin-top: 6px; }
+        .kaku-tags-selected, .kaku-tags-available {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+        }
+        .kaku-tags-available { border-top: 1px dashed #e0e0e0; padding-top: 10px; }
+        .kaku-tag-chip {
+            display: inline-flex; align-items: center;
+            background: #eceff1; color: #37474f;
+            border-radius: 16px; padding: 4px 12px;
+            font-size: 13.5px; cursor: pointer; user-select: none;
+            border: 1px solid transparent;
+        }
+        .kaku-tag-chip:hover { background: #e0e0e0; }
+        .kaku-tag-chip.is-picked { background: #e8eaf6; border-color: #c5cae9; color: #3949ab; }
+        .kaku-tag-selected { background: #e8eaf6; border-color: #9fa8da; color: #283593; font-weight: 500; }
+        .kaku-tag-chip-x {
+            border: none; background: transparent; cursor: pointer;
+            color: inherit; margin-left: 4px; font-size: 15px; line-height: 1; padding: 0 2px;
+        }
+        .kaku-tag-chip-x:hover { color: #b71c1c; }
+        .kaku-tags-tip { font-size: 13px; color: #90a4ae; line-height: 1.6; }
+        .kaku-submit-row { margin-top: 24px; display: flex; gap: 12px; align-items: center; }
+        /* 画板全屏时的容器背景与配色微调 */
+        body.kaku-ptro-open .ptro-holder { background: #eceff1; }
+    </style>
+{% endblock style %}
 
 {% block main %}
-<label for="id_title" class="form-control-label  requiredField">展示</label>
-<div id="test-image-preview" 
-    style="border: 1px solid #ccc; width: 100%; height: 300px; background-size: contain; background-repeat: no-repeat; background-position: center center;">
+<div class="mdui-row">
+    <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <div class="mdui-card kaku-card kaku-editor-card">
+            <div class="mdui-card-primary">
+                <div class="mdui-card-primary-title mdui-typo-headline">发布图画</div>
+                <div class="mdui-card-primary-subtitle kaku-meta">
+                    可以直接上传图片，也可以用内置画板在线创作
+                </div>
+            </div>
+            <div class="mdui-divider"></div>
+
+            <form class="kaku-picture-form" method="post" enctype="multipart/form-data"
+                  id="kaku-picture-form" action="{% url 'picture:create' %}">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="kaku-field-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <label for="{{ form.title.id_for_label }}">标题</label>
+                {{ form.title }}
+                <div class="kaku-hint">给这幅作品起个名字，50 字以内</div>
+                {% if form.title.errors %}<div class="kaku-field-errors">{{ form.title.errors }}</div>{% endif %}
+
+                <label>题图</label>
+                <div id="test-image-preview" style="width:100%; height:320px;">
+                    <div class="kaku-preview-empty" style="line-height:320px;">还没有图片 — 上传文件或在画板里画一幅</div>
+                </div>
+                <div class="kaku-picture-actions">
+                    <button type="button" class="mdui-btn mdui-btn-raised mdui-ripple" id="btn-choose-file">
+                        <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">image</i>选择本地图片
+                    </button>
+                    <button type="button" class="mdui-btn mdui-btn-raised mdui-ripple" id="btn-open-painterro">
+                        <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">brush</i>打开在线画板
+                    </button>
+                </div>
+                {{ form.thematic }}
+                <div class="kaku-hint">支持 JPG / PNG / GIF / WebP，不能大于 1MB（画板导出超限时可缩小画布再保存）</div>
+                <div class="kaku-file-status" id="kaku-file-status"></div>
+                {% if form.thematic.errors %}<div class="kaku-field-errors">{{ form.thematic.errors }}</div>{% endif %}
+
+                <label>标签</label>
+                <div class="kaku-hint">{{ form.tags_raw.help_text }}</div>
+                {{ form.available_tag_names|json_script:"kaku-available-tags" }}
+                {{ form.tags_raw }}
+                <div class="kaku-tags-picker">
+                    <input type="text" class="form-control kaku-tag-input"
+                           placeholder="搜索已有标签或输入新标签，回车添加（可用中文逗号分隔批量添加）"
+                           autocomplete="off"/>
+                    <div class="kaku-tags-selected"></div>
+                    <div class="kaku-tags-available"></div>
+                    <div class="kaku-tags-errors"></div>
+                </div>
+                {% if form.tags_raw.errors %}<div class="kaku-field-errors">{{ form.tags_raw.errors }}</div>{% endif %}
+
+                <div class="kaku-submit-row">
+                    <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple">发布</button>
+                    <a href="{% url 'picture:picture' %}" class="mdui-btn kaku-text-muted">返回图画列表</a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-
-{% crispy form %}
-
-<script>
-    $(document).ready(function(){
-        var objfile = document.getElementById('id_thematic');
-        var input = $('#id_thematic')
-        objfile.addEventListener('change', function () {
-            var filepath = objfile.value;
-            if (!filepath) {
-                alert("请先选择上传文件");
-                return;
-            }
-            var file = objfile.files[0];
-            if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif' && file.type !== 'image/webp') {
-                alert("不是有效的图片文件!");
-                input.val('');
-                return;
-            } else if (file.size > 1024*1024) {
-                alert("图片超过1mb");
-                input.val('');
-                return;
-            }
-            var reader = new FileReader();
-                preview = document.getElementById('test-image-preview');
-            reader.onload = function(e) {
-                var data = e.target.result; // 'data:image/jpeg;base64,/9j/4AAQSk...(base64编码)...'            
-                preview.style.backgroundImage = 'url(' + data + ')';
-            };
-            // 以DataURL的形式读取文件:
-            reader.readAsDataURL(file);
-        });
-     });
-</script>
 {% endblock main %}
+
+{% block script %}
+    <script src="{% static 'js/kaku-tags-picker.js' %}"></script>
+    <script src="{% static 'vendor/painterro/painterro.min.js' %}"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            var MAX_SIZE = 1024 * 1024; // 1MB
+            var preview = document.getElementById('test-image-preview');
+            var fileInput = document.getElementById('id_thematic');
+            var status = document.getElementById('kaku-file-status');
+            var ACCEPTED = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+            function fmtSize(bytes) {
+                return bytes >= 1024 * 1024
+                    ? (bytes / 1024 / 1024).toFixed(2) + ' MB'
+                    : Math.max(1, Math.round(bytes / 1024)) + ' KB';
+            }
+
+            function showPreview(file) {
+                if (!file) {
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.innerHTML = '';
+                    preview.style.backgroundImage = 'url(' + e.target.result + ')';
+                    preview.style.backgroundSize = 'contain';
+                    preview.style.backgroundRepeat = 'no-repeat';
+                    preview.style.backgroundPosition = 'center center';
+                    preview.classList.add('has-image');
+                    status.textContent = '已就绪：' + file.name + '（' + fmtSize(file.size) + '）';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function validateFile(file) {
+                if (ACCEPTED.indexOf(file.type) === -1) {
+                    alert('不是支持的图片格式（JPG / PNG / GIF / WebP）');
+                    return false;
+                }
+                if (file.size > MAX_SIZE) {
+                    alert('图片超过 1MB，请压缩后再试');
+                    return false;
+                }
+                return true;
+            }
+
+            // 本地文件选择
+            document.getElementById('btn-choose-file').addEventListener('click', function () {
+                fileInput.click();
+            });
+            fileInput.addEventListener('change', function () {
+                var file = fileInput.files && fileInput.files[0];
+                if (file && validateFile(file)) {
+                    showPreview(file);
+                } else {
+                    fileInput.value = '';
+                    fileInput.files = new DataTransfer().files;
+                }
+            });
+
+            // Painterro 中文翻译（键对齐 painterro en.lang.js）
+            var zhStrings = {
+                lineColor: '线', lineColorFull: '线条颜色',
+                fillColor: '填', fillColorFull: '填充颜色',
+                alpha: '透', alphaFull: '不透明度',
+                lineWidth: '宽', lineWidthFull: '线条粗细',
+                arrowLength: '箭', arrowLengthFull: '箭头大小',
+                eraserWidth: '擦', eraserWidthFull: '橡皮大小',
+                textColor: '字', textColorFull: '文字颜色',
+                fontSize: '号', fontSizeFull: '字号',
+                fontStrokeSize: '描', fontStrokeSizeFull: '描边粗细',
+                fontIsBold: '<b>B</b>', fontIsBoldFull: '加粗',
+                fontIsItalic: '<i>I</i>', fontIsItalicFull: '斜体',
+                shadowOn: '影', shadowOnFull: '阴影',
+                fontStrokeAndShadow: '描影', fontStrokeAndShadowFull: '描边与阴影',
+                fontName: '体', fontNameFull: '字体',
+                textStrokeColor: '描', textStrokeColorFull: '文字描边颜色',
+                apply: '应用', cancel: '取消', close: '关闭', clear: '清空',
+                width: '宽度', height: '高度', keepRatio: '保持宽高比',
+                fillPageWith: '用当前背景色填充页面',
+                pixelSize: '像', pixelSizeFull: '像素大小',
+                resizeScale: '缩放', resizeResize: '调整尺寸',
+                backgroundColor: '页面背景色',
+                pixelizePixelSize: '像素化格子大小',
+                language: '语言',
+                wrongPixelSizeValue: '像素值不正确：可输入 “20%”（占所选区域边长 1/5）或 “4”（4 像素）',
+                tools: {
+                    crop: '裁剪到所选区域', pixelize: '模糊所选区域',
+                    rect: '矩形', ellipse: '椭圆', line: '直线', arrow: '箭头',
+                    rotate: '旋转', save: '保存', load: '载入图片', text: '添加文字',
+                    brush: '画笔', resize: '调整大小', open: '打开图片', select: '选择区域',
+                    close: '关闭画板', eraser: '橡皮', settings: '设置',
+                    zoomin: '放大', zoomout: '缩小', undo: '撤销', redo: '重做',
+                    clear: '清空画布', bucket: '填充颜色'
+                },
+                pasteOptions: {
+                    fit: '替换全部', extend_down: '向下扩展', extend_right: '向右扩展',
+                    extend_left: '向左扩展', extend_top: '向上扩展', extend: '追加',
+                    over: '粘贴覆盖', how_to_paste: '如何粘贴？'
+                }
+            };
+
+            var ptro = null;
+
+            function painterroSave(image, done) {
+                var mime = image.hasAlphaChannel() ? 'image/png' : 'image/jpeg';
+                var blob = image.asBlob(mime, 0.92);
+                if (blob && blob.size > MAX_SIZE) {
+                    alert('画作超过 1MB：请缩小画布尺寸或用“调整大小”缩小后保存');
+                    done(false);
+                    return;
+                }
+                var name = image.suggestedFileName(mime);
+                if (!/\.(png|jpe?g|webp)$/i.test(name)) {
+                    name += (mime === 'image/png' ? '.png' : '.jpg');
+                }
+                var file = new File([blob], name, {type: mime});
+
+                // 把画板结果回填到表单的文件字段
+                if (window.DataTransfer && fileInput.files) {
+                    var dt = new DataTransfer();
+                    dt.items.add(file);
+                    fileInput.files = dt.files;
+                    showPreview(file);
+                    done(true); // 保存成功，关闭画板
+                } else {
+                    alert('当前浏览器不支持回填画板结果，请改用上传方式');
+                    done(false);
+                }
+            }
+
+            function openPainterro() {
+                if (!window.Painterro) {
+                    alert('画板组件加载失败，请刷新后重试');
+                    return;
+                }
+                if (!ptro) {
+                    ptro = window.Painterro({
+                        language: 'zh',
+                        translation: {name: 'zh', strings: zhStrings},
+                        defaultSize: '1280x800',
+                        defaultTool: 'brush',
+                        activeColor: '#37474f',
+                        backgroundFillColor: '#ffffff',
+                        hideByEsc: true,
+                        hiddenTools: ['select', 'crop', 'pixelize', 'open',
+                                      'rotate', 'resize', 'zoomin', 'zoomout', 'settings'],
+                        colorScheme: {
+                            main: '#ffffff',
+                            control: '#f5f5f5',
+                            controlContent: '#37474f',
+                            controlShadow: '0px 1px 3px 0px #cfd8dc',
+                            activeControl: '#546e7a',
+                            activeControlContent: '#ffffff',
+                            hoverControl: '#eceff1',
+                            hoverControlContent: '#263238'
+                        },
+                        saveHandler: painterroSave
+                    });
+                }
+                // 每次打开都给一块新画布
+                ptro.show({});
+            }
+
+            document.getElementById('btn-open-painterro').addEventListener('click', openPainterro);
+
+            $('#kaku-picture-form').on('submit', function () {
+                var $btn = $(this).find('button[type="submit"]');
+                $btn.prop('disabled', true).text('发布中…');
+            });
+        })();
+    </script>
+{% endblock script %}

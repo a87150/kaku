@@ -1,13 +1,9 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
 from django.utils import timezone
-from django.conf import settings
-
-import json
 
 from actstream.signals import action
 import mistune
@@ -180,11 +176,6 @@ class ArticleEditView(LoginRequiredMixin, UpdateView):
             return HttpResponseForbidden('只有作者才能编辑')
         return response
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class=form_class)
-        form.helper.form_action = reverse('written:edit', kwargs={'pk': self.kwargs.get('pk')})
-        return form
-
     def form_valid(self, form):
         response = super().form_valid(form)
         action.send(sender=self.request.user, verb='编辑了', action_object=self.object)
@@ -210,11 +201,14 @@ class ChapterCreateView(LoginRequiredMixin, CreateView):
             return HttpResponseForbidden('只有作者才能写子章节')
         return response
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class=form_class)
-        form.helper.form_action = reverse('written:create_chapter', kwargs={'pk': self.kwargs.get('pk')})
-        form.initial['article'] = [self.kwargs.get('pk')]
-        return form
+    def get_initial(self):
+        # 预设“所属文章”为 URL 中的父文章
+        return {'article': self.kwargs.get('pk')}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['chapter_article_pk'] = self.kwargs.get('pk')
+        return context
 
     def form_valid(self, form):
         response = super().form_valid(form)

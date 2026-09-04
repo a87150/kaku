@@ -126,17 +126,27 @@ class PictureCreateViewTests(TestCase):
         self.client.login(username='painter', password='pass-1234')
         resp = self.client.get('/picture/new/')
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'picture_create_form')
+        self.assertContains(resp, 'kaku-picture-form')
+        # 在线画板（Painterro）与标签选择器就位
+        self.assertContains(resp, 'vendor/painterro/painterro.min.js')
+        self.assertContains(resp, 'btn-open-painterro')
+        self.assertContains(resp, 'kaku-tags-picker')
 
-    def test_create_picture_success(self):
+    def test_create_picture_success_with_tags(self):
         self.client.login(username='painter', password='pass-1234')
         resp = self.client.post('/picture/new/', {
             'title': '我的新画',
             'thematic': make_png(),
+            'tags_raw': '水彩, 风景',
         })
         self.assertEqual(resp.status_code, 302)
         pic = Picture.objects.get(title='我的新画')
         self.assertEqual(pic.author, self.user)
+        # 标签被创建并关联
+        from index.models import Tag
+        self.assertEqual(
+            set(pic.tags.values_list('name', flat=True)), {'水彩', '风景'})
+        self.assertTrue(Tag.objects.filter(name='水彩').exists())
         # actstream 记录了“画了”动态
         self.assertTrue(Action.objects.filter(
             actor_object_id=self.user.pk, verb='画了').exists())
