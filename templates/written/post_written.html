@@ -6,9 +6,44 @@
 {% endblock title %}
 
 {% block style %}
-    <!-- EasyMDE 工具栏图标依赖 Font Awesome 类名（fa fa-*），本地化引入 -->
-    <link href="{% static 'vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet"/>
     <link href="{% static 'vendor/easymde/easymde.min.css' %}" rel="stylesheet"/>
+    <style>
+        /* EasyMDE 工具栏图标：不依赖任何图标字体，用统一字符字形渲染 */
+        .editor-toolbar button { min-width: 30px; padding: 0 4px; }
+        .editor-toolbar button i {
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+            font-style: normal;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 16px;
+            color: #455a64;
+            vertical-align: middle;
+        }
+        .editor-toolbar button i::before {
+            display: block;
+            font-family: inherit;
+            font-style: inherit;
+            line-height: 16px;
+        }
+        .editor-toolbar button i.fa-bold::before { content: "B"; font-weight: 900; }
+        .editor-toolbar button i.fa-italic::before { content: "I"; font-style: italic; font-weight: 700; }
+        .editor-toolbar button i.fa-strikethrough::before { content: "S"; text-decoration: line-through; }
+        .editor-toolbar button i.fa-header::before,
+        .editor-toolbar button i.fa-heading::before { content: "H"; font-weight: 900; font-size: 15px; }
+        .editor-toolbar button i.fa-quote-left::before { content: "“"; font-weight: 400; }
+        .editor-toolbar button i.fa-list-ul::before { content: "•"; }
+        .editor-toolbar button i.fa-list-ol::before { content: "1."; font-size: 13px; }
+        .editor-toolbar button i.fa-code::before { content: "</>"; font-size: 12px; letter-spacing: -1px; }
+        .editor-toolbar button i.fa-link::before { content: "链"; font-size: 13px; }
+        .editor-toolbar button i.fa-image::before { content: "图"; font-size: 13px; }
+        .editor-toolbar button i.fa-table::before { content: "表"; font-size: 13px; }
+        .editor-toolbar button i.fa-eye::before { content: "览"; font-size: 13px; }
+        .editor-toolbar button i.fa-columns::before { content: "分"; font-size: 13px; }
+        .editor-toolbar button i.fa-arrows-alt::before { content: "全"; font-size: 13px; }
+    </style>
     <style>
         /* ===== 编辑页排版（白卡片内高对比文字，避免壁纸干扰） ===== */
         .kaku-editor-card .mdui-card-primary {

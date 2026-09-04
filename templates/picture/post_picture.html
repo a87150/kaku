@@ -54,10 +54,29 @@
             width: 1px; height: 1px;
             opacity: 0; overflow: hidden;
         }
-        .kaku-picture-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .kaku-picture-actions .mdui-btn { color: #263238; background: #eceff1; cursor: pointer; }
-        .kaku-picture-actions label.mdui-btn { display: inline-flex; align-items: center; }
-        .kaku-picture-actions .mdui-btn:hover { background: #e0e0e0; }
+        .kaku-picture-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .kaku-picture-actions .mdui-btn,
+        .kaku-picture-actions label.mdui-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            box-sizing: border-box;
+            color: #263238;
+            background: #eceff1;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 36px;
+        }
+        .kaku-picture-actions label.mdui-btn { margin: 0; }
+        .kaku-picture-actions .mdui-btn:hover,
+        .kaku-picture-actions label.mdui-btn:hover { background: #e0e0e0; }
         .kaku-file-status { font-size: 13px; color: #546e7a; margin-top: 8px; }
         .kaku-field-errors .errorlist { margin: 6px 0 0; padding-left: 0; list-style: none; }
         .kaku-field-errors .errorlist li,
@@ -92,8 +111,54 @@
         .kaku-tag-chip-x:hover { color: #b71c1c; }
         .kaku-tags-tip { font-size: 13px; color: #90a4ae; line-height: 1.6; }
         .kaku-submit-row { margin-top: 24px; display: flex; gap: 12px; align-items: center; }
-        /* 画板全屏时的容器背景与配色微调 */
-        body.kaku-ptro-open .ptro-holder { background: #eceff1; }
+        /* ===== 在线画板弹层：画板嵌在受控容器内，不超出窗口 ===== */
+        #kaku-ptro-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2vh 2vw;
+            box-sizing: border-box;
+        }
+        #kaku-ptro-modal[hidden] { display: none; }
+        .kaku-ptro-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+        }
+        .kaku-ptro-box {
+            position: relative;
+            width: 100%;
+            height: 96vh;
+            max-width: 1200px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .kaku-ptro-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #37474f;
+            flex: 0 0 auto;
+        }
+        .kaku-ptro-head .kaku-ptro-tip { color: #78909c; font-size: 12.5px; }
+        .kaku-ptro-head .spacer { flex: 1 1 auto; }
+        #ptro-holder {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: hidden;
+        }
     </style>
 {% endblock style %}
 
@@ -158,6 +223,20 @@
                 </div>
             </form>
         </div>
+    </div>
+</div>
+
+<!-- 在线画板弹层（Painterro 嵌入此容器，画布随窗口缩放完整可见） -->
+<div id="kaku-ptro-modal" hidden>
+    <div class="kaku-ptro-backdrop" id="kaku-ptro-backdrop"></div>
+    <div class="kaku-ptro-box">
+        <div class="kaku-ptro-head">
+            <span><b>在线画板</b></span>
+            <span class="kaku-ptro-tip">画完后点工具栏「保存」使用这幅作品；Ctrl + 滚轮可缩放画布</span>
+            <span class="spacer"></span>
+            <button type="button" class="mdui-btn mdui-btn-dense" id="kaku-ptro-close">关闭</button>
+        </div>
+        <div id="ptro-holder"></div>
     </div>
 </div>
 {% endblock main %}
@@ -266,6 +345,24 @@
             };
 
             var ptro = null;
+            var ptroModal = document.getElementById('kaku-ptro-modal');
+            var ptroBackdrop = document.getElementById('kaku-ptro-backdrop');
+
+            function showPtroModal() {
+                ptroModal.hidden = false;
+            }
+
+            function hidePtroModal() {
+                ptroModal.hidden = true;
+            }
+
+            function closePainterro() {
+                if (ptro && ptro.hide) {
+                    ptro.hide();
+                } else {
+                    hidePtroModal();
+                }
+            }
 
             function painterroSave(image, done) {
                 var mime = image.hasAlphaChannel() ? 'image/png' : 'image/jpeg';
@@ -299,8 +396,11 @@
                     alert('画板组件加载失败，请刷新后重试');
                     return;
                 }
+                // 先显示弹层，让 holder 有实际尺寸，再创建/打开画板
+                showPtroModal();
                 if (!ptro) {
                     ptro = window.Painterro({
+                        id: 'ptro-holder',
                         language: 'zh',
                         translation: {name: 'zh', strings: zhStrings},
                         defaultSize: '1024x640',
@@ -320,20 +420,28 @@
                             hoverControl: '#eceff1',
                             hoverControlContent: '#263238'
                         },
+                        onHide: hidePtroModal,
                         saveHandler: painterroSave
                     });
                 }
-                // 每次打开都给一块新画布
-                ptro.show({});
-                // 打开后按可用区域自动缩放画布，避免画布太大被遮挡
                 setTimeout(function () {
-                    if (ptro && ptro.setZoom) {
-                        ptro.setZoom(100);
-                    }
-                }, 150);
+                    // 每次打开都给一块新画布，并按弹层可用区域自动缩放
+                    ptro.show({});
+                    setTimeout(function () {
+                        if (ptro && ptro.setZoom) {
+                            ptro.setZoom(100);
+                        }
+                    }, 150);
+                }, 60);
             }
 
             document.getElementById('btn-open-painterro').addEventListener('click', openPainterro);
+            document.getElementById('kaku-ptro-close').addEventListener('click', closePainterro);
+            ptroBackdrop.addEventListener('click', function (e) {
+                if (e.target === ptroBackdrop) {
+                    closePainterro();
+                }
+            });
 
             $('#kaku-picture-form').on('submit', function () {
                 var $btn = $(this).find('button[type="submit"]');
