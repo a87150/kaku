@@ -6,7 +6,7 @@
 
 ## 项目信息
 
-- **框架**: Django 4.2.11 (LTS)
+- **框架**: Django 4.2.30 (LTS)
 - **Python 版本**: 3.12+（Django 4.2 官方支持 3.8-3.12；在 Python 3.13/3.14 上需依赖项目内置的 `kaku/compat_py314.py` 兼容补丁，项目已自动加载）
 - **数据库**: SQLite（默认）或 MySQL
 - **缓存**: Redis（可选，未安装 Redis 时自动回退到数据库）
@@ -265,20 +265,20 @@ kaku/
 
 | 包名 | 版本 | 说明 |
 |------|------|------|
-| Django | 4.2.11 | Web 框架 (LTS) |
-| django-allauth | 0.61.0 | 认证系统 |
+| Django | 4.2.30 | Web 框架 (LTS) |
+| django-allauth | 0.63.6 | 认证系统 |
 | django-crispy-forms | 1.14.0 | 表单渲染 |
 | django-imagekit | 6.1.0 | 图片处理 |
 | django-notifications-hq | 1.8.0 | 通知系统 |
-| django-simple-captcha | 0.6.0 | 验证码 |
-| django-pagedown | 2.2.1 | Markdown 编辑器 |
+| django-simple-captcha | 0.7.0 | 验证码 |
+| django-pagedown | 2.2.1 | Markdown 编辑器（旧，界面已改 EasyMDE，依赖保留） |
 | django-activity-stream | 2.0.0 | 活动流 |
 | django-redis | 5.2.0 | Redis 缓存 |
 | mistune | 2.0.4 | Markdown 解析 |
 | Pillow | 12.3.0 | 图像处理 |
 | bleach | 6.0.0 | HTML 清理 |
-| sqlparse | 0.4.4 | SQL 解析（Django 依赖） |
-| setuptools | 69.5.1 | 提供 pkg_resources |
+| sqlparse | 0.6.0 | SQL 解析（Django 依赖） |
+| setuptools | 70.1.1 | 提供 pkg_resources（勿升 ≥84：已移除 pkg_resources） |
 
 ## 常见问题
 
@@ -303,6 +303,16 @@ A: 运行 `python manage.py collectstatic`。
 A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py` 内置兼容补丁（随 settings 自动加载），可在 Python 3.13/3.14 上运行；推荐使用 Python 3.12 获得最佳兼容性。
 
 ## 更新日志
+
+### v3.1 — 依赖安全补丁升级（dependabot）
+
+- Django 4.2.11 → 4.2.30（4.2 LTS 内全部安全修复批次，含 CVE-2024-38875 / CVE-2024-45230~32 / CVE-2024-53907~09 等）
+- django-allauth 0.61.0 → 0.63.6（0.x 线末尾，覆盖历次安全公告；未升 64/65 大改动线）
+- django-simple-captcha 0.6.0 → 0.7.0
+- sqlparse 0.4.4 → 0.6.0（修复 CVE-2024-43485 ReDoS）
+- setuptools 69.5.1 → 70.1.1（修复 CVE-2024-6345；勿再升 ≥84，其已移除 pkg_resources）
+- Pillow / requests 已是最新安全版本，未改动
+- 升级后 `manage.py check` 无问题，79 项测试全绿
 
 ### v3.0 — Django 4.2 升级
 

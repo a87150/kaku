@@ -1,16 +1,17 @@
 # Kaku —— Django 4.2 LTS 版本依赖（Python 3.12/3.13/3.14 可用）
-Django==4.2.11
-django-allauth==0.61.0
+# 2026-xx：执行 dependabot 安全补丁升级（Django 4.2.11→4.2.30 等），勿回退
+Django==4.2.30
+django-allauth==0.63.6
 django-crispy-forms==1.14.0
 django-imagekit==6.1.0
 django-notifications-hq==1.8.0
-django-simple-captcha==0.6.0
+django-simple-captcha==0.7.0
 django-pagedown==2.2.1
 django-activity-stream==2.0.0
 django-redis==5.2.0
 mistune==2.0.4
 Pillow==12.3.0
 bleach==6.0.0
-sqlparse==0.4.4
-setuptools==69.5.1
+sqlparse==0.6.0
+setuptools==70.1.1
 requests==2.34.2
