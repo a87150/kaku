@@ -80,6 +80,12 @@
             margin: 0 8px;
             flex: 0 0 auto;
         }
+        /* 工具栏与 EasyMDE 容器拼合成一体 */
+        .kaku-md-host .EasyMDEContainer {
+            border-top: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
         .kaku-editor-form .editor-preview,
         .kaku-editor-form .editor-preview-side {
             background: #fff;
@@ -153,7 +159,30 @@
                 {% if form.title.errors %}<div class="kaku-field-errors">{{ form.title.errors }}</div>{% endif %}
 
                 <label for="{{ form.content.id_for_label }}">正文（Markdown）</label>
-                {{ form.content }}
+                <div class="kaku-md-host">
+                    <!-- 工具栏为静态 HTML，避免编辑器初始化后丢失 -->
+                    <div class="kaku-md-bar" data-md-bar>
+                        <button type="button" data-md-method="toggleBold">加粗</button>
+                        <button type="button" data-md-method="toggleItalic">斜体</button>
+                        <button type="button" data-md-method="toggleStrikethrough">删除线</button>
+                        <button type="button" data-md-method="toggleHeading1">标题</button>
+                        <button type="button" data-md-method="toggleBlockquote">引用</button>
+                        <button type="button" data-md-method="toggleUnorderedList">无序列表</button>
+                        <button type="button" data-md-method="toggleOrderedList">有序列表</button>
+                        <button type="button" data-md-method="drawLink">链接</button>
+                        <button type="button" data-md-method="drawImage">图片</button>
+                        <button type="button" data-md-method="drawTable">表格</button>
+                        <button type="button" data-md-method="toggleCodeBlock">代码块</button>
+                        <button type="button" data-md-method="drawHorizontalRule">分隔线</button>
+                        <button type="button" data-md-method="undo">撤销</button>
+                        <button type="button" data-md-method="redo">重做</button>
+                        <span class="kaku-md-bar-sep"></span>
+                        <button type="button" data-md-method="togglePreview">预览</button>
+                        <button type="button" data-md-method="toggleSideBySide">左右分屏</button>
+                        <button type="button" data-md-method="toggleFullScreen">全屏</button>
+                    </div>
+                    {{ form.content }}
+                </div>
                 {% if form.content.errors %}<div class="kaku-field-errors">{{ form.content.errors }}</div>{% endif %}
 
                 {% if form.tags_enabled %}

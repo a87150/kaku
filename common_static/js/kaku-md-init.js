@@ -5,11 +5,17 @@
  *   2. vendor/dompurify/purify.min.js   —— 预览内容净化（防 XSS）
  *   3. vendor/easymde/easymde.min.js    —— 编辑器本体（内含 CodeMirror）
  *
- * 页面里放 <textarea data-md-editor>，初始化后自动接管：
- * 原 textarea 保留并与编辑器双向同步，直接随表单提交原始 Markdown。
+ * 页面结构约定（模板里直接输出，避免运行时插入造成工具栏丢失）：
+ *   <div class="kaku-md-host">
+ *       <div class="kaku-md-bar" data-md-bar>
+ *           <button type="button" data-md-method="toggleBold">加粗</button>
+ *           ...
+ *       </div>
+ *       <textarea data-md-editor ...></textarea>
+ *   </div>
  *
- * 不使用 EasyMDE 自带的图标工具栏（图标字体依赖易错位），改为自绘的
- * 文本按钮工具栏（.kaku-md-bar），排布完全可控。
+ * EasyMDE 接管 textarea 时会把它所在位置替换为 .EasyMDEContainer，
+ * 工具栏保持在上方（静态 HTML，不依赖容器探测）。
  */
 (function () {
     'use strict';
@@ -25,65 +31,31 @@
         return html;
     }
 
-    /* 自绘工具栏按钮配置：label 为按钮文字，method 为 EasyMDE 实例方法 */
-    var BAR_ITEMS = [
-        { label: '加粗', method: 'toggleBold' },
-        { label: '斜体', method: 'toggleItalic' },
-        { label: '删除线', method: 'toggleStrikethrough' },
-        { label: '标题', method: 'toggleHeading1' },
-        { label: '引用', method: 'toggleBlockquote' },
-        { label: '无序列表', method: 'toggleUnorderedList' },
-        { label: '有序列表', method: 'toggleOrderedList' },
-        { label: '链接', method: 'drawLink' },
-        { label: '图片', method: 'drawImage' },
-        { label: '表格', method: 'drawTable' },
-        { label: '代码块', method: 'toggleCodeBlock' },
-        { label: '分隔线', method: 'drawHorizontalRule' },
-        { label: '撤销', method: 'undo' },
-        { label: '重做', method: 'redo' }
-    ];
-
-    var MODE_ITEMS = [
-        { label: '预览', method: 'togglePreview' },
-        { label: '左右分屏', method: 'toggleSideBySide' },
-        { label: '全屏', method: 'toggleFullScreen' }
-    ];
-
-    function makeBar(editor, textarea) {
-        var bar = document.createElement('div');
-        bar.className = 'kaku-md-bar';
-
-        BAR_ITEMS.forEach(function (item) {
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = item.label;
-            btn.addEventListener('click', function () {
-                if (editor && typeof editor[item.method] === 'function') {
-                    editor[item.method]();
-                    if (editor.codemirror) {
-                        editor.codemirror.focus();
-                    }
-                }
-            });
-            bar.appendChild(btn);
+    function bindButton(btn, editor) {
+        var method = btn.getAttribute('data-md-method');
+        if (!method || !editor || typeof editor[method] !== 'function') {
+            return;
+        }
+        btn.addEventListener('click', function () {
+            editor[method]();
+            if (editor.codemirror) {
+                editor.codemirror.focus();
+            }
         });
+    }
 
-        var sep = document.createElement('span');
-        sep.className = 'kaku-md-bar-sep';
-        bar.appendChild(sep);
-
-        MODE_ITEMS.forEach(function (item) {
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = item.label;
-            btn.addEventListener('click', function () {
-                if (editor && typeof editor[item.method] === 'function') {
-                    editor[item.method]();
-                }
-            });
-            bar.appendChild(btn);
+    function bindBar(host, editor) {
+        var bar = host ? host.querySelector('[data-md-bar]') : null;
+        if (!bar) {
+            bar = document.querySelector('[data-md-bar]');
+        }
+        if (!bar) {
+            return;
+        }
+        var buttons = bar.querySelectorAll('button[data-md-method]');
+        Array.prototype.forEach.call(buttons, function (btn) {
+            bindButton(btn, editor);
         });
-        return bar;
     }
 
     function initEditor(textarea) {
@@ -92,13 +64,15 @@
         }
         textarea.setAttribute('data-md-init', '1');
 
+        var host = textarea.closest ? textarea.closest('.kaku-md-host') : null;
+
         var editor = new window.EasyMDE({
             element: textarea,
             autofocus: false,
             spellChecker: false,
             status: false,
             autoDownloadFontAwesome: false,
-            toolbar: false, // 不使用自带图标工具栏，改用自绘文本工具栏
+            toolbar: false, // 工具栏由页面静态 .kaku-md-bar 提供
             placeholder: textarea.getAttribute('placeholder') || '在这里用 Markdown 写作…',
             renderingConfig: {
                 singleLineBreaks: false,
@@ -107,14 +81,8 @@
             previewRender: safeRender
         });
 
-        // 把自绘工具栏插到 EasyMDE 容器最前面
-        var container = textarea.closest ? textarea.closest('.EasyMDEContainer')
-            : document.querySelector('.EasyMDEContainer');
-        if (!container) {
-            return;
-        }
-        var bar = makeBar(editor, textarea);
-        container.insertBefore(bar, container.firstChild);
+        // 工具栏按钮是静态 HTML，只需绑定点击（EasyMDE 完成后 DOM 已就位）
+        bindBar(host, editor);
     }
 
     function initAll() {
