@@ -19,7 +19,10 @@
             </div>
             <div class="mdui-divider"></div>
             <div class="mdui-card-content mdui-text-center">
-                <img src="{{ MEDIA_URL }}{{ picture.thematic }}" style="max-width:100%; height:auto; border-radius:4px;"/>
+                <img src="{{ MEDIA_URL }}{{ picture.thematic }}" style="max-width:100%; height:auto; border-radius:4px;"
+                     data-lightbox
+                     data-lightbox-src="{{ MEDIA_URL }}{{ picture.thematic }}"
+                     data-lightbox-caption="{{ picture.title }}" alt="{{ picture.title }}"/>
             </div>
         </div>
 

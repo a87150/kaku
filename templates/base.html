@@ -12,7 +12,7 @@
     <!-- 表单/设置页沿用 bootstrap 样式；mdui 在其后加载用于覆盖浏览页 -->
     <link href={% static '/css/bootstrap.min.css' %} rel="stylesheet"/>
     <link href={% static '/css/mdui.min.css' %} rel="stylesheet"/>
-    <link href={% static '/css/custom.css' %}?v=20260904b rel="stylesheet"/>
+    <link href={% static '/css/custom.css' %}?v=20260904c rel="stylesheet"/>
     <!-- 通知面板核心样式：内嵌，避免外部 CSS 缓存导致不生效 -->
     <style>
         .kaku-notify-details { position: relative; display: inline-block; }
@@ -194,6 +194,10 @@
 </script>
 {% block script %}
 {% endblock script %}
+
+<!-- 图片灯箱 + 文章目录（轻量、零依赖） -->
+<script src={% static '/js/kaku-lightbox.js' %}></script>
+<script src={% static '/js/kaku-toc.js' %}></script>
 
 <!-- 全站背景粒子动画（壁纸上叠加一层细线点缀） -->
 <script type="text/javascript"

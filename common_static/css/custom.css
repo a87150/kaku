@@ -286,3 +286,214 @@ a {
     background: #f0f0f0;
     text-decoration: none;
 }
+
+/* ================= 图片灯箱（kaku-lightbox.js） ================= */
+body.kaku-lb-open {
+    overflow: hidden;
+}
+
+.kaku-lb {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kaku-lb-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, .86);
+    animation: kaku-lb-fade .18s ease-out;
+}
+
+@keyframes kaku-lb-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.kaku-lb-figure {
+    position: relative;
+    margin: 0;
+    max-width: 94vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: kaku-lb-pop .2s ease-out;
+}
+
+@keyframes kaku-lb-pop {
+    from { opacity: 0; transform: scale(.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.kaku-lb-img {
+    max-width: 94vw;
+    max-height: 82vh;
+    object-fit: contain;
+    background: transparent;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+}
+
+/* 加载中：先隐藏图片并显示旋转圈 */
+.kaku-lb-img.kaku-lb-loading {
+    opacity: 0;
+}
+
+.kaku-lb-spinner {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border: 3px solid rgba(255, 255, 255, .25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: kaku-lb-spin .8s linear infinite;
+}
+
+.kaku-lb-figure.kaku-lb-busy .kaku-lb-spinner {
+    display: block;
+}
+
+@keyframes kaku-lb-spin {
+    to { transform: rotate(360deg); }
+}
+
+.kaku-lb-caption {
+    margin-top: 12px;
+    max-width: 80vw;
+    color: rgba(255, 255, 255, .85);
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.5;
+    word-break: break-word;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+}
+
+.kaku-lb-counter {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, .5);
+    font-size: 12px;
+}
+
+.kaku-lb-close,
+.kaku-lb-nav {
+    position: absolute;
+    border: none;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background-color .15s ease;
+    user-select: none;
+}
+
+.kaku-lb-close:hover,
+.kaku-lb-nav:hover {
+    background: rgba(255, 255, 255, .28);
+}
+
+.kaku-lb-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+    z-index: 2;
+}
+
+.kaku-lb-nav {
+    position: absolute;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    font-size: 34px;
+    z-index: 2;
+}
+
+.kaku-lb-prev { left: 12px; }
+.kaku-lb-next { right: 12px; }
+
+/* ================= 文章目录（kaku-toc.js） ================= */
+.kaku-toc-card .mdui-card-primary-title {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, .75);
+}
+
+.kaku-toc-card .mdui-card-primary-title::before {
+    content: 'list';
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-size: 18px;
+    margin-right: 8px;
+    color: rgba(0, 0, 0, .45);
+}
+
+.kaku-toc-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 46vh;
+    overflow-y: auto;
+}
+
+.kaku-toc-list li {
+    line-height: 1.9;
+}
+
+.kaku-toc-list li a {
+    display: inline-block;
+    max-width: 100%;
+    font-size: 13.5px;
+    color: rgba(0, 0, 0, .62);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-radius: 3px;
+    padding: 0 6px;
+}
+
+.kaku-toc-list li a:hover {
+    color: #3f51b5;
+    background-color: rgba(63, 81, 181, .08);
+}
+
+.kaku-toc-level-1 { padding-left: 0; }
+.kaku-toc-level-2 { padding-left: 14px; }
+.kaku-toc-level-3 { padding-left: 28px; }
+.kaku-toc-level-4 { padding-left: 42px; }
+.kaku-toc-level-5 { padding-left: 56px; }
+.kaku-toc-level-6 { padding-left: 70px; }
+
+.kaku-toc-level-1 > a { font-weight: 600; color: rgba(0, 0, 0, .78); }
+.kaku-toc-level-2 > a { font-weight: 500; }
+
+/* 标题定位偏移：平滑滚动时避开吸顶顶栏 */
+.kaku-article-body h1,
+.kaku-article-body h2,
+.kaku-article-body h3,
+.kaku-article-body h4,
+.kaku-article-body h5,
+.kaku-article-body h6 {
+    scroll-margin-top: 68px;
+}
+
+@media (max-width: 599px) {
+    .kaku-toc-list { max-height: 34vh; }
+}

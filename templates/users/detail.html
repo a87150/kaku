@@ -86,8 +86,12 @@
                 <div class="mdui-row">
                     {% for picture in picture_list %}
                     <div class="mdui-col-xs-6 mdui-col-sm-4 mdui-p-t-1 mdui-p-b-1">
-                        <a href="{{ picture.get_absolute_url }}">
-                            <img src="{{ MEDIA_URL }}{{ picture.thematic }}" class="kaku-picture-thumb" style="height:120px;"/>
+                        <a href="{{ picture.get_absolute_url }}"
+                           data-lightbox
+                           data-lightbox-src="{{ MEDIA_URL }}{{ picture.thematic }}"
+                           data-lightbox-caption="{{ picture.title }}"
+                           data-lightbox-group="user-pictures">
+                            <img src="{{ MEDIA_URL }}{{ picture.thematic }}" class="kaku-picture-thumb" style="height:120px;" alt="{{ picture.title }}"/>
                         </a>
                     </div>
                     {% empty %}
@@ -95,9 +99,9 @@
                     {% endfor %}
                 </div>
             </div>
-            {% if article_list|length > 9 %}
+            {% if picture_list|length > 9 %}
             <div class="mdui-card-actions">
-                <a href="{% url 'users:picture' user.username %}" class="mdui-btn">更多图画</a>
+                <a href="{% url 'users:pictures' user.username %}" class="mdui-btn">更多图画</a>
             </div>
             {% endif %}
         </div>

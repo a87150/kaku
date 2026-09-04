@@ -41,3 +41,24 @@ class ArticleViewTests(TestCase):
         resp = self.client.get(article.get_absolute_url())
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'T')
+
+    def test_detail_page_has_toc_container(self):
+        """详情页应包含文章目录容器（kaku-toc.js 依标题生成目录）。"""
+        article = Article.objects.create(
+            author=self.user, title='带小标题的文章',
+            content='# 第一章\n\n内容\n\n## 第一节\n\n更多内容')
+        resp = self.client.get(article.get_absolute_url())
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'data-toc-for="#content"')
+        self.assertContains(resp, 'data-toc-list')
+
+    def test_editor_page_loads_live_preview(self):
+        """发布页应输出 pagedown 实时预览所需资源（form.media 与预览面板）。"""
+        self.client.login(username='writer', password='pass-1234')
+        resp = self.client.get(reverse('written:create'))
+        self.assertEqual(resp.status_code, 200)
+        # pagedown 2.2.1 widget 面板 ID 约定：wmd-<面板>-id_content
+        self.assertContains(resp, 'id="wmd-input-id_content"')        # 编辑器 textarea
+        self.assertContains(resp, 'id="wmd-button-bar-id_content"')   # 工具栏容器
+        self.assertContains(resp, 'id="wmd-preview-id_content"')      # 实时预览容器
+        self.assertContains(resp, 'pagedown_init.js')                 # 编辑器初始化脚本

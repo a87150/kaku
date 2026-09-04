@@ -3,31 +3,100 @@
 {% load crispy_forms_tags %}
 
 {% block style %}
+    {{ form.media.css }}
     <style>
-        .wmd-spacer{
-            width: 1px; 
-            height: 20px; 
-            margin-left: 10px;
-            position: relative;
-            display: inline-block; 
-            list-style: none;
-        }
+        /* ===== pagedown 编辑器：主题统一 + 宽屏左右分栏实时预览 ===== */
 
-        .wmd-wrapper .wmd-panel {
-            margin-left: 0;
+        .wmd-wrapper {
             width: 100%;
             max-width: 100%;
-            min-width: 10px;
         }
 
-        .wmd-preview-title {
-            margin-top: 20px;
-        }
-
-        .wmd-wrapper .textInput {
-            height: 400px;
-            background-color: white;
+        /* 两个面板默认上下排列、占满整行 */
+        .wmd-wrapper .wmd-panel {
+            width: 100%;
             max-width: 100%;
+            min-width: 0;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        /* 工具栏 */
+        .wmd-wrapper .wmd-button-bar {
+            width: 100%;
+            background-color: #eeeeee;
+            border: 1px solid #e0e0e0;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            overflow: hidden;
+        }
+
+        .wmd-wrapper .wmd-button-row {
+            margin: 0;
+            padding: 4px 6px;
+            height: auto;
+        }
+
+        .wmd-wrapper .wmd-spacer {
+            background-color: rgba(0, 0, 0, .15);
+        }
+
+        /* 编辑框 */
+        .wmd-wrapper .textInput {
+            height: 430px;
+            background-color: #ffffff;
+            max-width: 100%;
+            resize: vertical;
+            border-radius: 0 0 4px 4px;
+            box-sizing: border-box;
+        }
+
+        /* 隐藏 pagedown 自带的 "HTML Preview:" 小字，改用样式化的面板标题 */
+        .wmd-preview-title {
+            display: none;
+        }
+
+        .wmd-wrapper .wmd-preview {
+            box-sizing: border-box;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 14px 16px;
+            min-height: 300px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .wmd-wrapper .wmd-preview::before {
+            content: '实时预览';
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: rgba(0, 0, 0, .5);
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        /* 宽屏（>= 992px）：编辑区与预览左右并排 */
+        @media (min-width: 992px) {
+            .wmd-wrapper {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+            }
+
+            .wmd-wrapper > .wmd-panel:first-child {
+                flex: 0 0 calc(52% - 8px);
+                margin-right: 8px;
+            }
+
+            .wmd-wrapper > .wmd-panel.wmd-preview {
+                flex: 0 0 calc(48% - 8px);
+                min-height: 430px;
+                margin-left: 8px;
+                margin-top: 0;
+            }
         }
     </style>
 {% endblock style %}
@@ -43,6 +112,7 @@
 {% endblock main %}
 
 {% block script %}
+    {{ form.media.js }}
     <script>
         $('#id_create_form').submit(function () {
             $('#submit-id-submit').attr('disabled', true).val('发布中...');

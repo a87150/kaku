@@ -24,6 +24,8 @@
                 var jsonStr = JSON.stringify(ret);
                 var obj = JSON.parse(jsonStr);
                 $("#content").html("<div id=\"content\">" + obj.content + "</div>");
+                // 章节内容已整体替换，重建文章目录
+                if (window.KakuTOC) { window.KakuTOC.rebuild(); }
             });
         });
     });

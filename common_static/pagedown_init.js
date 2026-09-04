@@ -1,71 +1,64 @@
-var DjangoPagedown = DjangoPagedown | {};
+/* django-pagedown 2.2.1 配套的编辑器初始化（本地化副本）
+ *
+ * 注意：必须与本版本 pagedown widget 的输出结构一致 ——
+ *   文本域  id="wmd-input-<field>"
+ *   工具栏  id="wmd-button-bar-<field>"
+ *   预览区  id="wmd-preview-<field>"
+ * Markdown.Editor 通过 postfix=<field> 拼接查找到这三个面板。
+ * 使用 Markdown.getSanitizingConverter()（净化 HTML）并启用 Markdown.Extra。
+ */
+var DjangoPagedown = DjangoPagedown || {};
 
 DjangoPagedown = (function() {
+  var converter = Markdown.getSanitizingConverter();
+  var editors = {};
+  var elements;
 
-    var converter,
-        editors,
-        elements;
+  Markdown.Extra.init(converter, {
+    extensions: "all"
+  });
 
-    var that = this;
+  var createEditor = function(element) {
+    var input = element.getElementsByClassName("wmd-input")[0];
+    if (input === undefined) {
+      return
+    }
+    // input.id 形如 "wmd-input-id_content"，去掉 "wmd-input-" 前缀得到 postfix
+    var id = input.id.substr(9);
+    if (!editors.hasOwnProperty(id)) {
+      var editor = new Markdown.Editor(converter, id, {});
 
-    var isPagedownable = function(el) {
-        if ( (' ' + el.className + ' ').indexOf(' wmd-input ') > -1 ) {
-            return true;
-        }
-        return false;
-    };
+      editor.run();
+      editors[id] = editor;
+    }
+  };
 
-    var createEditor = function(el) {
-        if ( isPagedownable(el) ) {
-            if ( ! that.editors.hasOwnProperty(el.id) ) {
-                var selectors = {
-                    input : el.id,
-                    button : el.id + "_wmd_button_bar",
-                    preview : el.id + "_wmd_preview",
-                };
-                that.editors[el.id] = new Markdown.Editor(that.converter, "", selectors);
-                that.editors[el.id].run();
-                return true;
-            } else {
-                console.log("Pagedown editor already attached to element: <#" + el.id + ">");
-            }
-        }
-        return false;
-    };
+  var destroyEditor = function(element) {
+    if (editors.hasOwnProperty(element.id)) {
+      delete editors[element.id];
+      return true;
+    }
+    return false;
+  };
 
-    var destroyEditor = function(el) {
-        if ( that.editors.hasOwnProperty(el.id)) {
-            delete that.editors[el.id];
-            return true;
-        }
-        return false;
-    };
+  var init = function() {
+    elements = document.getElementsByClassName("wmd-wrapper");
+    for (var i = 0; i < elements.length; ++i) {
+      createEditor(elements[i]);
+    }
+  };
 
-    var init = function() {
-        that.converter = Markdown.getSanitizingConverter();
-        Markdown.Extra.init(that.converter, {
-            extensions: "all"
-        });
-        that.elements = document.getElementsByTagName("textarea");
-        that.editors = {};
-        for (var i = 0; i < that.elements.length; ++i){
-            if ( isPagedownable(that.elements[i]) ) {
-                createEditor(that.elements[i]);
-            }
-        }
-    };
-
-    return {
-        init: function() {
-            return init();
-        },
-        createEditor: function(el) {
-            return createEditor(el);
-        },
-        destroyEditor: function(el) {
-            return destroyEditor(el);
-        },
-    };
+  return {
+    init: function() {
+      return init();
+    },
+    createEditor: function(element) {
+      return createEditor(element);
+    },
+    destroyEditor: function(element) {
+      return destroyEditor(element);
+    }
+  };
 })();
 
 window.onload = DjangoPagedown.init;

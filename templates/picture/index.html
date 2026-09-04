@@ -11,7 +11,11 @@
         {% for picture in picture_list %}
             <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-p-t-1 mdui-p-b-1">
                 <div class="mdui-card mdui-hoverable" style="height: 100%;">
-                    <a href="{{ picture.get_absolute_url }}">
+                    <a href="{{ picture.get_absolute_url }}"
+                       data-lightbox
+                       data-lightbox-src="{{ MEDIA_URL }}{{ picture.thematic }}"
+                       data-lightbox-caption="{{ picture.title }}"
+                       data-lightbox-group="picture-grid">
                         <img class="kaku-picture-thumb" src="{{ MEDIA_URL }}{{ picture.thematic }}" alt="{{ picture.title }}"/>
                     </a>
                     <div class="mdui-card-primary">

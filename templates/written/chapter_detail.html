@@ -7,6 +7,14 @@
 {% block main %}
 <div class="mdui-row">
     <div class="mdui-col-md-8 mdui-col-offset-md-2">
+        <!-- 章节内容目录（由 kaku-toc.js 自动生成） -->
+        <div class="mdui-card kaku-card kaku-toc-card" id="chapter-toc" data-toc-for="#content" style="display:none;">
+            <div class="mdui-card-primary" style="padding-bottom:0;">
+                <div class="mdui-card-primary-title">目录</div>
+            </div>
+            <div class="mdui-card-content kaku-toc-list" data-toc-list style="padding-top:6px;"></div>
+        </div>
+
         <div class="mdui-card kaku-card">
             <div class="mdui-card-primary">
                 <div class="mdui-card-primary-title mdui-typo-headline">{{ article.title }}</div>
