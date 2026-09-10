@@ -26,6 +26,39 @@ class ArticleModelTests(TestCase):
         self.assertIn('<td>单元格</td>', html)
 
 
+class MarkdownRenderTests(TestCase):
+    """Markdown 渲染行为契约（编辑器工具栏产出的是 GFM 语法）。"""
+
+    def setUp(self):
+        from .views import html_clean
+        self.html_clean = html_clean
+
+    def test_gfm_table_rendered_with_alignment(self):
+        html = self.html_clean('| 左 | 右 |\n|:--|--:|\n| 1 | 2 |\n')
+        self.assertIn('<table', html)
+        self.assertIn('<td', html)
+        # 对齐由 style 转成安全的 align 属性保留
+        self.assertIn('align="left"', html)
+        self.assertIn('align="right"', html)
+
+    def test_strikethrough_rendered(self):
+        self.assertIn('<del>删除线</del>', self.html_clean('~~删除线~~'))
+
+    def test_script_tag_stripped(self):
+        html = self.html_clean('正文<script>alert(1)</script>结束')
+        self.assertNotIn('<script', html)
+
+    def test_excerpt_renders_gfm_without_tags(self):
+        User = get_user_model()
+        user = User.objects.create_user(username='excerptor', password='pass-1234')
+        article = Article.objects.create(
+            author=user, title='摘要渲染',
+            content='| a | b |\n|:--|--:|\n| 1 | 2 |\n\n~~删除~~ 与正文')
+        self.assertTrue(article.excerpt.endswith('…'))
+        self.assertNotIn('<', article.excerpt)
+        self.assertNotIn('|', article.excerpt)  # 表格已渲染成文本而非管道符
+
+
 class ArticleViewTests(TestCase):
     def setUp(self):
         User = get_user_model()

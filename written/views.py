@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
+import re
+
 from actstream.signals import action
 import mistune
 import bleach
@@ -47,15 +49,31 @@ class IndexView(ListView):
         return context
 
 
+# 编辑器工具栏（EasyMDE）会产出 GFM 语法，这里启用对应 mistune 插件：
+#   table —— 管道表格；strikethrough —— ~~删除线~~
+MARKDOWN_PLUGINS = ['table', 'strikethrough']
+
+# mistune 表格插件输出 style="text-align:x"，bleach 白名单不保留 style，
+# 这里转成等价的 align 属性（安全属性，无脚本风险），保留表格对齐效果
+_TABLE_ALIGN_RE = re.compile(
+    r'(<(?:th|td)\b[^>]*?)\s+style="text-align:(left|center|right)"')
+
+
 def html_clean(htmlstr):
-    markdown = mistune.create_markdown(escape=False)
+    markdown = mistune.create_markdown(escape=False, plugins=MARKDOWN_PLUGINS)
 
     # 采用bleach来清除不必要的标签，并linkify text
     tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img', 'table']
     tags.extend(['p', 'hr', 'br', 'pre', 'code', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'del', 'dl', 'img', 'sub', 'sup', 'u',
                  'table', 'thead', 'tr', 'th', 'td', 'tbody', 'dd', 'caption', 'blockquote', 'section'])
-    attributes = {'a': ['href', 'title', 'target'],'img':['src', 'width', 'height']}
-    return bleach.linkify(bleach.clean(markdown(htmlstr),tags=tags,attributes=attributes))
+    attributes = {
+        'a': ['href', 'title', 'target'],
+        'img': ['src', 'width', 'height'],
+        'th': ['align'],
+        'td': ['align'],
+    }
+    rendered = _TABLE_ALIGN_RE.sub(r'\1 align="\2"', markdown(htmlstr))
+    return bleach.linkify(bleach.clean(rendered, tags=tags, attributes=attributes))
 
 
 class Detail(DetailView):

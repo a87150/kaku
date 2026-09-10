@@ -274,7 +274,7 @@ kaku/
 | django-simple-captcha | 0.7.0 | 验证码 |
 | django-activity-stream | 2.0.0 | 活动流 |
 | django-redis | 5.2.0 | Redis 缓存 |
-| mistune | 2.0.4 | Markdown 解析 |
+| mistune | 3.3.4 | Markdown 解析（已启用 table / strikethrough 插件，与编辑器工具栏一致） |
 | Pillow | 12.3.0 | 图像处理 |
 | bleach | 6.4.0 | HTML 清理 |
 | sqlparse | 0.6.0 | SQL 解析（Django 依赖） |
@@ -290,9 +290,10 @@ python scripts/dep_audit.py docs/dependabot-audit.md
 ```
 
 最近一次审计结果见 [`docs/dependabot-audit.md`](docs/dependabot-audit.md)：
-45 个包中仅 Django 4.2.30 / django-allauth 0.63.6 / mistune 2.0.4 命中
-（其修复版本只存在于更高大版本线），其余包（requests、Pillow、bleach、
-sqlparse、captcha、notifications 等）均无命中。
+45 个包中仅 Django 4.2.30（7 条）与 django-allauth 0.63.6（6 条）命中，
+其修复版本只存在于更高大版本线（Django 5.2/6.0、allauth 65.x）；
+mistune 升级到 3.3.4 后 28 条已清零，其余包（requests、Pillow、bleach、
+sqlparse、captcha、notifications、setuptools 等）均无命中。
 
 ## 常见问题
 
@@ -330,6 +331,9 @@ A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py`
 - django-model-utils 4.2.0 → 5.0.0 + setuptools 70.1.1 → 84.0.0：
   model-utils 5.0 改用 importlib.metadata，解除了对 pkg_resources 的依赖，
   setuptools 因此可升到最新（原先被迫停留在 70.1.1）
+- mistune 2.0.4 → 3.3.4：一次性消除 28 条 XSS / ReDoS 公告（其修复版本仅存在于
+  3.x）；同时启用 table / strikethrough 插件，修复了“编辑器插入的 GFM 表格
+  在详情页不渲染”的老问题（表格对齐由 style 转成安全的 align 属性保留）
 - Pillow / requests 已是最新安全版本，未改动
 - 移除停更的 django-pagedown（编辑器已改用 EasyMDE）
 - 升级后 `manage.py check` 无问题，79 项测试全绿
