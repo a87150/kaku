@@ -269,6 +269,7 @@ kaku/
 | django-allauth | 0.63.6 | 认证系统 |
 | django-crispy-forms | 1.14.0 | 表单渲染 |
 | django-imagekit | 6.1.0 | 图片处理 |
+| django-model-utils | 5.0.0 | 通知系统依赖（5.0 起改用 importlib.metadata，不再需要 pkg_resources） |
 | django-notifications-hq | 1.8.3 | 通知系统 |
 | django-simple-captcha | 0.7.0 | 验证码 |
 | django-activity-stream | 2.0.0 | 活动流 |
@@ -277,7 +278,21 @@ kaku/
 | Pillow | 12.3.0 | 图像处理 |
 | bleach | 6.4.0 | HTML 清理 |
 | sqlparse | 0.6.0 | SQL 解析（Django 依赖） |
-| setuptools | 70.1.1 | 提供 pkg_resources（勿升 ≥84：已移除 pkg_resources） |
+| setuptools | 84.0.0 | 构建/打包工具（已可升级：model-utils 5.0 不再依赖 pkg_resources） |
+
+## 依赖安全审计
+
+`scripts/dep_audit.py` 会把当前虚拟环境中**全部已安装包**（含传递依赖）提交
+[OSV 漏洞库](https://osv.dev/) 比对，生成明细清单：
+
+```bash
+python scripts/dep_audit.py docs/dependabot-audit.md
+```
+
+最近一次审计结果见 [`docs/dependabot-audit.md`](docs/dependabot-audit.md)：
+45 个包中仅 Django 4.2.30 / django-allauth 0.63.6 / mistune 2.0.4 命中
+（其修复版本只存在于更高大版本线），其余包（requests、Pillow、bleach、
+sqlparse、captcha、notifications 等）均无命中。
 
 ## 常见问题
 
@@ -312,6 +327,9 @@ A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py`
 - setuptools 69.5.1 → 70.1.1（修复 CVE-2024-6345；勿再升 ≥84，其已移除 pkg_resources）
 - bleach 6.0.0 → 6.4.0（6.x 安全修复线）
 - django-notifications-hq 1.8.0 → 1.8.3（1.8 线安全/兼容修复）
+- django-model-utils 4.2.0 → 5.0.0 + setuptools 70.1.1 → 84.0.0：
+  model-utils 5.0 改用 importlib.metadata，解除了对 pkg_resources 的依赖，
+  setuptools 因此可升到最新（原先被迫停留在 70.1.1）
 - Pillow / requests 已是最新安全版本，未改动
 - 移除停更的 django-pagedown（编辑器已改用 EasyMDE）
 - 升级后 `manage.py check` 无问题，79 项测试全绿

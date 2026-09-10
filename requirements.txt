@@ -1,12 +1,14 @@
 # Kaku —— Django 4.2 LTS 依赖（Python 3.12 / 3.13 / 3.14 可用）
 # 版本按 dependabot 安全补丁线锁定，请勿随意回退：
 #   Django 4.2.30、allauth 0.63.6、captcha 0.7.0、sqlparse 0.6.0、
-#   setuptools 70.1.1（勿升 >=84：已移除 pkg_resources）、bleach 6.4.0、
-#   django-notifications-hq 1.8.3
+#   bleach 6.4.0、django-notifications-hq 1.8.3、setuptools 84.0.0
+# 说明：setuptools 曾因旧版 django-model-utils 需要 pkg_resources 而停留在
+#   70.1.1；model-utils 5.0.0 已改用 importlib.metadata，故可升到最新并显式锁定。
 Django==4.2.30
 django-allauth==0.63.6
 django-crispy-forms==1.14.0
 django-imagekit==6.1.0
+django-model-utils==5.0.0
 django-notifications-hq==1.8.3
 django-simple-captcha==0.7.0
 django-activity-stream==2.0.0
@@ -15,5 +17,5 @@ mistune==2.0.4
 Pillow==12.3.0
 bleach==6.4.0
 sqlparse==0.6.0
-setuptools==70.1.1
+setuptools==84.0.0
 requests==2.34.2
