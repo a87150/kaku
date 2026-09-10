@@ -5,7 +5,7 @@
 # 说明：setuptools 曾因旧版 django-model-utils 需要 pkg_resources 而停留在
 #   70.1.1；model-utils 5.0.0 已改用 importlib.metadata，故可升到最新并显式锁定。
 Django==4.2.30
-django-allauth==0.63.6
+django-allauth==65.19.2
 django-crispy-forms==1.14.0
 django-imagekit==6.1.0
 django-model-utils==5.0.0

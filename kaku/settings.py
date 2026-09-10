@@ -218,14 +218,17 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+# allauth 0.63+ 的新设置风格：
+#   旧 ACCOUNT_AUTHENTICATION_METHOD / ACCOUNT_EMAIL_REQUIRED 已弃用
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_SIGNUP_FIELDS = ['username*', 'email*', 'password1*', 'password2*']
 ACCOUNT_FORMS = {
     'login': 'users.forms.LoginForm',
     'signup': 'users.forms.SignupForm',
 }
 ACCOUNT_USERNAME_MIN_LENGTH = 3
-ACCOUNT_USERNAME_VALIDATORS = 'users.validators.ASCIIUsernameValidator'
+# allauth 0.63+ 要求这里是一个「指向 list 的路径」（list 里放可调用的校验器）
+ACCOUNT_USERNAME_VALIDATORS = 'users.validators.username_validators'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Password validation

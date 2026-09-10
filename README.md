@@ -266,7 +266,7 @@ kaku/
 | 包名 | 版本 | 说明 |
 |------|------|------|
 | Django | 4.2.30 | Web 框架 (LTS) |
-| django-allauth | 0.63.6 | 认证系统 |
+| django-allauth | 65.19.2 | 认证系统（已迁移到 0.63+ 新设置风格） |
 | django-crispy-forms | 1.14.0 | 表单渲染 |
 | django-imagekit | 6.1.0 | 图片处理 |
 | django-model-utils | 5.0.0 | 通知系统依赖（5.0 起改用 importlib.metadata，不再需要 pkg_resources） |
@@ -290,10 +290,10 @@ python scripts/dep_audit.py docs/dependabot-audit.md
 ```
 
 最近一次审计结果见 [`docs/dependabot-audit.md`](docs/dependabot-audit.md)：
-45 个包中仅 Django 4.2.30（7 条）与 django-allauth 0.63.6（6 条）命中，
-其修复版本只存在于更高大版本线（Django 5.2/6.0、allauth 65.x）；
-mistune 升级到 3.3.4 后 28 条已清零，其余包（requests、Pillow、bleach、
-sqlparse、captcha、notifications、setuptools 等）均无命中。
+45 个包中仅 **Django 4.2.30（7 条）** 命中——其修复版本只存在于 5.2/6.0 线
+（4.2 LTS 已 EOL，不再回补）；mistune（28 条）、django-allauth（6 条）、
+setuptools（4 条）等均已通过升级清零，requests、Pillow、bleach、sqlparse、
+captcha、notifications 等其余包无命中。
 
 ## 常见问题
 
@@ -334,6 +334,12 @@ A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py`
 - mistune 2.0.4 → 3.3.4：一次性消除 28 条 XSS / ReDoS 公告（其修复版本仅存在于
   3.x）；同时启用 table / strikethrough 插件，修复了“编辑器插入的 GFM 表格
   在详情页不渲染”的老问题（表格对齐由 style 转成安全的 align 属性保留）
+- django-allauth 0.63.6 → 65.19.2：消除 6 条公告（open redirect 等），并迁移到
+  0.63+ 新设置风格：
+  * `ACCOUNT_AUTHENTICATION_METHOD` → `ACCOUNT_LOGIN_METHODS = {'username', 'email'}`
+  * `ACCOUNT_EMAIL_REQUIRED` → `ACCOUNT_SIGNUP_FIELDS = ['username*', 'email*', 'password1*', 'password2*']`
+  * `ACCOUNT_USERNAME_VALIDATORS` 改为「指向 list 的路径」
+    （`users.validators.username_validators`），否则注册会直接 500
 - Pillow / requests 已是最新安全版本，未改动
 - 移除停更的 django-pagedown（编辑器已改用 EasyMDE）
 - 升级后 `manage.py check` 无问题，79 项测试全绿
