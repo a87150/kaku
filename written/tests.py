@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from index.models import Tag
 from .models import Article
 
 
@@ -101,6 +102,43 @@ class ArticleViewTests(TestCase):
         # 标签选择器数据注入
         self.assertContains(resp, 'kaku-available-tags')
         self.assertContains(resp, 'kaku-tags-picker')
+
+    def test_detail_tag_card_allows_inline_edit_for_author(self):
+        """详情页标签块带 data-* 供 kaku-tags-live.js 就地增删，作者可见移除按钮。"""
+        tag = Tag.objects.create(name='python')
+        article = Article.objects.create(author=self.user, title='T', content='body')
+        article.tags.add(tag)
+        self.client.login(username='writer', password='pass-1234')
+        resp = self.client.get(article.get_absolute_url())
+        self.assertContains(resp, 'id="kaku-tag-chips"')
+        self.assertContains(resp, 'data-tags-type="article"')
+        self.assertContains(resp, 'data-tags-pk="%d"' % article.pk)
+        self.assertContains(resp, 'data-can-edit="1"')
+        self.assertContains(resp, 'class="kaku-tag-remove"')
+        self.assertContains(resp, 'js/kaku-tags-live.js')
+
+    def test_detail_tag_card_hides_remove_for_other_users(self):
+        """非作者只能看到标签，不能移除。"""
+        User = get_user_model()
+        tag = Tag.objects.create(name='python')
+        article = Article.objects.create(author=self.user, title='T', content='body')
+        article.tags.add(tag)
+        User.objects.create_user(username='visitor', password='pass-1234')
+        self.client.login(username='visitor', password='pass-1234')
+        resp = self.client.get(article.get_absolute_url())
+        self.assertContains(resp, 'id="kaku-tag-chips"')
+        self.assertContains(resp, 'python')
+        self.assertNotContains(resp, 'kaku-tag-remove')
+
+    def test_browse_pages_do_not_load_full_site_bootstrap(self):
+        """bootstrap 只在表单/评论表单页按需引入，纯浏览页不再全站加载 158KB。"""
+        resp = self.client.get(reverse('written:index'))
+        self.assertNotContains(resp, 'css/bootstrap.min.css')
+        self.assertNotContains(self.client.get('/'), 'css/bootstrap.min.css')
+
+        self.client.login(username='writer', password='pass-1234')
+        resp = self.client.get(reverse('written:create'))
+        self.assertContains(resp, 'css/bootstrap.min.css')
 
 
 class ArticleCreateTagTests(TestCase):

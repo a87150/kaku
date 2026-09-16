@@ -1,16 +1,32 @@
+{% load static %}
 <div class="mdui-card kaku-card">
     <div class="mdui-card-primary">
         <div class="mdui-card-primary-title">标签</div>
     </div>
     <div class="mdui-divider"></div>
     <div class="mdui-card-content">
-        {% for tag in tag_list %}
-            <a class="mdui-chip" href="/search/?query={{ tag }}" target="_blank">
-                <i class="mdui-chip-icon mdui-icon material-icons">label</i>
-                <span class="mdui-chip-title">{{ tag }}</span>
-            </a>
-        {% empty %}
-            <span class="kaku-text-muted">暂无标签</span>
-        {% endfor %}
+        <!-- data-* 供 kaku-tags-live.js 定位与提交；tags_author 与当前用户一致时才显示移除按钮 -->
+        <div class="kaku-tag-chips" id="kaku-tag-chips"
+             data-tags-type="{{ tags_type|default_if_none:'' }}"
+             data-tags-pk="{{ tags_pk|default_if_none:'' }}"
+             data-can-edit="{% if tags_author and tags_author == user %}1{% endif %}">
+            {% for tag in tag_list %}
+            <span class="kaku-tag-item" data-tag="{{ tag }}">
+                <a class="mdui-chip" href="/search/?query={{ tag|urlencode }}" target="_blank">
+                    <i class="mdui-chip-icon mdui-icon material-icons">label</i>
+                    <span class="mdui-chip-title">{{ tag }}</span>
+                </a>
+                {% if tags_author and tags_author == user %}
+                <button type="button" class="kaku-tag-remove" data-tag="{{ tag }}"
+                        title="移除标签 {{ tag }}" aria-label="移除标签 {{ tag }}">×</button>
+                {% endif %}
+            </span>
+            {% empty %}
+            <span class="kaku-text-muted kaku-tag-empty">暂无标签</span>
+            {% endfor %}
+        </div>
+        <div class="kaku-tags-errors" id="kaku-tag-live-msg" role="status" aria-live="polite"></div>
     </div>
 </div>
+
+<script src="{% static 'js/kaku-tags-live.js' %}"></script>

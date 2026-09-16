@@ -40,6 +40,20 @@ def _load_dotenv(path=None):
                 os.environ.setdefault(key, value)
 
 
+def _env_bool(name, default=False):
+    """读取布尔型环境变量：1/true/yes/on（忽略大小写与首尾空格）视为真。"""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def _env_list(name):
+    """读取逗号分隔的环境变量，丢弃空白项。"""
+    raw = os.environ.get(name, '')
+    return [item.strip() for item in raw.split(',') if item.strip()]
+
+
 _load_dotenv()
 
 
@@ -54,10 +68,31 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = _env_bool('DJANGO_DEBUG', True)
 
-ALLOWED_HOSTS = (os.environ.get('DJANGO_ALLOWED_HOSTS', 'takanashi.site,127.0.0.1,localhost,192.168.1.104').split(','))
+ALLOWED_HOSTS = _env_list('DJANGO_ALLOWED_HOSTS') or [
+    'takanashi.site', '127.0.0.1', 'localhost', '192.168.1.104']
 SITE_ID = 1
+
+# 反向代理/HTTPS 域名需要显式列入，否则 Django 4.x 会拒绝跨源 POST（含登录、CSRF）
+# 例：DJANGO_CSRF_TRUSTED_ORIGINS=https://takanashi.site,https://www.takanashi.site
+CSRF_TRUSTED_ORIGINS = _env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+
+# ===== 生产 HTTPS 相关安全项：默认全部关闭，按需用 DJANGO_HTTPS=1 打开 =====
+# 之所以不跟随 DEBUG 自动开启：若 nginx 只监听 80 端口，SECURE_SSL_REDIRECT
+# 会造成 http -> https -> 无人监听 的重定向环，把站点彻底打不开。
+if _env_bool('DJANGO_HTTPS'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# 这两项 Django 4.2 的默认值本就与之一致，写出仅为让上线检查清单可逐条核对
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 

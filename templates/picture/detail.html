@@ -4,6 +4,8 @@
 <title>{{ picture.title }} - kaku demo</title>
 {% endblock title %}
 
+{% block base_css %}{% include 'includes/_bootstrap_css.html' %}{% endblock base_css %}
+
 {% block main %}
 <div class="mdui-row">
     <div class="mdui-col-md-8 mdui-col-offset-md-2">
@@ -28,7 +30,7 @@
 
         {% include 'post_like.html' with like_type='picture' like_pk=picture.pk is_liked=is_like %}
 
-        {% include 'tag.html' %}
+        {% include 'tag.html' with tags_type='picture' tags_pk=picture.pk tags_author=picture.author %}
 
         {% if request.user.is_authenticated %}
         {% include 'post_tag.html' with tags_type='picture' tags_pk=picture.pk %}

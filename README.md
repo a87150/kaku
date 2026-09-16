@@ -164,9 +164,8 @@ python manage.py runserver
 
 ### 数据库配置
 
-默认使用 SQLite，生产环境建议使用 MySQL。
-
-修改 `kaku/settings.py` 中的 `DATABASES` 配置：
+默认使用 SQLite。如需切换 MySQL，修改 `kaku/settings.py` 中的 `DATABASES` 配置，
+并自行安装 `mysqlclient`（当前 `requirements.txt` 锁定的是 SQLite 部署，未包含它）：
 
 ```python
 DATABASES = {
@@ -181,8 +180,6 @@ DATABASES = {
 }
 ```
 
-如果不使用 MySQL，可以从 `requirements.txt` 中删除 `mysqlclient==1.3.14`。
-
 ### Redis 配置
 
 Redis 配置在 `kaku/settings.py` 中：
@@ -192,10 +189,15 @@ CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
-        "KEY_PREFIX": "kaku",
+        "KEY_PREFIX": "example",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 100,
+                "socket_connect_timeout": 0.3,
+            },
+            # Redis 不可用时静默降级，不拖慢页面
+            "IGNORE_EXCEPTIONS": True,
         }
     }
 }
@@ -217,9 +219,15 @@ cp .env.example .env   # 然后编辑 .env
 | `DJANGO_SECRET_KEY` | Django 密钥（生产必改） | 一长串随机字符 |
 | `DJANGO_DEBUG` | `True`/`False` | 生产设为 `False` |
 | `DJANGO_ALLOWED_HOSTS` | 逗号分隔主机名 | `mydomain.com,127.0.0.1` |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | HTTPS 站点必填，否则登录等 POST 报 403 | `https://mydomain.com` |
+| `DJANGO_HTTPS` | `1` 时启用 SSL 跳转/安全 Cookie/HSTS（默认关） | `1` |
+| `DJANGO_HSTS_SECONDS` | HSTS 有效期（配合上一项） | `31536000` |
 | `GITHUB_CLIENTID` | GitHub OAuth Client ID | — |
 | `GITHUB_CLIENTSECRET` | GitHub OAuth Client Secret | — |
 | `GITHUB_CALLBACK` | GitHub OAuth 回调地址 | `http://127.0.0.1:8000/oauth/github/` |
+
+> `DJANGO_HTTPS` 特意做成显式开关而不是"DEBUG=False 就自动开"：若 nginx 只监听 80 端口，
+> 自动开启 `SECURE_SSL_REDIRECT` 会造成 http → https 的重定向环，站点直接打不开。
 
 或在 shell 中直接 export（Linux/Mac）或 `$env:`（Windows PowerShell）后运行。
 
@@ -240,6 +248,13 @@ cp .env.example .env   # 然后编辑 .env
 2. 设置 `DJANGO_DEBUG=False`
 3. 配置静态文件服务（`collectstatic` + nginx）
 4. 配置邮件后端（邮件在 `.env` 对应 SMTP 或 settings 修改）
+
+## 生产部署
+
+nginx + gunicorn + supervisor 的完整流程见 **[`deploy/README.md`](deploy/README.md)**，
+配套示例配置在 `deploy/` 下（`nginx.conf` / `gunicorn_start.sh` / `supervisor.conf`）。
+该文档涵盖：环境变量清单、首次部署步骤、升级与回滚、Redis 降级与 `sync_cache` 定时任务、
+备份方式、上线检查清单。
 
 ## 项目结构
 
@@ -295,6 +310,11 @@ python scripts/dep_audit.py docs/dependabot-audit.md
 setuptools（4 条）等均已通过升级清零，requests、Pillow、bleach、sqlparse、
 captcha、notifications 等其余包无命中。
 
+这 7 条的逐个核对（哪些本项目根本不适用、哪一条真的会踩到、以及已采取的应用层
+缓解）见 [`docs/django52-upgrade-assessment.md`](docs/django52-upgrade-assessment.md)：
+该文档同时记录了 **Django 4.2 → 5.2 的完整可行性论证**——结论是项目自身代码在
+5.2 下已全绿，唯一硬阻塞是已停更的 `django-notifications-hq`。
+
 ## 常见问题
 
 ### Q: 依赖安装失败
@@ -318,6 +338,31 @@ A: 运行 `python manage.py collectstatic`。
 A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py` 内置兼容补丁（随 settings 自动加载），可在 Python 3.13/3.14 上运行；推荐使用 Python 3.12 获得最佳兼容性。
 
 ## 更新日志
+
+### v3.2 — 前端体验 / 功能增强 / 部署文档化
+
+- **前端按需加载**：bootstrap 原先全站加载（158KB），现改为只在含表单或评论表单的
+  7 个页面引入（新增 `templates/includes/_bootstrap_css.html` + base.html 的
+  `base_css` 块），浏览页不再白付这份体积
+- **创作页移动端适配**：文章编辑器页与发布图画页在窄屏收紧内边距、降低编辑区高度、
+  放大工具按钮触控区、输入框字号提升到 16px（避免 iOS 聚焦自动放大页面）、
+  画板弹层窄屏占满整屏
+- **详情页标签即时增删**：新增 `POST /tags/delete/`（仅作者本人可移除，前端不发请求
+  也能看到完整标签）；新增 `common_static/js/kaku-tags-live.js` 用 DOM 就地增删，
+  不再 `location.reload()`；服务端同时补上标签长度校验并回传最终标签名
+- **画板以已有图片为底再创作**：Painterro 的 `show(字符串)` 会把该图载入画布
+  （`show({})` 才是清空），已选图片时按钮文案变为「在所选图片上继续画」
+- **搜索体验**：结果区分「文章 / 图画」徽标、关键词高亮（`highlight` 过滤器）、
+  显示命中条数与截断提示、关键词去首尾空格、非法 `type` 回退为 `all`
+- **列表页**：卡片显示点赞/评论数（`annotate` 一次聚合，避免 N+1）、标签链接
+  `urlencode`、分页链接保留查询参数（新增 `{% page_url %}` 标签）
+- **安全（Django 4.2 无补丁项的补偿）**：整页缓存改为只服务匿名访客
+  （`kaku/cache.py::cache_page_anonymous`），使 CVE-2026-48588 在本项目失去适用面
+- **配置**：`CSRF_TRUSTED_ORIGINS` 与 `DJANGO_HTTPS` 安全开关（默认全关，避免纯 HTTP
+  部署出现重定向环）；`.env.example` 同步补齐
+- **文档**：新增 `deploy/README.md`（生产部署指南）、
+  `docs/django52-upgrade-assessment.md`（5.2 升级可行性论证）
+- 测试 83 → 109 项，`manage.py check` 无问题
 
 ### v3.1 — 依赖安全补丁升级（dependabot）
 

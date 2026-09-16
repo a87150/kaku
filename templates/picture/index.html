@@ -26,12 +26,13 @@
                             <span class="kaku-meta">
                                 <a href="{{ picture.author.get_absolute_url }}">{{ picture.author }}</a>
                                 &nbsp;·&nbsp; {{ picture.created_time }}
+                                &nbsp;·&nbsp; 赞 {{ picture.like_count }} &nbsp;·&nbsp; 评论 {{ picture.comment_count }}
                             </span>
                         </div>
                     </div>
                     <div class="mdui-card-actions">
                         {% for tag in picture.tags.all %}
-                            <a class="mdui-chip" href="/search/?query={{ tag }}" target="_blank">
+                            <a class="mdui-chip" href="/search/?query={{ tag|urlencode }}" target="_blank">
                                 <span class="mdui-chip-title">#{{ tag }}</span>
                             </a>
                         {% empty %}

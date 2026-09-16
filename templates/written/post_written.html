@@ -5,6 +5,8 @@
 <title>{% if article %}编辑文章{% elif chapter_article_pk %}添加章节{% else %}发布新文章{% endif %} - kaku demo</title>
 {% endblock title %}
 
+{% block base_css %}{% include 'includes/_bootstrap_css.html' %}{% endblock base_css %}
+
 {% block style %}
     <link href="{% static 'vendor/easymde/easymde.min.css' %}" rel="stylesheet"/>
     <style>
@@ -185,6 +187,26 @@
         .kaku-tags-tip { font-size: 13px; color: #90a4ae; line-height: 1.6; }
         .kaku-tags-empty-note { font-size: 13px; color: #78909c; margin-top: 8px; }
         .kaku-submit-row { margin-top: 24px; display: flex; gap: 12px; align-items: center; }
+        /* ===== 移动端适配：收紧内边距、降低编辑区高度、放大工具按钮触控区 ===== */
+        @media (max-width: 599px) {
+            .kaku-editor-card .mdui-card-primary { padding: 12px 12px 4px; }
+            .kaku-editor-form { padding: 4px 12px 20px; }
+            .kaku-editor-form .EasyMDEContainer .CodeMirror {
+                min-height: 240px;
+                font-size: 14px;
+                line-height: 1.7;
+            }
+            .kaku-md-bar { gap: 2px; padding: 5px 6px; }
+            .kaku-md-bar button { font-size: 12.5px; padding: 5px 8px; }
+            .kaku-md-bar-sep { margin: 0 4px; }
+            .kaku-live-preview { padding: 10px 12px; font-size: 14px; max-height: 50vh; }
+            .kaku-md-host.is-fullscreen { padding: 8px 10px 16px; }
+            .kaku-md-host.is-fullscreen .EasyMDEContainer .CodeMirror { min-height: 58vh; }
+            .kaku-md-host.is-fullscreen .kaku-live-preview { max-height: 58vh; }
+            /* 16px 可避免 iOS Safari 聚焦输入框时自动放大页面 */
+            .kaku-editor-form .form-control { font-size: 16px; }
+            .kaku-submit-row { flex-wrap: wrap; }
+        }
     </style>
 {% endblock style %}
 

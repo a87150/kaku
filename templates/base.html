@@ -9,10 +9,11 @@
     {% block title %}
     <title>kaku demo</title>
     {% endblock title %}
-    <!-- 表单/设置页沿用 bootstrap 样式；mdui 在其后加载用于覆盖浏览页 -->
-    <link href={% static '/css/bootstrap.min.css' %} rel="stylesheet"/>
+    <!-- bootstrap 按需加载：仅表单/设置页在自己的 base_css 块里引入（浏览页省下 158KB） -->
+    {% block base_css %}{% endblock base_css %}
+    <!-- mdui 在 bootstrap 之后加载，用于覆盖浏览页样式 -->
     <link href={% static '/css/mdui.min.css' %} rel="stylesheet"/>
-    <link href={% static '/css/custom.css' %}?v=20260904c rel="stylesheet"/>
+    <link href={% static '/css/custom.css' %}?v=20260916a rel="stylesheet"/>
     <!-- 通知铃铛/未读徽标核心样式（面板样式在 custom.css） -->
     <style>
         .kaku-notify-bell {

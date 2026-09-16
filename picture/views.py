@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 from django.utils import timezone
 
 from actstream.signals import action
@@ -21,7 +22,12 @@ class IndexView(ListView):
     context_object_name = "picture_list"
 
     def get_queryset(self):
-        return Picture.objects.select_related('author').prefetch_related('tags')
+        # 列表卡片要显示点赞/评论数：一次 annotate 聚合，避免每张卡片多查两次
+        return (Picture.objects
+                .select_related('author')
+                .prefetch_related('tags')
+                .annotate(like_count=Count('likes', distinct=True),
+                          comment_count=Count('comments', distinct=True)))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

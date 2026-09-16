@@ -18,10 +18,19 @@
             return;
         }
 
+        // tag.html 的 kaku-tags-live.js 负责把标签块就地插进列表
+        function live() {
+            return window.KakuTagsLive || null;
+        }
+
         function postTag() {
             var tag = input.value.trim();
             if (!tag) {
-                alert('标签不能为空');
+                if (live()) {
+                    live().showMsg('标签不能为空', false);
+                } else {
+                    alert('标签不能为空');
+                }
                 return;
             }
             var type = btn.getAttribute('data-type');
@@ -29,14 +38,28 @@
             if (!type || !pk) {
                 return;
             }
+
             btn.disabled = true;
-            setTimeout(function () {
-                btn.disabled = false;
-            }, 3000);
             window.KakuAjax.post('/tags/', {tag: tag, pk: pk, type: type}, function (ret) {
-                alert(ret && ret.msg ? ret.msg : '操作失败');
-                if (ret && ret.ok) {
-                    location.reload();
+                btn.disabled = false;
+                ret = ret || {};
+                if (ret.ok) {
+                    input.value = '';
+                    if (live()) {
+                        live().addTag(ret.tag || tag);
+                    } else {
+                        // 兜底：理论上详情页都会加载 live 脚本
+                        location.reload();
+                    }
+                } else if (live()) {
+                    live().showMsg(ret.msg || '操作失败', false);
+                } else {
+                    alert(ret.msg || '操作失败');
+                }
+            }, function () {
+                btn.disabled = false;
+                if (live()) {
+                    live().showMsg('网络异常，请稍后重试', false);
                 }
             });
         }

@@ -1,27 +1,28 @@
+{% load kaku_pagination %}
 {% if is_paginated %}
 <div class="mdui-p-t-2 mdui-p-b-2 mdui-text-center">
     {% if first %}
-        <a href="?page=1" class="mdui-btn mdui-ripple">1</a>
+        <a href="{% page_url 1 %}" class="mdui-btn mdui-ripple">1</a>
     {% endif %}
     {% if left %}
         {% if left_has_more %}
             <span class="mdui-btn mdui-btn-icon" disabled>…</span>
         {% endif %}
         {% for i in left %}
-            <a href="?page={{ i }}" class="mdui-btn mdui-ripple">{{ i }}</a>
+            <a href="{% page_url i %}" class="mdui-btn mdui-ripple">{{ i }}</a>
         {% endfor %}
     {% endif %}
-    <a href="?page={{ page_obj.number }}" class="mdui-btn mdui-btn-raised mdui-color-grey-800">{{ page_obj.number }}</a>
+    <a href="{% page_url page_obj.number %}" class="mdui-btn mdui-btn-raised mdui-color-grey-800">{{ page_obj.number }}</a>
     {% if right %}
         {% for i in right %}
-            <a href="?page={{ i }}" class="mdui-btn mdui-ripple">{{ i }}</a>
+            <a href="{% page_url i %}" class="mdui-btn mdui-ripple">{{ i }}</a>
         {% endfor %}
         {% if right_has_more %}
             <span class="mdui-btn mdui-btn-icon" disabled>…</span>
         {% endif %}
     {% endif %}
     {% if last %}
-        <a href="?page={{ paginator.num_pages }}" class="mdui-btn mdui-ripple">{{ paginator.num_pages }}</a>
+        <a href="{% page_url paginator.num_pages %}" class="mdui-btn mdui-ripple">{{ paginator.num_pages }}</a>
     {% endif %}
 </div>
 {% endif %}

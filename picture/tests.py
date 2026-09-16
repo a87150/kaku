@@ -111,6 +111,19 @@ class PictureDetailViewTests(TestCase):
         resp = self.client.get(pic.get_absolute_url())
         self.assertContains(resp, 'id="like-btn"')
 
+    def test_detail_tag_card_allows_inline_edit_for_author(self):
+        """作者在详情页可即时移除标签，无需整页刷新。"""
+        tag = Tag.objects.create(name='风景')
+        pic = self.make_picture()
+        pic.tags.add(tag)
+        self.client.login(username='painter', password='pass-1234')
+        resp = self.client.get(pic.get_absolute_url())
+        self.assertContains(resp, 'id="kaku-tag-chips"')
+        self.assertContains(resp, 'data-tags-type="picture"')
+        self.assertContains(resp, 'data-tags-pk="%d"' % pic.pk)
+        self.assertContains(resp, 'class="kaku-tag-remove"')
+        self.assertContains(resp, 'js/kaku-tags-live.js')
+
 
 class PictureCreateViewTests(TestCase):
     def setUp(self):
@@ -131,6 +144,17 @@ class PictureCreateViewTests(TestCase):
         self.assertContains(resp, 'vendor/painterro/painterro.min.js')
         self.assertContains(resp, 'btn-open-painterro')
         self.assertContains(resp, 'kaku-tags-picker')
+
+    def test_create_page_painterro_uses_selected_image_as_base(self):
+        """画板支持以已选图片为底继续创作：按钮文案会变，且会把底图交给 ptro.show()。"""
+        self.client.login(username='painter', password='pass-1234')
+        resp = self.client.get('/picture/new/')
+        self.assertContains(resp, 'id="btn-open-painterro-label"')
+        self.assertContains(resp, 'function readCurrentImage')
+        # Painterro 的 show(字符串) 才载入图片，show({}) 是清空成新画布
+        self.assertContains(resp, 'ptro.show(dataUrl || {})')
+        # 题图预览尺寸改由 CSS 控制，窄屏才能用媒体查询收紧
+        self.assertNotContains(resp, 'style="width:100%; height:320px;"')
 
     def test_create_picture_success_with_tags(self):
         self.client.login(username='painter', password='pass-1234')

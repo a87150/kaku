@@ -24,9 +24,14 @@ RUNDIR=$(dirname $SOCKFILE)
 test -d $RUNDIR || mkdir -p $RUNDIR
 
 # 启动 Django
+# --timeout：避免大图上传/画板导出这类慢请求被 worker 提前掐断
+# --max-requests：定期回收 worker，缓解第三方库可能的内存增长
 exec venv/bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
     --name $NAME \
     --workers $NUM_WORKERS \
     --user=$USER --group=$GROUP \
     --log-level=info \
+    --timeout 60 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
     --bind=unix:$SOCKFILE

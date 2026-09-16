@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        {% include 'tag.html' %}
+        {% include 'tag.html' with tags_type='article' tags_pk=article.article.pk tags_author=article.article.author %}
     </div>
 </div>
 {% endblock main %}

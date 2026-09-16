@@ -5,6 +5,8 @@
 <title>发布图画 - kaku demo</title>
 {% endblock title %}
 
+{% block base_css %}{% include 'includes/_bootstrap_css.html' %}{% endblock base_css %}
+
 {% block style %}
     <style>
         /* ===== 发布图画页排版（白卡片内高对比文字） ===== */
@@ -37,15 +39,20 @@
             box-shadow: 0 0 0 2px rgba(120, 144, 156, .25);
             outline: none;
         }
-        /* 题图预览区 */
+        /* 题图预览区（尺寸写在 CSS 里，窄屏用媒体查询收紧） */
         #test-image-preview {
+            width: 100%;
+            height: 320px;
             border: 2px dashed #b0bec5;
             background-color: #fafafa;
             border-radius: 8px;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         #test-image-preview.has-image { border-style: solid; border-color: #90a4ae; }
-        .kaku-preview-empty { color: #90a4ae; text-align: center; }
+        .kaku-preview-empty { color: #90a4ae; text-align: center; padding: 0 16px; line-height: 1.7; }
         /* 题图上传入口：原生 file input 视觉隐藏，由“选择本地图片”标签触发 */
         .kaku-file-hidden { position: relative; }
         .kaku-file-hidden input[type="file"] {
@@ -159,6 +166,23 @@
             min-height: 0;
             overflow: hidden;
         }
+        /* ===== 移动端适配：预览区收矮、按钮等宽易点、画板弹层占满整屏 ===== */
+        @media (max-width: 599px) {
+            .kaku-editor-card .mdui-card-primary { padding: 12px 12px 4px; }
+            .kaku-picture-form { padding: 4px 12px 20px; }
+            #test-image-preview { height: 200px; }
+            .kaku-preview-empty { font-size: 13px; }
+            .kaku-picture-actions { gap: 8px; }
+            .kaku-picture-actions .mdui-btn,
+            .kaku-picture-actions label.mdui-btn { flex: 1 1 0; min-width: 0; font-size: 13px; }
+            /* 16px 可避免 iOS Safari 聚焦输入框时自动放大页面 */
+            .kaku-picture-form .form-control { font-size: 16px; }
+            .kaku-submit-row { flex-wrap: wrap; }
+            #kaku-ptro-modal { padding: 0; }
+            .kaku-ptro-box { height: 100%; max-width: none; border-radius: 0; }
+            .kaku-ptro-head { flex-wrap: wrap; gap: 6px; padding: 6px 10px; }
+            .kaku-ptro-head .kaku-ptro-tip { display: none; }
+        }
     </style>
 {% endblock style %}
 
@@ -187,19 +211,20 @@
                 {% if form.title.errors %}<div class="kaku-field-errors">{{ form.title.errors }}</div>{% endif %}
 
                 <label>题图</label>
-                <div id="test-image-preview" style="width:100%; height:320px;">
-                    <div class="kaku-preview-empty" style="line-height:320px;">还没有图片 — 上传文件或在画板里画一幅</div>
+                <div id="test-image-preview">
+                    <div class="kaku-preview-empty">还没有图片 — 上传文件或在画板里画一幅</div>
                 </div>
                 <div class="kaku-picture-actions">
                     <label for="id_thematic" class="mdui-btn mdui-btn-raised mdui-ripple" role="button" tabindex="0">
                         <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">image</i>选择本地图片
                     </label>
                     <button type="button" class="mdui-btn mdui-btn-raised mdui-ripple" id="btn-open-painterro">
-                        <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">brush</i>打开在线画板
+                        <i class="mdui-icon material-icons" style="font-size:18px; margin-right:4px;">brush</i><span id="btn-open-painterro-label">打开在线画板</span>
                     </button>
                 </div>
                 <span class="kaku-file-hidden">{{ form.thematic }}</span>
                 <div class="kaku-hint">支持 JPG / PNG / GIF / WebP，不能大于 1MB（画板导出超限时可缩小画布再保存）</div>
+                <div class="kaku-hint">已选好图片再点画板，会<b>直接在该图片上继续创作</b>；没有图片时打开的是空白画布。</div>
                 <div class="kaku-file-status" id="kaku-file-status"></div>
                 {% if form.thematic.errors %}<div class="kaku-field-errors">{{ form.thematic.errors }}</div>{% endif %}
 
@@ -232,7 +257,7 @@
     <div class="kaku-ptro-box">
         <div class="kaku-ptro-head">
             <span><b>在线画板</b></span>
-            <span class="kaku-ptro-tip">画完后点工具栏「保存」使用这幅作品；Ctrl + 滚轮可缩放画布</span>
+            <span class="kaku-ptro-tip">画完后点工具栏「保存」使用这幅作品；已选图片会自动作为底图，Ctrl + 滚轮可缩放画布</span>
             <span class="spacer"></span>
             <button type="button" class="mdui-btn mdui-btn-dense" id="kaku-ptro-close">关闭</button>
         </div>
@@ -253,6 +278,14 @@
             var fileInput = document.getElementById('id_thematic');
             var status = document.getElementById('kaku-file-status');
             var ACCEPTED = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            var painterroBtnLabel = document.getElementById('btn-open-painterro-label');
+
+            // 有底图时按钮文案跟着变，提示“继续创作”而非“新建”
+            function setPainterroLabel(hasImage) {
+                if (painterroBtnLabel) {
+                    painterroBtnLabel.textContent = hasImage ? '在所选图片上继续画' : '打开在线画板';
+                }
+            }
 
             function fmtSize(bytes) {
                 return bytes >= 1024 * 1024
@@ -273,6 +306,7 @@
                     preview.style.backgroundPosition = 'center center';
                     preview.classList.add('has-image');
                     status.textContent = '已就绪：' + file.name + '（' + fmtSize(file.size) + '）';
+                    setPainterroLabel(true);
                 };
                 reader.readAsDataURL(file);
             }
@@ -299,6 +333,7 @@
                     if (window.DataTransfer) {
                         fileInput.files = new DataTransfer().files;
                     }
+                    setPainterroLabel(false);
                 }
             });
 
@@ -391,6 +426,19 @@
                 }
             }
 
+            // 把表单里已选中的图片读成 data URL，用于当作画板底图
+            function readCurrentImage(cb) {
+                var file = fileInput.files && fileInput.files[0];
+                if (!file) {
+                    cb(null);
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function (e) { cb(e.target.result); };
+                reader.onerror = function () { cb(null); };
+                reader.readAsDataURL(file);
+            }
+
             function openPainterro() {
                 if (!window.Painterro) {
                     alert('画板组件加载失败，请刷新后重试');
@@ -425,13 +473,16 @@
                     });
                 }
                 setTimeout(function () {
-                    // 每次打开都给一块新画布，并按弹层可用区域自动缩放
-                    ptro.show({});
-                    setTimeout(function () {
-                        if (ptro && ptro.setZoom) {
-                            ptro.setZoom(100);
-                        }
-                    }, 150);
+                    // Painterro 的 show(字符串) 会把该图载入画布；show({}) 才是清空成新画布。
+                    // 有已选图片就以它为底图继续创作，否则开一张空白画布。
+                    readCurrentImage(function (dataUrl) {
+                        ptro.show(dataUrl || {});
+                        setTimeout(function () {
+                            if (ptro && ptro.setZoom) {
+                                ptro.setZoom(100);
+                            }
+                        }, 150);
+                    });
                 }, 60);
             }
 

@@ -104,6 +104,84 @@ class TagCreateViewTests(TestCase):
         self.assertFalse(data['ok'])
         self.assertIn('超过10个tag', data['msg'])
 
+    def test_add_tag_returns_final_name(self):
+        """前端就地插入标签块，需要服务端回传最终采用的标签名（含去空格）。"""
+        resp = self.post_tag(tag='  Django  ')
+        data = json.loads(resp.content)
+        self.assertTrue(data['ok'])
+        self.assertEqual(data['tag'], 'Django')
+        self.assertTrue(self.article.tags.filter(name='Django').exists())
+
+    def test_overlong_tag_rejected(self):
+        resp = self.post_tag(tag='x' * 31)
+        data = json.loads(resp.content)
+        self.assertFalse(data['ok'])
+        self.assertIn('标签太长', data['msg'])
+
+
+class TagDeleteViewTests(TestCase):
+    """详情页标签移除：仅作者本人可操作，返回 JSON 供前端就地删除。"""
+
+    def setUp(self):
+        self.author = User.objects.create_user(username='bob', password='pass-1234')
+        self.other = User.objects.create_user(username='eve', password='pass-1234')
+        self.article = Article.objects.create(
+            author=self.author, title='带标签的文章', content='正文')
+        self.picture = Picture.objects.create(
+            author=self.author, title='带标签的图画', thematic='pictures/t.png')
+        self.tag = Tag.objects.create(name='python')
+        self.article.tags.add(self.tag)
+
+    def post_delete(self, tag='python', type='article', pk=None, username='bob'):
+        self.client.login(username=username, password='pass-1234')
+        return self.client.post('/tags/delete/', {
+            'tag': tag, 'type': type,
+            'pk': pk if pk is not None else self.article.pk})
+
+    def test_requires_login(self):
+        resp = self.client.post('/tags/delete/', {
+            'tag': 'python', 'type': 'article', 'pk': self.article.pk})
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('/users/login/', resp.url)
+
+    def test_author_can_remove_tag(self):
+        resp = self.post_delete()
+        data = json.loads(resp.content)
+        self.assertTrue(data['ok'])
+        self.assertEqual(data['tag'], 'python')
+        self.assertFalse(self.article.tags.filter(name='python').exists())
+
+    def test_non_author_cannot_remove_tag(self):
+        resp = self.post_delete(username='eve')
+        self.assertEqual(resp.status_code, 403)
+        data = json.loads(resp.content)
+        self.assertFalse(data['ok'])
+        self.assertIn('只有作者', data['msg'])
+        self.assertTrue(self.article.tags.filter(name='python').exists())
+
+    def test_unknown_type_rejected(self):
+        resp = self.post_delete(type='novel')
+        data = json.loads(resp.content)
+        self.assertFalse(data['ok'])
+        self.assertIn('类型错误', data['msg'])
+
+    def test_missing_object_404(self):
+        resp = self.post_delete(pk=99999)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_tag_not_on_object_rejected(self):
+        resp = self.post_delete(tag='missing')
+        data = json.loads(resp.content)
+        self.assertFalse(data['ok'])
+        self.assertIn('不在此条目上', data['msg'])
+
+    def test_picture_author_can_remove_tag(self):
+        self.picture.tags.add(self.tag)
+        resp = self.post_delete(type='picture', pk=self.picture.pk)
+        data = json.loads(resp.content)
+        self.assertTrue(data['ok'])
+        self.assertFalse(self.picture.tags.filter(name='python').exists())
+
 
 class LikeCreateViewTests(TestCase):
     def setUp(self):
