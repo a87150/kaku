@@ -55,8 +55,7 @@ class RecentNotificationsContextProcessorTests(TestCase):
 class CachePageAnonymousTests(TestCase):
     """整页缓存只服务匿名访客。
 
-    已登录渲染含顶栏昵称/头像/未读徽标，一旦进共享缓存就有跨会话串号风险
-    （CVE-2026-48588 的触发模式，Django 4.2 无修复版本）。
+    已登录渲染含顶栏昵称/头像/未读徽标，一旦进共享缓存就有跨会话串号风险。
     """
 
     def setUp(self):

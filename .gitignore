@@ -55,9 +55,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# 临时探针目录（依赖/版本兼容性验证，用完即删）
-/.tmp_*/
-
 # Testing
 .tox/
 .coverage

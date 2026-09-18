@@ -103,7 +103,7 @@
     margin-right: 12px;
 }
 
-/* 隐藏 bootstrap 遗留可能出现的样式残留 */
+/* 全站链接不显示下划线（Bootstrap 5 默认给 a 加下划线，这里统一去掉） */
 a {
     text-decoration: none;
 }

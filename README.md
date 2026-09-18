@@ -7,7 +7,7 @@
 ## 项目信息
 
 - **框架**: Django 5.2.17 (LTS)
-- **Python 版本**: 3.10 – 3.14（Django 5.2 官方支持范围，本机 3.14.7 已在其中；`kaku/compat_py314.py` 是 4.2 时代的补丁，在 5.2 上会自动空转，保留以兼容回退）
+- **Python 版本**: 3.10 – 3.14（Django 5.2 官方支持范围，本机 3.14.7 已在其中）
 - **数据库**: SQLite（默认）或 MySQL
 - **缓存**: Redis（可选，未安装 Redis 时自动回退到数据库）
 
@@ -309,8 +309,8 @@ python scripts/dep_audit.py docs/dependabot-audit.md
 
 沿革：最初有 72 条告警，经 mistune（28 条）、django-allauth（6 条）、setuptools（4 条）
 等升级清零后，最后剩余 7 条**全部来自 Django 4.2.30**——4.2 已 EOL，这些修复只发在
-5.2/6.0 线。这 7 条已随 **Django 4.2 → 5.2.17** 的升级全部清除，可行性论证与实测
-记录见 [`docs/django52-upgrade-assessment.md`](docs/django52-upgrade-assessment.md)。
+5.2/6.0 线，而依赖链上又有一个已停更的组件卡着。这 7 条已随
+**Django 4.2 → 5.2.17** 的升级全部清除。
 
 ## 常见问题
 
@@ -333,8 +333,6 @@ A: 运行 `python manage.py collectstatic`。
 ### Q: Python 3.13 / 3.14 下是否支持
 
 A: 支持。项目现运行在 Django 5.2.17 上，5.2 官方支持 Python 3.10–3.14。
-`kaku/compat_py314.py` 是 Django 4.2 时代的补丁（4.2 只声明到 Python 3.12），
-5.2 上游已修掉它要绕过的 `BaseContext.__copy__`，因此该补丁会自动空转，留着无害。
 
 ## 更新日志
 
@@ -355,11 +353,12 @@ A: 支持。项目现运行在 Django 5.2.17 上，5.2 官方支持 Python 3.10�
 - 缓存：`django-redis 5.2.0 → 7.0.0`（redis-py 已是 8.1.0，无需变更）
 - 清理孤儿依赖：`swapper` / `jsonfield` / `pytz` / `django-model-utils` 均只因
   notifications-hq 而存在，换包后一并卸载并移出 `requirements.txt`
-- Python 版本回到官方支持范围：Django 5.2 官方支持 3.10–3.14（4.2 只到 3.12，此前靠
-  `kaku/compat_py314.py` 兜底）；该补丁在 5.2 上会自动空转，保留以兼容回退
+- Python 版本回到官方支持范围：Django 5.2 官方支持 3.10–3.14（4.2 只到 3.12，
+  此前靠一份内置补丁兜底）
 - 移除 `USE_L10N`（Django 5.0 已删除该设置）
-- 文档：`docs/django52-upgrade-assessment.md` 更新为完整论证 + 实测记录；
-  `scripts/probe_django.py` 可复用旁挂任意 Django 版本做兼容探针
+- 清理 4.2 时代的兼容负担：删除 `kaku/compat_py314.py`（5.2 上游已修掉它要绕过的
+  `BaseContext.__copy__`）与版本探针脚本，并清掉 settings 里遗留的旧版文档链接、
+  Django 1.10 样板注释、`oauth` 里的空壳测试
 - 测试 114 项全绿，`manage.py check` 无问题
 
 ### v3.2 — 前端体验 / 功能增强 / 部署文档化
@@ -383,8 +382,7 @@ A: 支持。项目现运行在 Django 5.2.17 上，5.2 官方支持 Python 3.10�
   （`kaku/cache.py::cache_page_anonymous`），使 CVE-2026-48588 在本项目失去适用面
 - **配置**：`CSRF_TRUSTED_ORIGINS` 与 `DJANGO_HTTPS` 安全开关（默认全关，避免纯 HTTP
   部署出现重定向环）；`.env.example` 同步补齐
-- **文档**：新增 `deploy/README.md`（生产部署指南）、
-  `docs/django52-upgrade-assessment.md`（5.2 升级可行性论证）
+- **文档**：新增 `deploy/README.md`（生产部署指南）
 - 测试 83 → 109 项，`manage.py check` 无问题
 
 ### v3.1 — 依赖安全补丁升级（dependabot）

@@ -1,11 +1,4 @@
-"""
-WSGI config for kaku project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
-"""
+"""WSGI 入口：生产环境由 gunicorn 以 kaku.wsgi:application 启动。"""
 
 import os
 
