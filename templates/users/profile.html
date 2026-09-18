@@ -67,7 +67,7 @@
             flex-wrap: wrap;
         }
         #avatar-upload-panel .kaku-avatar-current img { border-radius: 50%; }
-        #avatar-upload-panel .form-control-file {
+        #avatar-upload-panel .form-control {
             display: block;
             margin: 10px 0 6px;
             font-size: 14px;
@@ -117,7 +117,7 @@
                         {% csrf_token %}
                         <input type="file" name="mugshot" id="id_mugshot"
                                accept="image/jpeg,image/png,image/gif,image/webp"
-                               class="form-control-file"/>
+                               class="form-control"/>
                         <div class="kaku-avatar-msg" id="avatar-upload-msg"></div>
                         <div class="kaku-avatar-actions">
                             <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-grey-800 mdui-ripple">上传并更换</button>

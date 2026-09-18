@@ -34,7 +34,8 @@ class PictureCreateForm(forms.ModelForm):
             'placeholder': '给这幅作品起个名字（50 字以内）',
         })
         self.fields['thematic'].widget.attrs.update({
-            'class': 'form-control-file',
+            # Bootstrap 5 已移除 .form-control-file，文件输入统一用 .form-control
+            'class': 'form-control',
             'accept': 'image/jpeg,image/png,image/gif,image/webp',
         })
         field = self.fields['tags_raw']

@@ -14,6 +14,10 @@ ENV/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+# 升级/迁移前的本地数据库备份
+db.sqlite3.bak*
+db.sqlite3.backup*
+/backups/
 /media
 /static
 /staticfiles

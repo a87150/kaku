@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 
 # 应用 Python 3.13+/3.14 兼容补丁（修复 Django 4.2 中 BaseContext.__copy__ 崩溃）
+# 说明：Django 5.2 上游已修掉 copy(super())，补丁会因自检不通过而自动空转；
+# 保留它是为了兼容 4.2 回退场景，勿删（详见 kaku/compat_py314.py 顶部说明）。
 try:
     from .compat_py314 import apply_python314_compat
     apply_python314_compat()
@@ -109,6 +111,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'crispy_forms',
+    # crispy-forms 2.x 起模板包拆分为独立发行包；本项目表单页用 Bootstrap 5
+    'crispy_bootstrap5',
     'captcha',
     'actstream',
     'notifications',
@@ -218,8 +222,7 @@ TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
-USE_L10N = True
-
+# 说明：USE_L10N 已在 Django 5.0 被移除（本地化始终开启），故不再设置
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -264,7 +267,9 @@ ACCOUNT_FORMS = {
 ACCOUNT_USERNAME_MIN_LENGTH = 3
 # allauth 0.63+ 要求这里是一个「指向 list 的路径」（list 里放可调用的校验器）
 ACCOUNT_USERNAME_VALIDATORS = 'users.validators.username_validators'
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+# 2.x 起必须显式声明允许的模板包，否则 {% crispy %} 找不到 bootstrap5
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

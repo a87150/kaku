@@ -1,18 +1,24 @@
-# Kaku —— Django 4.2 LTS 依赖（Python 3.12 / 3.13 / 3.14 可用）
+# Kaku —— Django 5.2 LTS 依赖（Python 3.10 / 3.11 / 3.12 / 3.13 / 3.14）
 # 版本按 dependabot 安全补丁线锁定，请勿随意回退：
-#   Django 4.2.30、allauth 0.63.6、captcha 0.7.0、sqlparse 0.6.0、
-#   bleach 6.4.0、django-notifications-hq 1.8.3、setuptools 84.0.0
-# 说明：setuptools 曾因旧版 django-model-utils 需要 pkg_resources 而停留在
-#   70.1.1；model-utils 5.0.0 已改用 importlib.metadata，故可升到最新并显式锁定。
-Django==4.2.30
+#   Django 5.2.17、allauth 65.19.2、captcha 0.7.0、sqlparse 0.6.0、
+#   bleach 6.4.0、django-notifications-community 1.12.2、setuptools 84.0.0
+# 两点历史说明：
+#   1) 通知组件由已停更的 django-notifications-hq（最新 1.8.3，Meta 里用了 Django 5.1
+#      已移除的 index_together）换成社区维护的 django-notifications-community。
+#      导入路径仍是 notifications，迁移历史与旧版连续，直接 migrate 即可。
+#   2) crispy-forms 2.x 起把模板包拆成了独立发行包，本项目表单页用 Bootstrap 5：
+#      需要同时安装 crispy-bootstrap5 并在 INSTALLED_APPS 里注册（见 kaku/settings.py）。
+#      静态资源 common_static/css/bootstrap.min.css 也已同步换成 Bootstrap 5.3.8。
+# django-model-utils 此前只为 notifications-hq 而锁定，换包后已无任何依赖方，故移除。
+Django==5.2.17
 django-allauth==65.19.2
-django-crispy-forms==1.14.0
+django-crispy-forms==2.7
+crispy-bootstrap5==2026.9
 django-imagekit==6.1.0
-django-model-utils==5.0.0
-django-notifications-hq==1.8.3
+django-notifications-community==1.12.2
 django-simple-captcha==0.7.0
 django-activity-stream==2.0.0
-django-redis==5.2.0
+django-redis==7.0.0
 mistune==3.3.4
 Pillow==12.3.0
 bleach==6.4.0

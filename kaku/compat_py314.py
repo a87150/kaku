@@ -7,6 +7,10 @@ django.template.context.BaseContext.__copy__ 里的 ``copy(super())``
 导致 crispy_forms 等任何复制模板 Context 的代码崩溃。
 
 这里在不修改 site-packages 的前提下，于项目启动时替换该方法实现。
+
+注意：Django 5.2 上游已把该方法改为 ``duplicate.__class__ = self.__class__``，
+因此本补丁在 5.2+ 上会因下面的源码自检不通过而自动空转（无害）。
+保留它是为了兼容回退到 4.2 的场景。
 """
 
 import sys

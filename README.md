@@ -6,8 +6,8 @@
 
 ## 项目信息
 
-- **框架**: Django 4.2.30 (LTS)
-- **Python 版本**: 3.12+（Django 4.2 官方支持 3.8-3.12；在 Python 3.13/3.14 上需依赖项目内置的 `kaku/compat_py314.py` 兼容补丁，项目已自动加载）
+- **框架**: Django 5.2.17 (LTS)
+- **Python 版本**: 3.10 – 3.14（Django 5.2 官方支持范围，本机 3.14.7 已在其中；`kaku/compat_py314.py` 是 4.2 时代的补丁，在 5.2 上会自动空转，保留以兼容回退）
 - **数据库**: SQLite（默认）或 MySQL
 - **缓存**: Redis（可选，未安装 Redis 时自动回退到数据库）
 
@@ -280,20 +280,20 @@ kaku/
 
 | 包名 | 版本 | 说明 |
 |------|------|------|
-| Django | 4.2.30 | Web 框架 (LTS) |
-| django-allauth | 65.19.2 | 认证系统（已迁移到 0.63+ 新设置风格） |
-| django-crispy-forms | 1.14.0 | 表单渲染 |
+| Django | 5.2.17 | Web 框架 (LTS) |
+| django-allauth | 65.19.2 | 认证系统（0.63+ 新设置风格） |
+| django-crispy-forms | 2.7 | 表单渲染 |
+| crispy-bootstrap5 | 2026.9 | crispy 2.x 起模板包拆分为独立发行包（表单页用 Bootstrap 5.3.8） |
 | django-imagekit | 6.1.0 | 图片处理 |
-| django-model-utils | 5.0.0 | 通知系统依赖（5.0 起改用 importlib.metadata，不再需要 pkg_resources） |
-| django-notifications-hq | 1.8.3 | 通知系统 |
+| django-notifications-community | 1.12.2 | 通知系统（社区维护 fork，替代已停更的 django-notifications-hq） |
 | django-simple-captcha | 0.7.0 | 验证码 |
 | django-activity-stream | 2.0.0 | 活动流 |
-| django-redis | 5.2.0 | Redis 缓存 |
+| django-redis | 7.0.0 | Redis 缓存 |
 | mistune | 3.3.4 | Markdown 解析（已启用 table / strikethrough 插件，与编辑器工具栏一致） |
 | Pillow | 12.3.0 | 图像处理 |
 | bleach | 6.4.0 | HTML 清理 |
 | sqlparse | 0.6.0 | SQL 解析（Django 依赖） |
-| setuptools | 84.0.0 | 构建/打包工具（已可升级：model-utils 5.0 不再依赖 pkg_resources） |
+| setuptools | 84.0.0 | 构建/打包工具 |
 
 ## 依赖安全审计
 
@@ -305,15 +305,12 @@ python scripts/dep_audit.py docs/dependabot-audit.md
 ```
 
 最近一次审计结果见 [`docs/dependabot-audit.md`](docs/dependabot-audit.md)：
-45 个包中仅 **Django 4.2.30（7 条）** 命中——其修复版本只存在于 5.2/6.0 线
-（4.2 LTS 已 EOL，不再回补）；mistune（28 条）、django-allauth（6 条）、
-setuptools（4 条）等均已通过升级清零，requests、Pillow、bleach、sqlparse、
-captcha、notifications 等其余包无命中。
+**42 个包、0 条命中**。
 
-这 7 条的逐个核对（哪些本项目根本不适用、哪一条真的会踩到、以及已采取的应用层
-缓解）见 [`docs/django52-upgrade-assessment.md`](docs/django52-upgrade-assessment.md)：
-该文档同时记录了 **Django 4.2 → 5.2 的完整可行性论证**——结论是项目自身代码在
-5.2 下已全绿，唯一硬阻塞是已停更的 `django-notifications-hq`。
+沿革：最初有 72 条告警，经 mistune（28 条）、django-allauth（6 条）、setuptools（4 条）
+等升级清零后，最后剩余 7 条**全部来自 Django 4.2.30**——4.2 已 EOL，这些修复只发在
+5.2/6.0 线。这 7 条已随 **Django 4.2 → 5.2.17** 的升级全部清除，可行性论证与实测
+记录见 [`docs/django52-upgrade-assessment.md`](docs/django52-upgrade-assessment.md)。
 
 ## 常见问题
 
@@ -335,9 +332,35 @@ A: 运行 `python manage.py collectstatic`。
 
 ### Q: Python 3.13 / 3.14 下是否支持
 
-A: Django 4.2 官方支持 Python 3.8-3.12。项目已在 `kaku/compat_py314.py` 内置兼容补丁（随 settings 自动加载），可在 Python 3.13/3.14 上运行；推荐使用 Python 3.12 获得最佳兼容性。
+A: 支持。项目现运行在 Django 5.2.17 上，5.2 官方支持 Python 3.10–3.14。
+`kaku/compat_py314.py` 是 Django 4.2 时代的补丁（4.2 只声明到 Python 3.12），
+5.2 上游已修掉它要绕过的 `BaseContext.__copy__`，因此该补丁会自动空转，留着无害。
 
 ## 更新日志
+
+### v3.3 — Django 5.2 LTS 升级 + 通知组件换血 + Bootstrap 5
+
+**Django 4.2.30 → 5.2.17**，剩余 7 条 dependabot 告警全部清零（审计结果 42 个包 / 0 条命中）。
+
+- 通知组件：`django-notifications-hq 1.8.3`（已停更，`Meta` 里用了 Django 5.1 移除的
+  `index_together`，正是在 5.2 上的硬阻塞）换成社区维护的
+  **`django-notifications-community 1.12.2`**。导入路径仍是 `notifications`，
+  迁移历史与旧版**连续**（0001–0009 文件名一致，新增 0010–0013），已实测在真实库上
+  平滑迁移、通知数据不丢
+- 表单渲染：`django-crispy-forms 1.14.0 → 2.7`；2.x 起模板包拆分为独立发行包，
+  本项目表单页改用 **Bootstrap 5**，因此引入 `crispy-bootstrap5 2026.9`，
+  `CRISPY_TEMPLATE_PACK` / `CRISPY_ALLOWED_TEMPLATE_PACKS` 相应改为 `bootstrap5`
+- 静态资源：`common_static/css/bootstrap.min.css` 由 **Bootstrap 4.6.2 → 5.3.8**；
+  同步迁移 BS4 专属类 `.form-control-file`（BS5 已移除，文件输入统一用 `.form-control`）
+- 缓存：`django-redis 5.2.0 → 7.0.0`（redis-py 已是 8.1.0，无需变更）
+- 清理孤儿依赖：`swapper` / `jsonfield` / `pytz` / `django-model-utils` 均只因
+  notifications-hq 而存在，换包后一并卸载并移出 `requirements.txt`
+- Python 版本回到官方支持范围：Django 5.2 官方支持 3.10–3.14（4.2 只到 3.12，此前靠
+  `kaku/compat_py314.py` 兜底）；该补丁在 5.2 上会自动空转，保留以兼容回退
+- 移除 `USE_L10N`（Django 5.0 已删除该设置）
+- 文档：`docs/django52-upgrade-assessment.md` 更新为完整论证 + 实测记录；
+  `scripts/probe_django.py` 可复用旁挂任意 Django 版本做兼容探针
+- 测试 114 项全绿，`manage.py check` 无问题
 
 ### v3.2 — 前端体验 / 功能增强 / 部署文档化
 

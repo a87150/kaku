@@ -25,15 +25,16 @@
             margin: 4px 0 8px;
             line-height: 1.6;
         }
-        .kaku-picture-form .form-control,
-        .kaku-picture-form .form-control-file {
+        /* Bootstrap 5 已移除 .form-control-file，文件输入也用 .form-control */
+        .kaku-picture-form .form-control {
             background: #fff;
             border: 1px solid #cfd8dc;
             border-radius: 6px;
             font-size: 15px;
             color: #263238;
+            padding: 10px 12px;
+            box-sizing: border-box;
         }
-        .kaku-picture-form .form-control { padding: 10px 12px; box-sizing: border-box; }
         .kaku-picture-form .form-control:focus {
             border-color: #78909c;
             box-shadow: 0 0 0 2px rgba(120, 144, 156, .25);
