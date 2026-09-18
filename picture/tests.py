@@ -12,6 +12,7 @@ from actstream.models import Action
 from index.models import Tag
 from kaku.redisfake import patch_redis_down
 from .models import Picture
+from .views import IndexView
 
 User = get_user_model()
 
@@ -33,6 +34,10 @@ class PictureListViewTests(TestCase):
         resp = self.client.get('/picture/')
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '暂时还没有图片')
+
+    def test_index_queryset_is_ordered_for_pagination(self):
+        """列表页 annotate 聚合后 Meta.ordering 会失效，必须显式排序，否则分页会串数据。"""
+        self.assertTrue(IndexView().get_queryset().ordered)
 
     def test_index_lists_picture_and_lightbox_attrs(self):
         Picture.objects.create(author=self.user, title='第一张画', thematic=make_png())

@@ -22,12 +22,15 @@ class IndexView(ListView):
     context_object_name = "picture_list"
 
     def get_queryset(self):
-        # 列表卡片要显示点赞/评论数：一次 annotate 聚合，避免每张卡片多查两次
+        # 列表卡片要显示点赞/评论数：一次 annotate 聚合，避免每张卡片多查两次。
+        # 注意：annotate 走 GROUP BY，Django 会忽略 Meta.ordering，所以必须显式
+        # order_by，否则分页顺序不确定（UnorderedObjectListWarning / 翻页串数据）。
         return (Picture.objects
                 .select_related('author')
                 .prefetch_related('tags')
                 .annotate(like_count=Count('likes', distinct=True),
-                          comment_count=Count('comments', distinct=True)))
+                          comment_count=Count('comments', distinct=True))
+                .order_by('-created_time'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

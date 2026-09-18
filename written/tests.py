@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from index.models import Tag
 from .models import Article
+from .views import IndexView
 
 
 class ArticleModelTests(TestCase):
@@ -69,6 +70,10 @@ class ArticleViewTests(TestCase):
         self.client.login(username='writer', password='pass-1234')
         resp = self.client.get(reverse('written:index'))
         self.assertEqual(resp.status_code, 200)
+
+    def test_index_queryset_is_ordered_for_pagination(self):
+        """列表页 annotate 聚合后 Meta.ordering 会失效，必须显式排序，否则分页会串数据。"""
+        self.assertTrue(IndexView().get_queryset().ordered)
 
     def test_article_detail_page(self):
         article = Article.objects.create(author=self.user, title='T', content='body')
