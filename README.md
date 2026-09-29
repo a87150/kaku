@@ -144,9 +144,6 @@ python manage.py runserver
 # 收集静态文件
 python manage.py collectstatic
 
-# 同步缓存到数据库
-python manage.py sync_cache
-
 # 创建数据库脚本
 python manage.py makemigrations
 
@@ -222,19 +219,23 @@ cp .env.example .env   # 然后编辑 .env
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | HTTPS 站点必填，否则登录等 POST 报 403 | `https://mydomain.com` |
 | `DJANGO_HTTPS` | `1` 时启用 SSL 跳转/安全 Cookie/HSTS（默认关） | `1` |
 | `DJANGO_HSTS_SECONDS` | HSTS 有效期（配合上一项） | `31536000` |
-| `GITHUB_CLIENTID` | GitHub OAuth Client ID | — |
+| `GITHUB_CLIENTID` | GitHub OAuth Client ID（allauth socialaccount） | — |
 | `GITHUB_CLIENTSECRET` | GitHub OAuth Client Secret | — |
-| `GITHUB_CALLBACK` | GitHub OAuth 回调地址 | `http://127.0.0.1:8000/oauth/github/` |
+| `DJANGO_TRUST_XFF` | `1` 时采信 `X-Forwarded-For` 的第一跳（仅在可信反代之后开启） | `0` |
 
 > `DJANGO_HTTPS` 特意做成显式开关而不是"DEBUG=False 就自动开"：若 nginx 只监听 80 端口，
 > 自动开启 `SECURE_SSL_REDIRECT` 会造成 http → https 的重定向环，站点直接打不开。
 
 或在 shell 中直接 export（Linux/Mac）或 `$env:`（Windows PowerShell）后运行。
 
-### GitHub OAuth 配置
+### GitHub 登录配置
+
+GitHub 登录由 `allauth.socialaccount` 提供（不再手写 OAuth 流程）：
 
 1. 在 [GitHub OAuth Apps](https://github.com/settings/developers) 创建应用
-2. 把 Client ID / Secret / 回调地址填入 `.env`（见上表）
+2. Authorization callback URL 填 `<站点>/users/github/login/callback/`，
+   例如 `https://takanashi.site/users/github/login/callback/`
+3. 把 Client ID / Secret 填入 `.env`（见上表）
 
 ### 允许的主机
 
@@ -253,7 +254,7 @@ cp .env.example .env   # 然后编辑 .env
 
 nginx + gunicorn + supervisor 的完整流程见 **[`deploy/README.md`](deploy/README.md)**，
 配套示例配置在 `deploy/` 下（`nginx.conf` / `gunicorn_start.sh` / `supervisor.conf`）。
-该文档涵盖：环境变量清单、首次部署步骤、升级与回滚、Redis 降级与 `sync_cache` 定时任务、
+该文档涵盖：环境变量清单、首次部署步骤、升级与回滚、Redis 降级行为、
 备份方式、上线检查清单。
 
 ## 项目结构
@@ -266,7 +267,6 @@ kaku/
 ├── picture/           # 图片应用
 ├── comment/           # 评论应用
 ├── follow/            # 关注应用
-├── oauth/             # OAuth 认证
 ├── search/            # 搜索功能
 ├── index/             # 首页和通用功能
 ├── common_static/     # 静态资源
@@ -358,7 +358,7 @@ A: 支持。项目现运行在 Django 5.2.17 上，5.2 官方支持 Python 3.10�
 - 移除 `USE_L10N`（Django 5.0 已删除该设置）
 - 清理 4.2 时代的兼容负担：删除 `kaku/compat_py314.py`（5.2 上游已修掉它要绕过的
   `BaseContext.__copy__`）与版本探针脚本，并清掉 settings 里遗留的旧版文档链接、
-  Django 1.10 样板注释、`oauth` 里的空壳测试
+  Django 1.10 样板注释、`oauth` 里的空壳测试（`oauth` 应用后续已整体移除，见下方 v3.3）
 - 测试 114 项全绿，`manage.py check` 无问题
 
 ### v3.2 — 前端体验 / 功能增强 / 部署文档化

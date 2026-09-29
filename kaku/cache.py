@@ -22,11 +22,11 @@ def cache_page_anonymous(timeout, **kwargs):
         cached_view = cache_page(timeout, **kwargs)(view_func)
 
         @wraps(view_func)
-        def _wrapped(request, *args, **kwargs):
+        def _wrapped(request, *args, **view_kwargs):
             user = getattr(request, 'user', None)
             if user is not None and user.is_authenticated:
-                return view_func(request, *args, **kwargs)
-            return cached_view(request, *args, **kwargs)
+                return view_func(request, *args, **view_kwargs)
+            return cached_view(request, *args, **view_kwargs)
 
         return _wrapped
 

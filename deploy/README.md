@@ -70,8 +70,8 @@ settings 会在启动时读取项目根目录的 `.env`（自实现轻量解析�
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | HTTPS 必填 | 带协议的完整来源，如 `https://takanashi.site`。**不填会导致登录/点赞等 POST 报 403** |
 | `DJANGO_HTTPS` | HTTPS 时填 `1` | 打开 SSL 跳转、安全 Cookie、HSTS |
 | `DJANGO_HSTS_SECONDS` | 可选 | 默认 `31536000`（1 年） |
-| `GITHUB_CLIENTID` / `GITHUB_CLIENTSECRET` | 需要 GitHub 登录时 | 在 GitHub OAuth App 里创建 |
-| `GITHUB_CALLBACK` | 同上 | 必须与 GitHub 后台填的回调地址**完全一致**，如 `https://takanashi.site/oauth/github/` |
+| `GITHUB_CLIENTID` / `GITHUB_CLIENTSECRET` | 需要 GitHub 登录时 | 在 GitHub OAuth App 里创建（allauth.socialaccount） |
+| `DJANGO_TRUST_XFF` | 反代之后填 `1` | 采信 `X-Forwarded-For` 的第一跳；不填则只信 `REMOTE_ADDR`。GitHub 回调地址在 GitHub 后台填 `https://<域名>/users/github/login/callback/` |
 
 生成密钥：
 
@@ -180,23 +180,17 @@ supervisorctl restart kaku
 `settings.CACHES` 指向 `redis://127.0.0.1:6379/1`，并设置了 `IGNORE_EXCEPTIONS=True`
 与会话级短超时（`socket_connect_timeout=0.3`，关闭重试退避）。
 
-`index/redis_caches.py` 的每个函数都捕获 `ConnectionInterrupted / RedisError` 并在异常时
-直接读写数据库，因此：
+Redis 只承担两类工作：
 
-- **Redis 没装或挂掉，站点仍然可用**，只是点赞/浏览量直接落库（请求里多几次写 SQL）。
-- 恢复 Redis 后，历史计数不会再重复写回：需要定时任务把差值同步到数据库：
+1. 列表页整页缓存（只缓存匿名访客，见 `kaku/cache.py`）；
+2. 其它 `django.core.cache` 读写。
 
-```bash
-python manage.py sync_cache     # 同步浏览量与点赞集合，然后清空对应 Redis 键
-```
+**浏览量与点赞数不再经过 Redis**：它们是普通数据库写入（点赞走 M2M，浏览量走
+`F('views') + 1`），因此 Redis 挂掉或清空都不会丢计数，也不再需要 `sync_cache`
+定时任务（该命令已随实现一并删除）。Redis 不可用时整页缓存静默失效（`IGNORE_EXCEPTIONS`），
+页面照常渲染，只是每次都要跑查询。
 
-建议 crontab（例如每 10 分钟）：
-
-```cron
-*/10 * * * * cd /django/kaku && venv/bin/python manage.py sync_cache >> /django/logs/sync_cache.log 2>&1
-```
-
-**不跑 `sync_cache` 的后果**：浏览量/点赞数只存在于 Redis，Redis 一旦清空就丢计数。
+运行测试同样不依赖 Redis：`python manage.py test` 会自动切到进程内缓存。
 
 ---
 
@@ -229,7 +223,6 @@ tar czf /django/backup/media-$(date +%F).tar.gz -C /django/kaku media
 - [ ] 已跑 `python manage.py collectstatic --noinput`
 - [ ] `media/` 与 `db.sqlite3` 的属主是 gunicorn 运行用户
 - [ ] `/django/kaku/.env` 权限 `600`
-- [ ] 已建 `sync_cache` 定时任务（使用 Redis 时）
 - [ ] 验证过：注册、登录、GitHub 登录、发文章、发图画（含在线画板）、评论 @提及、点赞、标签增删、搜索
 
 ---

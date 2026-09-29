@@ -114,9 +114,11 @@ class ChapterCreationForm(forms.ModelForm):
 
     class Meta:
         model = Chapter
-        fields = ('title', 'content', 'article',)
+        # article 不由表单提交：它从 URL 取，放进表单字段等于让用户自选父文章
+        fields = ('title', 'content',)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, article=None, **kwargs):
+        self.article = article
         super().__init__(*args, **kwargs)
         self.fields['title'].widget.attrs.update({
             'class': 'form-control',
@@ -129,4 +131,7 @@ class ChapterCreationForm(forms.ModelForm):
             'rows': 16,
             'placeholder': '在这里用 Markdown 写章节内容…（工具栏可预览 / 全屏）',
         })
-        self.fields['article'].widget.attrs.update({'class': 'form-control'})
+
+    def save(self, commit=True):
+        self.instance.article = self.article
+        return super().save(commit=commit)

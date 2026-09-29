@@ -1,17 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import View
 
-from notifications.models import Notification
 from notifications.views import AllNotificationsList
 from actstream.signals import action
 
 from .models import Tag
-from .redis_caches import like, dislike
-from .util import what_type
+from .util import dislike, like, what_type
 
-from kaku.tagfields import MAX_TAGS_PER_ITEM, TAG_NAME_MAX_LEN
+from kaku.tagfields import clean_tag_names
 
 
 def index(request):
@@ -34,17 +33,14 @@ class TagCreateView(LoginRequiredMixin, View):
         if not tag_name:
             return JsonResponse({'ok': False, 'msg': '标签不能为空'})
 
-        if len(tag_name) > TAG_NAME_MAX_LEN:
-            return JsonResponse({
-                'ok': False,
-                'msg': '标签太长（最多 %d 字）' % TAG_NAME_MAX_LEN,
-            })
-
         if obj.tags.filter(name=tag_name).exists():
             return JsonResponse({'ok': False, 'msg': '已添加过该标签'})
 
-        if obj.tags.count() >= MAX_TAGS_PER_ITEM:
-            return JsonResponse({'ok': False, 'msg': '超过10个tag'})
+        # 长度与数量上限复用表单侧的公共校验，规则只写一处
+        try:
+            clean_tag_names(list(obj.tags.values_list('name', flat=True)) + [tag_name])
+        except ValidationError as exc:
+            return JsonResponse({'ok': False, 'msg': exc.messages[0]})
 
         t, _ = Tag.objects.get_or_create(name=tag_name)
         obj.tags.add(t)

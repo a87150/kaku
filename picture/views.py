@@ -1,5 +1,4 @@
 from django.views.generic import ListView, DetailView, CreateView
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,8 +9,7 @@ from actstream.signals import action
 
 from .models import Picture
 from .forms import PictureCreateForm
-from index.pagination_data import pagination_data
-from index.redis_caches import update_views, get_views, is_likes
+from index.util import is_likes, update_views
 from comment.forms import CommentCreationForm
 
 class IndexView(ListView):
@@ -32,29 +30,15 @@ class IndexView(ListView):
                           comment_count=Count('comments', distinct=True))
                 .order_by('-created_time'))
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        page_data = pagination_data(context.get('paginator'), 
-                                    context.get('page_obj'),
-                                    context.get('is_paginated'))
-
-        context.update(page_data)
-
-        return context
-
-
 class Detail(DetailView):
     model = Picture
     template_name = "picture/detail.html"
     context_object_name = 'picture'
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        update_views('picture', self.picture)
-        return response
-
     def get_object(self, queryset=None):
         self.picture = super().get_object(queryset=None)
+        # 先计数再渲染，否则页面上的「浏览」永远比真实值少 1
+        update_views('picture', self.picture)
         return self.picture
 
     def get_context_data(self, **kwargs):
@@ -62,8 +46,8 @@ class Detail(DetailView):
         tag_list = self.object.tags.all()
         address_list = self.object.address_set.all()
         comment_list = self.object.comments.all()[:20]
-        form = CommentCreationForm()
-        views = get_views('picture', self.picture)
+        form = CommentCreationForm(target=self.object)
+        views = self.picture.views
 
         if self.request.user.is_authenticated:
             is_like = is_likes('picture', self.picture, self.request.user)
@@ -85,7 +69,9 @@ class PictureCreateView(LoginRequiredMixin, CreateView):
     template_name = 'picture/post_picture.html'
 
     def post(self, request, *args, **kwargs):
-        if 'thematic' in request.FILES and len(request.FILES['thematic']) >= 1024*1024:
+        # 与 users.MugshotChangeView 一致：用 UploadedFile.size，不去依赖 len()
+        thematic = request.FILES.get('thematic')
+        if thematic is not None and thematic.size >= 1024 * 1024:
             return HttpResponseForbidden("<h3>不能大于1mb</h3><a href=\"/picture/new/\">返回</a>")
 
         try:

@@ -15,14 +15,10 @@ class Avatar(object):
         self.cols = columns
         self._generate_colours()
 
-        m = hashlib.md5()
-        m.update(b"hello world")
-        entropy = len(m.hexdigest()) / 2 * 8
         if self.rows > 15 or self.cols > 15:
             raise ValueError("Rows and columns must be valued 15 or under")
 
         self.digest = hashlib.md5
-        self.digest_entropy = entropy
 
     def _generate_colours(self):
         colours_ok = False
@@ -49,13 +45,6 @@ class Avatar(object):
         hex_digest_byte_list = self._string_to_byte_list(string)
         matrix = self._create_matrix(hex_digest_byte_list)
         return self._create_image(matrix, width, height, pad)
-
-    def save(self, image_byte_array=None, save_location=None):
-        if image_byte_array and save_location:
-            with open(save_location, 'wb') as f:
-                return f.write(image_byte_array)
-        else:
-            raise ValueError('image_byte_array and path must be provided')
 
     def _get_pastel_colour(self, lighten=127):
         """

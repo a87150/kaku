@@ -1,22 +1,33 @@
 from django import forms
+from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 from .models import Comment
 
+
 class CommentCreationForm(forms.ModelForm):
+    """评论表单。
+
+    target 是被评论的对象，由调用方注入（详情页传当前对象，评论视图从 URL 取），
+    不再依赖 Referer。
+    """
+
     class Meta:
         model = Comment
         fields = ('content',)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, target=None, **kwargs):
         self.user = kwargs.pop('user', None)
-        self.content_type = kwargs.pop('content_type', None)
-        self.object_id = kwargs.pop('object_id', None)
+        self.target = target
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
-        self.helper.form_action = 'comment:create'
+        if target is not None:
+            # crispy 会把这里当 URL 名去 reverse，失败则原样输出；这里直接给路径
+            self.helper.form_action = reverse('comment:create', args=[
+                ContentType.objects.get_for_model(target).pk, target.pk])
         self.helper.form_method = 'post'
         self.helper.form_id = 'comment_create_form'
         self.helper.add_input(Submit('submit', '发布'))
@@ -29,6 +40,7 @@ class CommentCreationForm(forms.ModelForm):
     def save(self, commit=True):
         if self.user:
             self.instance.author = self.user
-            self.instance.content_type = self.content_type
-            self.instance.object_id = self.object_id
+        if self.target is not None:
+            # GenericForeignKey 赋值会同时写 content_type 与 object_id
+            self.instance.content_object = self.target
         return super().save(commit=commit)

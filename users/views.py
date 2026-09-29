@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
@@ -19,7 +20,7 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
 class UserProfileChangeView(LoginRequiredMixin, UpdateView):
     form_class = UserProfileForm
     template_name = 'users/profile_change.html'
-    success_url = '/users/profile'
+    success_url = reverse_lazy('users:profile')
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -28,7 +29,7 @@ class UserProfileChangeView(LoginRequiredMixin, UpdateView):
 class MugshotChangeView(LoginRequiredMixin, UpdateView):
     form_class = MugshotForm
     template_name = 'users/mugshot_change.html'
-    success_url = '/users/profile'
+    success_url = reverse_lazy('users:profile')
     
     def post(self, request, *args, **kwargs):
         # 用 UploadedFile.size 判断大小；缺少文件时交给表单校验

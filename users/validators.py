@@ -2,7 +2,10 @@ from django.contrib.auth.validators import ASCIIUsernameValidator as DjangoASCII
 
 
 class ASCIIUsernameValidator(DjangoASCIIUsernameValidator):
-    regex = r'^[\w]+$'
+    # 字符集显式写出，与 message 保持一致。
+    # Django 的版本用 r'^[\w.@+-]+\Z' + re.ASCII，允许 . @ + - _，
+    # 与本项目「只能包含数字和字母」的说法不符。
+    regex = r'^[0-9A-Za-z]+\Z'
     message = '用户名只能包含数字和字母'
 
 

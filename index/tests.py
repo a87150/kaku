@@ -1,14 +1,12 @@
 import json
 
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.test import TestCase
 
 from notifications.models import Notification
 
 from index.models import Tag
 from index.util import what_type
-from kaku.redisfake import patch_redis_down
 from written.models import Article
 from picture.models import Picture
 
@@ -102,7 +100,7 @@ class TagCreateViewTests(TestCase):
         resp = self.post_tag(tag='overflow')
         data = json.loads(resp.content)
         self.assertFalse(data['ok'])
-        self.assertIn('超过10个tag', data['msg'])
+        self.assertIn('标签最多选择 10 个', data['msg'])
 
     def test_add_tag_returns_final_name(self):
         """前端就地插入标签块，需要服务端回传最终采用的标签名（含去空格）。"""
@@ -116,7 +114,7 @@ class TagCreateViewTests(TestCase):
         resp = self.post_tag(tag='x' * 31)
         data = json.loads(resp.content)
         self.assertFalse(data['ok'])
-        self.assertIn('标签太长', data['msg'])
+        self.assertIn('太长', data['msg'])
 
 
 class TagDeleteViewTests(TestCase):
@@ -185,11 +183,6 @@ class TagDeleteViewTests(TestCase):
 
 class LikeCreateViewTests(TestCase):
     def setUp(self):
-        cache.clear()
-        # 稳定走数据库回退，断言不受本机 Redis 是否运行影响
-        self.redis_down = patch_redis_down()
-        self.redis_down.start()
-        self.addCleanup(self.redis_down.stop)
         self.user = User.objects.create_user(username='bob', password='pass-1234')
         self.article = Article.objects.create(
             author=self.user, title='点赞测试文', content='正文')
@@ -226,6 +219,18 @@ class LikeCreateViewTests(TestCase):
         self.assertTrue(data['ok'])
         page = self.client.get(self.picture.get_absolute_url())
         self.assertContains(page, 'id="dislike-btn"')
+
+    def test_like_lands_in_db_and_list_count(self):
+        """点赞要落库并立刻反映到列表页计数（曾只写 Redis，列表页永远不涨）。"""
+        self.post_like('article', self.article.pk, 'like')
+        self.assertTrue(self.article.likes.filter(pk=self.user.pk).exists())
+        self.assertContains(self.client.get('/written/'), '赞 1')
+
+    def test_dislike_removes_like_from_db(self):
+        self.post_like('article', self.article.pk, 'like')
+        self.post_like('article', self.article.pk, 'dislike')
+        self.assertFalse(self.article.likes.filter(pk=self.user.pk).exists())
+        self.assertContains(self.client.get('/written/'), '赞 0')
 
     def test_unknown_type_returns_json_error(self):
         """未知类型不应抛 500，而是返回 JSON 错误。"""

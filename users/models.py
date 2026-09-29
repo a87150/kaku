@@ -1,5 +1,4 @@
-from django.db import models
-from django.core.files.base import ContentFile
+from django.db import IntegrityError, models
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 
@@ -8,7 +7,9 @@ import os
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
-from .mugshot import Avatar
+
+# 站内用户名长度约定（GitHub 派生的 gh_<id> 也必须塞得下），只在这里定义一次
+USERNAME_MAX_LEN = 10
 
 
 def user_mugshot_path(instance, filename):
@@ -51,17 +52,17 @@ class User(AbstractUser):
         self.nickname = candidate
 
     def save(self, *args, **kwargs):
-        # 注册/导入等未显式提供昵称时，先用用户名兜底
+        # 注册/导入等未显式提供昵称时，先用用户名兜底；冲突时自动加后缀。
+        # 头像生成已挪到 post_save（见 receivers.create_default_mugshot）——
+        # save() 应当只是持久化，否则任何一次带 update_fields 的保存都会顺带写文件。
         self._ensure_unique_nickname()
-
-        if not self.mugshot:
-            avatar = Avatar(rows=10, columns=10)
-            image_byte_array = avatar.get_image(string=self.username,
-                                                width=480,
-                                                height=480,
-                                                pad=10)
-            self.mugshot.save('default_mugshot.png', ContentFile(image_byte_array), save=False)
-        super().save(*args, **kwargs)
+        try:
+            super().save(*args, **kwargs)
+        except IntegrityError:
+            # 两个并发注册可能同时通过唯一性检查，落库时才撞上 unique 约束。
+            # 这时另一个事务已提交，再跑一次检查就能拿到带后缀的新昵称。
+            self._ensure_unique_nickname()
+            super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('users:detail', args=(self.username,))

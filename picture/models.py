@@ -17,11 +17,11 @@ class Picture(models.Model):
 
     id = models.AutoField(primary_key=True)
     title = models.CharField(_('title'), max_length=50)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('p_author'), on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='p_author', on_delete=models.CASCADE)
     thematic = models.ImageField(_('题图'), upload_to=pictures_path, )
     created_time = models.DateTimeField(_('created_time'), auto_now_add=True)
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)
-    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name=_('p_likes'))
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='p_likes')
     tags = models.ManyToManyField(Tag, blank=True, verbose_name=_('tags'))
     comments = GenericRelation(Comment, verbose_name=_('comments'))
 

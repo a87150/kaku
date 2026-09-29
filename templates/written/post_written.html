@@ -282,11 +282,6 @@
                     <div class="kaku-tags-errors"></div>
                 </div>
                 {% if form.tags_raw.errors %}<div class="kaku-field-errors">{{ form.tags_raw.errors }}</div>{% endif %}
-
-                {% else %}
-                <label for="{{ form.article.id_for_label }}">所属文章</label>
-                {{ form.article }}
-                {% if form.article.errors %}<div class="kaku-field-errors">{{ form.article.errors }}</div>{% endif %}
                 {% endif %}
 
                 <div class="kaku-submit-row">

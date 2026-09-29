@@ -1,6 +1,6 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
@@ -14,8 +14,7 @@ import bleach
 
 from .models import Article, Chapter
 from .forms import ArticleCreationForm, ArticleEditForm, ChapterCreationForm
-from index.pagination_data import pagination_data
-from index.redis_caches import update_views, get_views, is_likes
+from index.util import is_likes, update_views
 from comment.forms import CommentCreationForm
 
 
@@ -37,27 +36,6 @@ class IndexView(ListView):
                 .annotate(like_count=Count('likes', distinct=True),
                           comment_count=Count('comments', distinct=True))
                 .order_by('-created_time'))
-        
-    def get_context_data(self, **kwargs):
-
-        # 首先获得父类生成的传递给模板的字典。
-        context = super().get_context_data(**kwargs)
-
-        # 父类生成的字典中已有 paginator、page_obj、is_paginated 这三个模板变量，
-        # paginator 是 Paginator 的一个实例，
-        # page_obj 是 Page 的一个实例，
-        # is_paginated 是一个布尔变量，用于指示是否已分页。
-        # 例如如果规定每页 10 个数据，而本身只有 5 个数据，其实就用不着分页，此时 is_paginated=False。
-        # 调用自己写的 pagination_data 方法获得显示分页导航条需要的数据，见下方。
-        page_data = pagination_data(context.get('paginator'), 
-                                    context.get('page_obj'),
-                                    context.get('is_paginated'))
-
-        # 将分页导航条的模板变量更新到 context 中，注意 page_data 方法返回的也是一个字典。
-        context.update(page_data)
-
-        return context
-
 
 # 编辑器工具栏（EasyMDE）会产出 GFM 语法，这里启用对应 mistune 插件：
 #   table —— 管道表格；strikethrough —— ~~删除线~~
@@ -73,11 +51,13 @@ def html_clean(htmlstr):
     markdown = mistune.create_markdown(escape=False, plugins=MARKDOWN_PLUGINS)
 
     # 采用bleach来清除不必要的标签，并linkify text
-    tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'img', 'table']
-    tags.extend(['p', 'hr', 'br', 'pre', 'code', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'del', 'dl', 'img', 'sub', 'sup', 'u',
-                 'table', 'thead', 'tr', 'th', 'td', 'tbody', 'dd', 'caption', 'blockquote', 'section'])
+    tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol',
+            'strong', 'ul', 'img', 'table', 'p', 'hr', 'br', 'pre', 'span', 'h1', 'h2',
+            'h3', 'h4', 'h5', 'del', 'dl', 'sub', 'sup', 'u', 'thead', 'tr', 'th', 'td',
+            'tbody', 'dd', 'caption', 'section']
+    # 不放行 a[target]：正文里的 target="_blank" 会带来反向 tabnabbing
     attributes = {
-        'a': ['href', 'title', 'target'],
+        'a': ['href', 'title'],
         'img': ['src', 'width', 'height'],
         'th': ['align'],
         'td': ['align'],
@@ -91,18 +71,14 @@ class Detail(DetailView):
     template_name = "written/detail.html"
     context_object_name = 'article'
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        update_views('article', self.article)
-        return response
-
     def get_object(self, queryset=None):
-        # 覆写 get_object 方法的目的是因为需要对 article 的 content 值进行渲染
+        # 覆写 get_object 方法的目的是因为需要对 article 的 content 值进行渲染。
+        # 浏览计数也必须在这里自增：放到 super().get() 之后会先渲染再计数，
+        # 页面上的「浏览」永远比真实值少 1。
         self.article = super().get_object(queryset=None)
-
-        if self.article:
-            self.article.content = html_clean(self.article.content)
-            return self.article
+        self.article.content = html_clean(self.article.content)
+        update_views('article', self.article)
+        return self.article
 
     def get_context_data(self, **kwargs):
         # 覆写 get_context_data 的目的是因为要把评论表单、article 下的评论列表传递给模板。
@@ -110,8 +86,8 @@ class Detail(DetailView):
         tag_list = self.object.tags.all()
         chapter_list = self.object.chapter_set.all()[:20]
         comment_list = self.object.comments.all()[:20]
-        form = CommentCreationForm()
-        views = get_views('article', self.article)
+        form = CommentCreationForm(target=self.object)
+        views = self.article.views
 
         if self.request.user.is_authenticated:
             is_like = is_likes('article', self.article, self.request.user)
@@ -190,19 +166,14 @@ class ArticleEditView(LoginRequiredMixin, UpdateView):
     form_class = ArticleEditForm
     template_name = 'written/post_written.html'
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-
-        # TODO: use a more elegent way
-        if self.request.user != self.object.author:
-            return HttpResponseForbidden('只有作者才能编辑')
-        return response
-
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if self.request.user != self.object.author:
-            return HttpResponseForbidden('只有作者才能编辑')
-        return response
+    def get_object(self, queryset=None):
+        # 鉴权必须发生在对象加载处。原来的 get()/post() 覆写都在 super() 之后才检查，
+        # 而 POST 时父类已经 form.save() 落库 —— 非作者能把别人的文章改完才拿到 403。
+        # 这里统一提前 404，且不泄露文章是否存在。
+        article = super().get_object(queryset=queryset)
+        if article.author_id != self.request.user.pk:
+            raise Http404
+        return article
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -215,23 +186,18 @@ class ChapterCreateView(LoginRequiredMixin, CreateView):
     form_class = ChapterCreationForm
     template_name = 'written/post_written.html'
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
+    def get_parent_article(self):
+        """父文章只从 URL 取并当场鉴权：放进表单字段等于让用户自选父文章。"""
+        article = get_object_or_404(Article, pk=self.kwargs['pk'])
+        if article.author_id != self.request.user.pk:
+            raise Http404
+        return article
 
-        # TODO: use a more elegent way
-        if self.request.user != Article.objects.get(id=self.kwargs.get('pk')).author:
-            return HttpResponseForbidden('只有作者才能写子章节')
-        return response
-
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if self.request.user != Article.objects.get(id=self.kwargs.get('pk')).author:
-            return HttpResponseForbidden('只有作者才能写子章节')
-        return response
-
-    def get_initial(self):
-        # 预设“所属文章”为 URL 中的父文章
-        return {'article': self.kwargs.get('pk')}
+    def get_form_kwargs(self):
+        # GET 与 POST 都会经过这里，鉴权因此先于任何写入
+        kwargs = super().get_form_kwargs()
+        kwargs['article'] = self.get_parent_article()
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

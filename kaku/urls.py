@@ -8,7 +8,7 @@ import notifications.urls
 
 
 urlpatterns = [
-    re_path(r'', include('index.urls')),
+    path('', include('index.urls')),
     path('admin/', admin.site.urls),
     path('written/', include('written.urls')),
     path('picture/', include('picture.urls')),
@@ -17,7 +17,6 @@ urlpatterns = [
     path('captcha/', include('captcha.urls')),
     path('comment/', include('comment.urls')),
     path('follow/', include('follow.urls')),
-    path('oauth/', include('oauth.urls')),
     path('search/', include('search.urls')),
     re_path('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 ]

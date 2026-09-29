@@ -1,8 +1,6 @@
 from django import forms
 from django.urls import reverse
 from django.core.validators import RegexValidator
-from django.utils.html import mark_safe
-from django.utils.translation import pgettext, gettext_lazy as _, gettext
 
 from allauth.account.forms import (
     LoginForm as AllAuthLoginForm,
@@ -71,8 +69,9 @@ class UserProfileForm(forms.ModelForm):
 
     def clean_nickname(self):
         nickname = self.cleaned_data['nickname']
-        if len(nickname) > 10:
-            raise forms.ValidationError("昵称长度不能超过10个字符")
+        max_len = User._meta.get_field('nickname').max_length
+        if len(nickname) > max_len:
+            raise forms.ValidationError("昵称长度不能超过%d个字符" % max_len)
         # 排除自己后检查唯一
         if User.objects.filter(nickname=nickname).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError("该昵称已被使用，换一个吧")

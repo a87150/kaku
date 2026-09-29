@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from index.models import Tag
-from .models import Article
+from .models import Article, Chapter
 from .views import IndexView
 
 
@@ -203,3 +203,60 @@ class ArticleCreateTagTests(TestCase):
         self.assertEqual(resp.status_code, 302)
         a.refresh_from_db()
         self.assertEqual(list(a.tags.values_list('name', flat=True)), ['newtag'])
+
+class ArticlePermissionTests(TestCase):
+    """非作者不能改别人的文章/章节。
+
+    鉴权曾经写在 super().post() 之后，父类已经 form.save() 落库 —— 
+    响应是 403，内容却已经被改掉了。
+    """
+
+    def setUp(self):
+        User = get_user_model()
+        self.author = User.objects.create_user(username='owner', password='pass-1234')
+        self.other = User.objects.create_user(username='intruder', password='pass-1234')
+        self.article = Article.objects.create(
+            author=self.author, title='原标题', content='原正文')
+
+    def login_other(self):
+        self.client.login(username='intruder', password='pass-1234')
+
+    def test_non_author_cannot_edit_article(self):
+        self.login_other()
+        resp = self.client.post(reverse('written:edit', args=[self.article.pk]), {
+            'title': '被篡改的标题', 'content': '被篡改的正文',
+            'excerpt': '', 'tags_raw': ''})
+        self.assertEqual(resp.status_code, 404)
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.title, '原标题')
+        self.assertEqual(self.article.content, '原正文')
+
+    def test_non_author_cannot_open_edit_page(self):
+        self.login_other()
+        resp = self.client.get(reverse('written:edit', args=[self.article.pk]))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_author_can_edit_own_article(self):
+        self.client.login(username='owner', password='pass-1234')
+        resp = self.client.post(reverse('written:edit', args=[self.article.pk]), {
+            'title': '新标题', 'content': '新正文', 'excerpt': '', 'tags_raw': ''})
+        self.assertEqual(resp.status_code, 302)
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.title, '新标题')
+
+    def test_non_author_cannot_add_chapter(self):
+        self.login_other()
+        resp = self.client.post(reverse('written:create_chapter', args=[self.article.pk]), {
+            'title': '偷加的章节', 'content': 'x'})
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(Chapter.objects.count(), 0)
+
+    def test_chapter_parent_comes_from_url_not_post(self):
+        """POST 里塞别人的文章 pk 不能把章节挂到别人文章下面。"""
+        victim = Article.objects.create(author=self.other, title='受害文章', content='x')
+        self.client.login(username='owner', password='pass-1234')
+        resp = self.client.post(reverse('written:create_chapter', args=[self.article.pk]), {
+            'title': '章节', 'content': 'x', 'article': victim.pk})
+        self.assertEqual(resp.status_code, 302)
+        chapter = Chapter.objects.get()
+        self.assertEqual(chapter.article, self.article)

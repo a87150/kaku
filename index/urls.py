@@ -9,5 +9,4 @@ urlpatterns = [
     path('tags/delete/', views.TagDeleteView.as_view(), name='tags_delete'),
     path('like/', views.LikeCreateView.as_view(), name='like'),
     path('notifications/', views.NotificationsListView.as_view(), name='notifications'),
-    path('accounts/profile/', views.index, name='index')
 ]

@@ -15,13 +15,13 @@ class Article(models.Model):
 
     id = models.AutoField(primary_key=True)
     title = models.CharField(_('title'), max_length=50)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('a_author'), on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='a_author', on_delete=models.CASCADE)
     content = models.TextField(_('content'))
     excerpt = models.CharField(_('excerpt'), max_length=100, blank=True, null=True)
     created_time = models.DateTimeField(_('created time'), auto_now_add=True)
     last_modified_time = models.DateTimeField(_('last modified time'), auto_now=True)
     views = models.PositiveIntegerField(_('views'), default=0, editable=False)
-    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name=_('a_likes'))
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='a_likes')
     tags = models.ManyToManyField(Tag, blank=True, verbose_name=_('tags'))
     comments = GenericRelation(Comment, verbose_name=_('comments'))
 

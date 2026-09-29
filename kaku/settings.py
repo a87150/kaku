@@ -6,6 +6,7 @@
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,6 +64,10 @@ SITE_ID = 1
 # 例：DJANGO_CSRF_TRUSTED_ORIGINS=https://takanashi.site,https://www.takanashi.site
 CSRF_TRUSTED_ORIGINS = _env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
 
+# 是否采信 X-Forwarded-For 里的客户端 IP。只有部署在可信反向代理之后才打开，
+# 否则任何访客都能伪造 last_login_ip / ip_joined。
+TRUST_X_FORWARDED_FOR = _env_bool('DJANGO_TRUST_XFF', False)
+
 # ===== 生产 HTTPS 相关安全项：默认全部关闭，按需用 DJANGO_HTTPS=1 打开 =====
 # 之所以不跟随 DEBUG 自动开启：若 nginx 只监听 80 端口，SECURE_SSL_REDIRECT
 # 会造成 http -> https -> 无人监听 的重定向环，把站点彻底打不开。
@@ -93,6 +98,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    # allauth 65 起每个 provider 是独立 app，必须显式安装
+    'allauth.socialaccount.providers.github',
     'crispy_forms',
     # crispy-forms 2.x 起模板包拆分为独立发行包；本项目表单页用 Bootstrap 5
     'crispy_bootstrap5',
@@ -107,7 +114,6 @@ INSTALLED_APPS = [
     'index',
     'comment',
     'follow',
-    'oauth',
     'search',
 ]
 
@@ -163,22 +169,34 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 from redis.retry import Retry
 from redis.backoff import NoBackoff
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "KEY_PREFIX": "example",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {
-                "max_connections": 100,
-                "retry": Retry(NoBackoff(), 1),
-                "socket_connect_timeout": 0.3,
-            },
-            "IGNORE_EXCEPTIONS": True,
+if 'test' in sys.argv:
+    # 跑测试时用进程内缓存：测试不该依赖本机 Redis。
+    # 否则 cache.set 被 IGNORE_EXCEPTIONS 静默吞掉（缓存断言假失败），
+    # 每次连接超时还会把整个套件拖到几分钟。
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         }
     }
-}
+    # 测试不需要真加密强度：PBKDF2 在 100+ 个用例里是主要耗时
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://127.0.0.1:6379/1",
+            "KEY_PREFIX": "example",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {
+                    "max_connections": 100,
+                    "retry": Retry(NoBackoff(), 1),
+                    "socket_connect_timeout": 0.3,
+                },
+                "IGNORE_EXCEPTIONS": True,
+            }
+        }
+    }
 
 # File storage
 STORAGES = {
@@ -257,16 +275,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# github oauth —— 通过环境变量注入，避免把密钥写进代码仓库
-# 本地可新建 .env（参照 .env.example）或在 shell 设置环境变量：
-#   GITHUB_CLIENTID / GITHUB_CLIENTSECRET / GITHUB_CALLBACK / DJANGO_SECRET_KEY
-
-GITHUB_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
-GITHUB_CLIENTID = os.environ.get('GITHUB_CLIENTID', '')
-GITHUB_CLIENTSECRET = os.environ.get('GITHUB_CLIENTSECRET', '')
-
-# 这里是github认证处理的url,就是自己处理登陆逻辑
-GITHUB_CALLBACK = os.environ.get('GITHUB_CALLBACK', 'http://127.0.0.1:8000/oauth/github/')
+# GitHub 登录交给已安装的 allauth.socialaccount，不再手写 OAuth 流程。
+# 密钥通过环境变量注入（参照 .env.example）：GITHUB_CLIENTID / GITHUB_CLIENTSECRET。
+# 回调地址由 allauth 依据当前域名生成：<站点>/users/github/login/callback/，
+# GitHub OAuth App 里的 Authorization callback URL 必须与之一致。
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'SCOPE': ['user'],
+        'APP': {
+            'client_id': os.environ.get('GITHUB_CLIENTID', ''),
+            'secret': os.environ.get('GITHUB_CLIENTSECRET', ''),
+        },
+    },
+}
+SOCIALACCOUNT_ADAPTER = 'users.adapter.SocialAccountAdapter'
 
 '''
 LOGGING = {

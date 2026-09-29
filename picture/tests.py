@@ -10,7 +10,6 @@ from PIL import Image
 from actstream.models import Action
 
 from index.models import Tag
-from kaku.redisfake import patch_redis_down
 from .models import Picture
 from .views import IndexView
 
@@ -65,9 +64,6 @@ class PictureListViewTests(TestCase):
 class PictureDetailViewTests(TestCase):
     def setUp(self):
         cache.clear()
-        self.redis_down = patch_redis_down()
-        self.redis_down.start()
-        self.addCleanup(self.redis_down.stop)
         self.user = User.objects.create_user(username='painter', password='pass-1234')
 
     def make_picture(self, **kwargs):
@@ -84,12 +80,12 @@ class PictureDetailViewTests(TestCase):
         self.assertContains(resp, 'data-lightbox')
 
     def test_detail_increments_views(self):
-        """浏览计数在渲染后累加：首次显示 0，第二次显示 1，DB 同步为 2。"""
+        """浏览计数在渲染前累加：首次就显示 1，第二次显示 2，DB 同步为 2。"""
         pic = self.make_picture()
         resp = self.client.get(pic.get_absolute_url())
-        self.assertContains(resp, '浏览 0')
-        resp = self.client.get(pic.get_absolute_url())
         self.assertContains(resp, '浏览 1')
+        resp = self.client.get(pic.get_absolute_url())
+        self.assertContains(resp, '浏览 2')
         pic.refresh_from_db()
         self.assertEqual(pic.views, 2)
 

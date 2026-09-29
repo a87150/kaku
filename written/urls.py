@@ -13,5 +13,5 @@ urlpatterns = [
     re_path(r'^new/(?:(?P<slug>[\w-]+)/)?$', views.ArticleCreateView.as_view(), name='create'),
     path('article/<int:pk>/edit/', views.ArticleEditView.as_view(), name='edit'),
     path('chapter/<int:pk>/', views.ChapterDetail.as_view(), name='chapter'),
-    path('article/<int:pk>/new/', views.ChapterCreateView.as_view(), name='create_chapter'),
+    path('article/<int:pk>/chapter/new/', views.ChapterCreateView.as_view(), name='create_chapter'),
 ]

@@ -21,3 +21,20 @@ class UserModelTests(TestCase):
         u2.save()
         self.assertNotEqual(u2.nickname, 'alice')
         self.assertTrue(u2.nickname.startswith('alice'))
+
+class LoginPageTests(TestCase):
+    """登录页要提供 GitHub 入口（由 allauth.socialaccount 提供）。"""
+
+    def test_login_page_offers_github_login(self):
+        resp = self.client.get('/users/login/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, '/users/github/login/')
+
+    def test_unknown_username_is_rejected_by_validator(self):
+        from django.core.exceptions import ValidationError
+        from .validators import ASCIIUsernameValidator
+        validator = ASCIIUsernameValidator()
+        validator('abc123')
+        for bad in ('中文名', 'has space', 'dot.name'):
+            with self.assertRaises(ValidationError):
+                validator(bad)

@@ -1,11 +1,9 @@
 import re
-from urllib.parse import urlparse
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponseForbidden
-from django.urls import resolve
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import CreateView
 
@@ -15,35 +13,25 @@ from notifications.signals import notify
 from .forms import CommentCreationForm
 from .models import Comment
 from users.models import User
-from written.models import Article
-from picture.models import Picture
-
-# 评论只允许出现在这些内容类型的详情页上（app_name:url_name -> 模型）
-COMMENT_TARGETS = {
-    ('written', 'detail'): Article,
-    ('picture', 'detail'): Picture,
-}
-
-
-def _parse_referrer(referrer):
-    """从来源 URL 解析出被评论对象 (model_class, object_id)，解析失败返回 (None, None)。"""
-    try:
-        path = urlparse(referrer).path
-        match = resolve(path)
-    except Exception:
-        return None, None
-
-    model_class = COMMENT_TARGETS.get((match.app_name, match.url_name))
-    object_id = match.kwargs.get('pk')
-    if model_class is None or object_id is None:
-        return None, None
-    return model_class, int(object_id)
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
+    """新建评论。
+
+    被评论对象由 URL 直接给出（ContentType 主键 + 对象主键），不再从 Referer 反解：
+    Referer 会被代理或浏览器策略剥掉，而且客户端完全可控。
+    """
+
     model = Comment
     form_class = CommentCreationForm
     template_name = 'comment/comment.html'
+
+    def get_target(self):
+        ct = get_object_or_404(ContentType, pk=self.kwargs['ct_id'])
+        model = ct.model_class()
+        if model is None:
+            raise Http404('无法识别评论对象')
+        return get_object_or_404(model, pk=self.kwargs['pk'])
 
     def post(self, request, *args, **kwargs):
         try:
@@ -59,44 +47,32 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        referrer = self.request.META.get('HTTP_REFERER', '')
-
-        self.model_class, self.object_id = _parse_referrer(referrer)
-        if self.model_class is None:
-            raise Http404('无法识别评论对象')
-
         kwargs.update({
-            "user": self.request.user,
-            "content_type": ContentType.objects.get_for_model(self.model_class),
-            "object_id": self.object_id,
+            'user': self.request.user,
+            'target': self.get_target(),
         })
         return kwargs
 
     def get_success_url(self):
-        url = self.referrer = self.request.META.get('HTTP_REFERER', '/')
-        # 接受到评论会被 strip，临时为其补一个空格，防止@用户名在最后时无法解析
-        comment = (self.request.POST.get('content') or '') + ' '
-        nicknames = re.findall(r'@(?P<nickname>[a-zA-Z0-9\u0800-\u9fa5]+) ', comment)
-        sender = self.request.user
-        target = self.model_class.objects.get(id=self.object_id)
+        # 目标与作者都取自已落库的评论，不再回头重解析原始 POST
+        target = self.object.content_object
         author = target.author
+        sender = self.request.user
+        # 评论内容会被 strip，临时补一个空格，防止 @用户名在结尾时解析不到
+        nicknames = set(re.findall(
+            r'@(?P<nickname>[a-zA-Z0-9\u0800-\u9fa5]+) ', self.object.content + ' '))
+
         mentioned = False
-
         if nicknames:
-            users = User.objects.filter(nickname__in=nicknames)
-            if users:
-                # 自己 @ 自己不会收到通知
-                recipients = users.exclude(id=sender.id)
+            recipients = User.objects.filter(nickname__in=nicknames).exclude(pk=sender.pk)
+            mentioned = recipients.filter(pk=author.pk).exists()
+            if recipients.exists():
+                # notify 的 recipient 接受 queryset：一次派发，共用内容类型查询
+                notify.send(sender=sender, recipient=recipients, verb='@你', target=target)
 
-                if author in recipients:
-                    mentioned = True
-
-                for recipient in recipients:
-                    notify.send(sender=sender, recipient=recipient, verb='@你', target=target)
-
-        # 如果帖子作者没被 @ 并且回复者不是作者自己，则向作者发送一条通知
         if not mentioned and sender != author:
             notify.send(sender=sender, recipient=author, verb='评论了', target=target)
 
         action.send(sender, verb='评论了', action_object=target)
-        return url
+        # 跳回被评论对象的详情页，不再采用客户端可控的 Referer
+        return target.get_absolute_url()
